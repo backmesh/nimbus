@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_quill/extensions.dart';
@@ -68,7 +66,7 @@ class _HomePageState extends State<HomePage> {
         elevation: 0,
         centerTitle: false,
         title: const Text(
-          'Flutter Quill',
+          'Journal',
         ),
       ),
       body: _buildWelcomeEditor(context),
@@ -166,53 +164,10 @@ class _HomePageState extends State<HomePage> {
         sizeSmall: const TextStyle(fontSize: 9)
         ),
     );
-    if (kIsWeb) {
-      quillEditor = QuillEditor(
-          controller: _controller!,
-          scrollController: ScrollController(),
-          scrollable: true,
-          focusNode: _focusNode,
-          autoFocus: false,
-          readOnly: false,
-          placeholder: 'Add content',
-          expands: false,
-          padding: EdgeInsets.zero,
-          onTapUp: (details, p1) {
-            return _onTripleClickSelection();
-          },
-          customStyles: DefaultStyles(
-            h1: DefaultTextBlockStyle(
-                const TextStyle(
-                  fontSize: 32,
-                  color: Colors.black,
-                  height: 1.15,
-                  fontWeight: FontWeight.w300,
-                ),
-                const VerticalSpacing(16, 0),
-                const VerticalSpacing(0, 0),
-                null),
-            sizeSmall: const TextStyle(fontSize: 9),
-          ));
-    }
     var toolbar = QuillToolbar.basic(
       controller: _controller!,
-      showAlignmentButtons: true,
       afterButtonPressed: _focusNode.requestFocus,
     );
-    if (kIsWeb) {
-      toolbar = QuillToolbar.basic(
-        controller: _controller!,
-        showAlignmentButtons: true,
-        afterButtonPressed: _focusNode.requestFocus,
-      );
-    }
-    if (_isDesktop()) {
-      toolbar = QuillToolbar.basic(
-        controller: _controller!,
-        showAlignmentButtons: true,
-        afterButtonPressed: _focusNode.requestFocus,
-      );
-    }
 
     return SafeArea(
       child: Column(
@@ -226,19 +181,9 @@ class _HomePageState extends State<HomePage> {
               child: quillEditor,
             ),
           ),
-          kIsWeb
-              ? Expanded(
-                  child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-                  child: toolbar,
-                ))
-              : Container(child: toolbar)
+          Container(child: toolbar)
         ],
       ),
     );
   }
-
-  bool _isDesktop() => !kIsWeb && !Platform.isAndroid && !Platform.isIOS;
-
 }
