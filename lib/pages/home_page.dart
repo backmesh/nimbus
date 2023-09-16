@@ -71,14 +71,6 @@ class _HomePageState extends State<HomePage> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.grey.shade800,
-        elevation: 0,
-        centerTitle: false,
-        title: const Text(
-          'Journal',
-        ),
-      ),
       body: _buildWelcomeEditor(context),
     );
   }
