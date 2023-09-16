@@ -22,6 +22,7 @@ class _HomePageState extends State<HomePage> {
   final FocusNode _focusNode = FocusNode();
   Timer? _selectAllTimer;
   _SelectionType _selectionType = _SelectionType.none;
+  bool _hasSelection = false;
 
   @override
   void dispose() {
@@ -43,13 +44,22 @@ class _HomePageState extends State<HomePage> {
       final doc = Document.fromJson(jsonDecode(result));
       setState(() {
         _controller = QuillController(
-            document: doc, selection: const TextSelection.collapsed(offset: 0));
+          document: doc,
+          selection: const TextSelection.collapsed(offset: 0),
+          onSelectionChanged: (textSelection) {
+            setState(() {
+              _hasSelection = !textSelection.isCollapsed;
+            });
+          },
+        );
       });
     } catch (error) {
       final doc = Document()..insert(0, 'Empty asset');
       setState(() {
         _controller = QuillController(
-            document: doc, selection: const TextSelection.collapsed(offset: 0));
+          document: doc,
+          selection: const TextSelection.collapsed(offset: 0)
+        );
       });
     }
   }
@@ -193,6 +203,7 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
+          Container(child: _hasSelection ? toolbar : Container()),
           Expanded(
             flex: 15,
             child: Container(
@@ -201,7 +212,6 @@ class _HomePageState extends State<HomePage> {
               child: quillEditor,
             ),
           ),
-          Container(child: toolbar)
         ],
       ),
     );
