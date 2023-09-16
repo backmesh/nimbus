@@ -166,6 +166,26 @@ class _HomePageState extends State<HomePage> {
     );
     var toolbar = QuillToolbar.basic(
       controller: _controller!,
+      multiRowsDisplay: false,
+      showDividers: false,
+      showColorButton: false,
+      showSubscript: false,
+      showSuperscript: false,
+      showBackgroundColorButton: false,
+      showFontFamily: false,
+      showCodeBlock: false,
+      showInlineCode: false,
+      showClearFormat: false,
+      showIndent: false,
+      showSearchButton: false,
+      showLink: false,
+      showFontSize: false,
+      showRedo: false,
+      showUndo: false,
+      showListBullets: false,
+      showListNumbers: false,
+      showListCheck: false,
+      showQuote: false,
       afterButtonPressed: _focusNode.requestFocus,
     );
 
