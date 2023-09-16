@@ -12,6 +12,8 @@ enum _SelectionType {
   // line,
 }
 
+
+
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
@@ -23,6 +25,7 @@ class _HomePageState extends State<HomePage> {
   Timer? _selectAllTimer;
   _SelectionType _selectionType = _SelectionType.none;
   bool _hasSelection = false;
+  DateTime _date = DateTime.now();
 
   @override
   void dispose() {
@@ -137,7 +140,12 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  bool _isTodaySelected() {
+    return _date.toString().substring(0,10) == DateTime.now().toString().substring(0,10);
+  }
+
   Widget _buildWelcomeEditor(BuildContext context) {
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     Widget quillEditor = QuillEditor(
       controller: _controller!,
       scrollController: ScrollController(),
@@ -191,10 +199,25 @@ class _HomePageState extends State<HomePage> {
       afterButtonPressed: _focusNode.requestFocus,
     );
 
+    var dateText = _isTodaySelected() ? 'Today' : localizations.formatShortDate(_date);
+
     return SafeArea(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
+
+          Row(children: [
+            Center(child: Text(dateText)),
+            IconButton(
+              icon: Icon(Icons.date_range),
+              padding: EdgeInsets.zero,
+              onPressed: () async {
+                DateTime? newDate = await showDatePicker(context: context, initialDate: _date, firstDate: DateTime(2010), lastDate: DateTime.now());
+                if (newDate == null) return;
+                setState(() => _date = newDate);
+              },
+            ),
+          ]),
           Container(child: _hasSelection ? toolbar : Container()),
           Expanded(
             flex: 15,
