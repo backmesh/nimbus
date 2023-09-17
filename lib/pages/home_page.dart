@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_quill/extensions.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 enum _SelectionType {
   none,
@@ -12,14 +12,13 @@ enum _SelectionType {
   // line,
 }
 
-
-
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  final _storage = new FlutterSecureStorage();
   QuillController? _controller;
   final FocusNode _focusNode = FocusNode();
   Timer? _selectAllTimer;
@@ -36,18 +35,34 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _loadFromAssets();
+    _onNewDate(_date);
   }
 
-  Future<void> _loadFromAssets() async {
+  static String dateToKey(DateTime date) => date.toString().substring(0,10);
+
+  static String docToVal(Document? doc) {
+    return doc != null ? jsonEncode(doc.toDelta().toJson()) : "";
+  }
+  
+  static Document valToDoc(String? val) {
+    return val != null ? Document.fromDelta(Delta.fromJson(jsonDecode(val))) : Document();
+  }
+
+  Future<void> _onNewDate(DateTime newDate) async {
+    // save current entry if controller has been initiated
+    if (_controller != null) {
+      final value = docToVal(_controller?.document);
+      await _storage.write(
+        key: dateToKey(_date),
+        value: value,
+      );
+    }
     try {
-      final result = await rootBundle.loadString(isDesktop()
-          ? 'assets/sample_data_nomedia.json'
-          : 'assets/sample_data.json');
-      final doc = Document.fromJson(jsonDecode(result));
+      final newValue = await _storage.read(key: dateToKey(newDate));
+      final newDoc = valToDoc(newValue);
       setState(() {
         _controller = QuillController(
-          document: doc,
+          document: newDoc,
           selection: const TextSelection.collapsed(offset: 0),
           onSelectionChanged: (textSelection) {
             setState(() {
@@ -55,14 +70,21 @@ class _HomePageState extends State<HomePage> {
             });
           },
         );
+        _date = newDate;
       });
     } catch (error) {
-      final doc = Document()..insert(0, 'Empty asset');
+      print(error);
       setState(() {
         _controller = QuillController(
-          document: doc,
-          selection: const TextSelection.collapsed(offset: 0)
+          document: Document(),
+          selection: const TextSelection.collapsed(offset: 0),
+          onSelectionChanged: (textSelection) {
+            setState(() {
+              _hasSelection = !textSelection.isCollapsed;
+            });
+          },
         );
+        _date = newDate;
       });
     }
   }
@@ -153,7 +175,7 @@ class _HomePageState extends State<HomePage> {
       focusNode: _focusNode,
       autoFocus: false,
       readOnly: false,
-      placeholder: 'Add content',
+      placeholder: 'What is on your mind?',
       enableSelectionToolbar: isMobile(),
       expands: false,
       padding: EdgeInsets.zero,
@@ -214,7 +236,7 @@ class _HomePageState extends State<HomePage> {
               onPressed: () async {
                 DateTime? newDate = await showDatePicker(context: context, initialDate: _date, firstDate: DateTime(2010), lastDate: DateTime.now());
                 if (newDate == null) return;
-                setState(() => _date = newDate);
+                await _onNewDate(newDate);
               },
             ),
           ]),
