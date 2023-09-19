@@ -11,9 +11,9 @@ import 'pages/home_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  // FirebaseUIAuth.configureProviders([
-  //   GoogleProvider(clientId: 'clientId'),
-  // ]);
+  FirebaseUIAuth.configureProviders([
+    GoogleProvider(clientId: '', iOSPreferPlist: true),
+  ]);
   runApp(MyApp());
 }
 
@@ -46,7 +46,15 @@ class MyApp extends StatelessWidget {
       supportedLocales: [
         const Locale('en', 'US'),
       ],
-      home: HomePage(),
+      home: SignInScreen(
+        actions: [
+          AuthStateChangeAction<SignedIn>(
+            (context, state) {
+              //Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
+            },
+          )
+        ],
+      ),
     );
   }
 }
