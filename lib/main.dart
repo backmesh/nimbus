@@ -6,14 +6,19 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:journal/firebase_options.dart';
 
+import 'dart:io' show Platform;
+
 import 'pages/home_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  FirebaseUIAuth.configureProviders([
-    GoogleProvider(clientId: '', iOSPreferPlist: true),
-  ]);
+  if (Platform.isMacOS) {
+    FirebaseUIAuth.configureProviders([
+      GoogleProvider(
+          clientId: DefaultFirebaseOptions.currentPlatform.iosClientId ?? ""),
+    ]);
+  }
   runApp(MyApp());
 }
 
