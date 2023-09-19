@@ -38,14 +38,16 @@ class _HomePageState extends State<HomePage> {
     _onNewDate(_date);
   }
 
-  static String dateToKey(DateTime date) => date.toString().substring(0,10);
+  static String dateToKey(DateTime date) => date.toString().substring(0, 10);
 
   static String docToVal(Document? doc) {
     return doc != null ? jsonEncode(doc.toDelta().toJson()) : "";
   }
-  
+
   static Document valToDoc(String? val) {
-    return val != null ? Document.fromDelta(Delta.fromJson(jsonDecode(val))) : Document();
+    return val != null
+        ? Document.fromDelta(Delta.fromJson(jsonDecode(val)))
+        : Document();
   }
 
   Future<void> _onNewDate(DateTime newDate) async {
@@ -163,11 +165,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   bool _isTodaySelected() {
-    return _date.toString().substring(0,10) == DateTime.now().toString().substring(0,10);
+    return _date.toString().substring(0, 10) ==
+        DateTime.now().toString().substring(0, 10);
   }
 
   Widget _buildWelcomeEditor(BuildContext context) {
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final MaterialLocalizations localizations =
+        MaterialLocalizations.of(context);
     Widget quillEditor = QuillEditor(
       controller: _controller!,
       scrollController: ScrollController(),
@@ -183,18 +187,17 @@ class _HomePageState extends State<HomePage> {
         return _onTripleClickSelection();
       },
       customStyles: DefaultStyles(
-        h1: DefaultTextBlockStyle(
-            const TextStyle(
-              fontSize: 32,
-              color: Colors.black,
-              height: 1.15,
-              fontWeight: FontWeight.w300,
-            ),
-            const VerticalSpacing(16, 0),
-            const VerticalSpacing(0, 0),
-            null),
-        sizeSmall: const TextStyle(fontSize: 9)
-        ),
+          h1: DefaultTextBlockStyle(
+              const TextStyle(
+                fontSize: 32,
+                color: Colors.black,
+                height: 1.15,
+                fontWeight: FontWeight.w300,
+              ),
+              const VerticalSpacing(16, 0),
+              const VerticalSpacing(0, 0),
+              null),
+          sizeSmall: const TextStyle(fontSize: 9)),
     );
     var toolbar = QuillToolbar.basic(
       controller: _controller!,
@@ -221,20 +224,24 @@ class _HomePageState extends State<HomePage> {
       afterButtonPressed: _focusNode.requestFocus,
     );
 
-    var dateText = _isTodaySelected() ? 'Today' : localizations.formatShortDate(_date);
+    var dateText =
+        _isTodaySelected() ? 'Today' : localizations.formatShortDate(_date);
 
     return SafeArea(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-
           Row(children: [
             Center(child: Text(dateText)),
             IconButton(
               icon: Icon(Icons.date_range),
               padding: EdgeInsets.zero,
               onPressed: () async {
-                DateTime? newDate = await showDatePicker(context: context, initialDate: _date, firstDate: DateTime(2010), lastDate: DateTime.now());
+                DateTime? newDate = await showDatePicker(
+                    context: context,
+                    initialDate: _date,
+                    firstDate: DateTime(2010),
+                    lastDate: DateTime.now());
                 if (newDate == null) return;
                 await _onNewDate(newDate);
               },
