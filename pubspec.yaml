@@ -31,6 +31,10 @@ dependencies:
   cupertino_icons: ^1.0.4
   flutter_quill: ^7.4.6
   flutter_secure_storage: ^9.0.0
+  go_router: 7.1.1
+  firebase_core: 2.13.0
+  firebase_auth: 4.6.1
+  firebase_ui_auth: 1.4.1
 
 dev_dependencies:
   flutter_test:
