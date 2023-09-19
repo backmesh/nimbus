@@ -16,7 +16,8 @@ void main() async {
   if (Platform.isMacOS) {
     FirebaseUIAuth.configureProviders([
       GoogleProvider(
-          clientId: DefaultFirebaseOptions.currentPlatform.iosClientId ?? ""),
+          clientId:
+              "1007565245786-bfj0lum7b97o0rk8up0qrhlvbsfqujo7.apps.googleusercontent.com"),
     ]);
   }
   runApp(MyApp());
@@ -51,15 +52,7 @@ class MyApp extends StatelessWidget {
       supportedLocales: [
         const Locale('en', 'US'),
       ],
-      home: SignInScreen(
-        actions: [
-          AuthStateChangeAction<SignedIn>(
-            (context, state) {
-              //Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
-            },
-          )
-        ],
-      ),
+      home: SignInScreen(showAuthActionSwitch: false),
     );
   }
 }
