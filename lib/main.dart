@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -52,18 +54,25 @@ class MyApp extends StatelessWidget {
       home: SignInScreen(
         showAuthActionSwitch: false,
         actions: [
+          // TODO dry up
           AuthStateChangeAction<SignedIn>((context, state) {
-            print(state.user);
+            final uid = state.user?.uid;
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => HomePage()),
+              MaterialPageRoute(builder: (context) {
+                if (uid == null) Text(state.toString());
+                return HomePage(uid as String);
+              }),
             );
           }),
           AuthStateChangeAction<UserCreated>((context, state) {
-            print(state.credential.user);
+            final uid = state.credential.user?.uid;
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => HomePage()),
+              MaterialPageRoute(builder: (context) {
+                if (uid == null) Text(state.toString());
+                return HomePage(uid as String);
+              }),
             );
           }),
         ],

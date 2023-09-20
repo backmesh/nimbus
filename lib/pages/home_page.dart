@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/extensions.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 enum _SelectionType {
   none,
@@ -13,12 +13,47 @@ enum _SelectionType {
 }
 
 class HomePage extends StatefulWidget {
+  final String uid;
+  const HomePage(this.uid);
+
   @override
   _HomePageState createState() => _HomePageState();
 }
 
+class Storage {
+  static final CollectionReference _usersRef =
+      FirebaseFirestore.instance.collection('journalists');
+
+  static write(String uid, DateTime date, Document? doc) async {
+    final val = _docToVal(doc);
+    if (val == "") return;
+    await _usersRef.doc(_entryKey(uid, date)).set({
+      "delta": val,
+    });
+  }
+
+  static Future<Document?> read(String uid, DateTime date) async {
+    final entry = await _usersRef.doc(_entryKey(uid, date)).get();
+    if (!entry.exists) return null;
+    return _valToDoc(entry.get('delta') ?? null);
+  }
+
+  static String _entryKey(String uid, DateTime date) {
+    return "${uid}/entries/${date.toString().substring(0, 10)}";
+  }
+
+  static String _docToVal(Document? doc) {
+    return doc != null ? jsonEncode(doc.toDelta().toJson()) : "";
+  }
+
+  static Document? _valToDoc(String? val) {
+    return val != null
+        ? Document.fromDelta(Delta.fromJson(jsonDecode(val)))
+        : null;
+  }
+}
+
 class _HomePageState extends State<HomePage> {
-  final _storage = new FlutterSecureStorage();
   QuillController? _controller;
   final FocusNode _focusNode = FocusNode();
   Timer? _selectAllTimer;
@@ -38,30 +73,13 @@ class _HomePageState extends State<HomePage> {
     _onNewDate(_date);
   }
 
-  static String dateToKey(DateTime date) => date.toString().substring(0, 10);
-
-  static String docToVal(Document? doc) {
-    return doc != null ? jsonEncode(doc.toDelta().toJson()) : "";
-  }
-
-  static Document valToDoc(String? val) {
-    return val != null
-        ? Document.fromDelta(Delta.fromJson(jsonDecode(val)))
-        : Document();
-  }
-
   Future<void> _onNewDate(DateTime newDate) async {
     // save current entry if controller has been initiated
     if (_controller != null) {
-      final value = docToVal(_controller?.document);
-      await _storage.write(
-        key: dateToKey(_date),
-        value: value,
-      );
+      await Storage.write(widget.uid, _date, _controller?.document);
     }
     try {
-      final newValue = await _storage.read(key: dateToKey(newDate));
-      final newDoc = valToDoc(newValue);
+      final newDoc = await Storage.read(widget.uid, newDate) ?? Document();
       setState(() {
         _controller = QuillController(
           document: newDoc,

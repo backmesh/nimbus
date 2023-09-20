@@ -6,7 +6,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   desktop_webview_auth
   firebase_auth
   firebase_core
-  flutter_secure_storage_windows
   pasteboard
   url_launcher_windows
 )
