@@ -43,7 +43,9 @@ class Storage {
   }
 
   static String _docToVal(Document? doc) {
-    return doc != null ? jsonEncode(doc.toDelta().toJson()) : "";
+    if (doc == null) return "";
+    if (doc.isEmpty()) return "";
+    return jsonEncode(doc.toDelta().toJson());
   }
 
   static Document? _valToDoc(String? val) {
