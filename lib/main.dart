@@ -49,7 +49,25 @@ class MyApp extends StatelessWidget {
       supportedLocales: [
         const Locale('en', 'US'),
       ],
-      home: SignInScreen(showAuthActionSwitch: false),
+      home: SignInScreen(
+        showAuthActionSwitch: false,
+        actions: [
+          AuthStateChangeAction<SignedIn>((context, state) {
+            print(state.user);
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => HomePage()),
+            );
+          }),
+          AuthStateChangeAction<UserCreated>((context, state) {
+            print(state.credential.user);
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => HomePage()),
+            );
+          }),
+        ],
+      ),
     );
   }
 }
