@@ -25,7 +25,9 @@ class Storage {
       FirebaseFirestore.instance.collection('journalists');
 
   static write(String uid, DateTime date, Document? doc) async {
-    final val = _docToVal(doc);
+    if (doc == null) return;
+    if (doc.isEmpty()) return;
+    final val = jsonEncode(doc.toDelta().toJson());
     if (val == "") return;
     await _usersRef.doc(_entryKey(uid, date)).set({
       "delta": val,
@@ -35,23 +37,13 @@ class Storage {
   static Future<Document?> read(String uid, DateTime date) async {
     final entry = await _usersRef.doc(_entryKey(uid, date)).get();
     if (!entry.exists) return null;
-    return _valToDoc(entry.get('delta') ?? null);
+    final delta = entry.get('delta');
+    if (delta == null) return null;
+    return Document.fromDelta(Delta.fromJson(jsonDecode(delta)));
   }
 
   static String _entryKey(String uid, DateTime date) {
     return "${uid}/entries/${date.toString().substring(0, 10)}";
-  }
-
-  static String _docToVal(Document? doc) {
-    if (doc == null) return "";
-    if (doc.isEmpty()) return "";
-    return jsonEncode(doc.toDelta().toJson());
-  }
-
-  static Document? _valToDoc(String? val) {
-    return val != null
-        ? Document.fromDelta(Delta.fromJson(jsonDecode(val)))
-        : null;
   }
 }
 
