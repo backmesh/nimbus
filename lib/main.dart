@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
-import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
+import 'package:firebase_ui_oauth_apple/firebase_ui_oauth_apple.dart';
 import 'package:journal/firebase_options.dart';
 
 import 'dart:io' show Platform;
@@ -15,9 +14,7 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   if (Platform.isMacOS) {
     FirebaseUIAuth.configureProviders([
-      GoogleProvider(
-          clientId:
-              "1007565245786-bfj0lum7b97o0rk8up0qrhlvbsfqujo7.apps.googleusercontent.com"),
+      AppleProvider(),
     ]);
   }
   runApp(MyApp());
