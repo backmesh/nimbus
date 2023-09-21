@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
@@ -10,6 +9,10 @@ Document _deltaToDoc(String delta) {
 
 String _docToDelta(Document doc) {
   return jsonEncode(doc.toDelta().toJson());
+}
+
+bool sameCalendarDay(DateTime a, DateTime b) {
+  return a.toString().substring(0, 10) == b.toString().substring(0, 10);
 }
 
 class Entry {
@@ -27,6 +30,10 @@ class Entry {
   Map<String, Object?> toDb() {
     return {'delta': _docToDelta(doc), 'date': Timestamp.fromDate(date)};
   }
+
+  Entry fromDoc(Document newDoc) {
+    return Entry(date: date, doc: newDoc);
+  }
 }
 
 class EntryStore {
@@ -43,12 +50,12 @@ class EntryStore {
         );
   }
 
-  static write(String uid, Entry? entry) async {
+  static Future<void> write(String uid, Entry? entry) async {
     if (entry == null) return;
     if (entry.doc.isEmpty()) return;
     final val = entry.toDb();
     if (val['delta'] == '') return;
-    await _users.doc(_entryKey(uid, entry.date)).set(entry);
+    await _users.doc(_entryKey(uid, entry.date)).set(val);
   }
 
   // TODO use withConverter or remove

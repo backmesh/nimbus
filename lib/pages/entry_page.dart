@@ -25,16 +25,15 @@ class _EntryPageState extends State<EntryPage> {
   QuillController? _controller;
   final FocusNode _focusNode = FocusNode();
   Timer? _selectAllTimer;
+  Timer? _saveTimer;
   _SelectionType _selectionType = _SelectionType.none;
   bool _hasSelection = false;
 
   @override
   void dispose() {
     _selectAllTimer?.cancel();
-    // TODO is there better way to do this?
-    // save entry in the background and pray it worked
-    EntryStore.write(widget.uid,
-        Entry(doc: _controller?.document as Document, date: widget.entry.date));
+    _saveTimer?.cancel();
+    _saveEntry();
     super.dispose();
   }
 
@@ -60,6 +59,7 @@ class _EntryPageState extends State<EntryPage> {
       return Center(child: Text('Loading...'));
     }
 
+    widget.entry.doc.changes.listen((event) => _startSaveTimer());
     return _buildWelcomeEditor(context);
   }
 
@@ -117,6 +117,21 @@ class _EntryPageState extends State<EntryPage> {
     }
 
     return false;
+  }
+
+  void _saveEntry() {
+    // async function but we are not waiting for it
+    EntryStore.write(
+        widget.uid, widget.entry.fromDoc(_controller?.document ?? Document()));
+  }
+
+  void _startSaveTimer() {
+    _saveTimer?.cancel();
+    _saveTimer = Timer(const Duration(seconds: 10), () {
+      _saveEntry();
+      _saveTimer?.cancel();
+      _saveTimer = null;
+    });
   }
 
   void _startTripleClickTimer() {

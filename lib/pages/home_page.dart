@@ -73,18 +73,13 @@ class _HomePageState extends State<HomePage> {
                   return ListView.builder(
                     reverse: true,
                     itemBuilder: (context, index) {
+                      final currDate = _date.subtract(Duration(days: index));
                       late Entry entry;
-                      final isLastItem = index + 1 == snapshot.docs.length;
+                      //final isLastItem = index + 1 == snapshot.docs.length;
                       if (snapshot.hasMore) snapshot.fetchMore();
-                      if (isLastItem || snapshot.docs.isEmpty) {
-                        //if (snapshot.docs.isEmpty) {
-                        if (snapshot.hasMore) snapshot.fetchMore();
-                        entry = Entry(
-                            doc: Document(),
-                            date: _date.subtract(Duration(days: index)));
-                      } else {
-                        entry = snapshot.docs[index].data();
-                      }
+                      entry = snapshot.docs.map((d) => d.data()).firstWhere(
+                          (e) => sameCalendarDay(e.date, currDate),
+                          orElse: () => Entry(doc: Document(), date: currDate));
                       return EntryPage(entry, widget.uid);
                     },
                   );
