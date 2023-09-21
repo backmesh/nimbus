@@ -15,8 +15,7 @@ enum _SelectionType {
 class EntryPage extends StatefulWidget {
   final Entry entry;
   final String uid;
-  final DateTime date;
-  const EntryPage(this.entry, this.uid, this.date);
+  const EntryPage(this.entry, this.uid);
 
   @override
   _EntryPageState createState() => _EntryPageState();
@@ -34,7 +33,7 @@ class _EntryPageState extends State<EntryPage> {
     _selectAllTimer?.cancel();
     // save entry
     await EntryStore.write(widget.uid,
-        Entry(doc: _controller?.document as Document, date: widget.date));
+        Entry(doc: _controller?.document as Document, date: widget.entry.date));
     super.dispose();
   }
 

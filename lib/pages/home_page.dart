@@ -74,7 +74,11 @@ class _HomePageState extends State<HomePage> {
                 query: EntryStore.readAll(widget.uid),
                 itemBuilder: (context, snapshot) {
                   final entry = snapshot.data();
-                  return EntryPage(entry, widget.uid, entry.date);
+                  return EntryPage(entry, widget.uid);
+                },
+                emptyBuilder: (context) {
+                  return EntryPage(
+                      Entry(doc: Document(), date: _date), widget.uid);
                 },
               ),
             ),

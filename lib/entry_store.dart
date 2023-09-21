@@ -51,16 +51,17 @@ class EntryStore {
     await _users.doc(_entryKey(uid, entry.date)).set(entry);
   }
 
-  static Future<Entry?> read(String uid, DateTime date) async {
-    final snapshot = _users.doc(_entryKey(uid, date));
-    final entry = await snapshot.get();
-    if (!entry.exists) return null;
-    final delta = entry.get('delta');
-    if (delta == null) return null;
-    return Entry(
-        doc: _deltaToDoc(delta),
-        date: (entry.get('date')! as Timestamp).toDate());
-  }
+  // TODO use withConverter or remove
+  // static Future<Entry?> read(String uid, DateTime date) async {
+  //   final snapshot = _users.doc(_entryKey(uid, date));
+  //   final entry = await snapshot.get();
+  //   if (!entry.exists) return null;
+  //   final delta = entry.get('delta');
+  //   if (delta == null) return null;
+  //   return Entry(
+  //       doc: _deltaToDoc(delta),
+  //       date: (entry.get('date')! as Timestamp).toDate());
+  // }
 
   static String _entryKey(String uid, DateTime date) {
     return '${uid}/entries/${date.toString().substring(0, 10)}';
