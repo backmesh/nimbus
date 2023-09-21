@@ -29,10 +29,11 @@ class _EntryPageState extends State<EntryPage> {
   bool _hasSelection = false;
 
   @override
-  void dispose() async {
+  void dispose() {
     _selectAllTimer?.cancel();
-    // save entry
-    await EntryStore.write(widget.uid,
+    // TODO is there better way to do this?
+    // save entry in the background and pray it worked
+    EntryStore.write(widget.uid,
         Entry(doc: _controller?.document as Document, date: widget.entry.date));
     super.dispose();
   }

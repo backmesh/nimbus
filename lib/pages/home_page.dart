@@ -63,22 +63,31 @@ class _HomePageState extends State<HomePage> {
             child: Container(
               color: Colors.white,
               padding: const EdgeInsets.only(left: 16, right: 16),
-              // child: EntryPage(
-              //     Entry(
-              //       date: _date,
-              //       doc: Document(),
-              //     ),
-              //     widget.uid,
-              //     _date)
-              child: FirestoreListView<Entry>(
+              child: FirestoreQueryBuilder<Entry>(
                 query: EntryStore.readAll(widget.uid),
-                itemBuilder: (context, snapshot) {
-                  final entry = snapshot.data();
-                  return EntryPage(entry, widget.uid);
-                },
-                emptyBuilder: (context) {
-                  return EntryPage(
-                      Entry(doc: Document(), date: _date), widget.uid);
+                builder: (context, snapshot, _) {
+                  // Loading
+                  if (snapshot.isFetching) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+
+                  return ListView.builder(
+                    itemBuilder: (context, index) {
+                      late Entry entry;
+                      final isLastItem = index + 1 == snapshot.docs.length;
+                      if (snapshot.hasMore) snapshot.fetchMore();
+                      if (isLastItem || snapshot.docs.isEmpty) {
+                        //if (snapshot.docs.isEmpty) {
+                        if (snapshot.hasMore) snapshot.fetchMore();
+                        entry = Entry(
+                            doc: Document(),
+                            date: _date.subtract(Duration(days: 1)));
+                      } else {
+                        entry = snapshot.docs[index].data();
+                      }
+                      return EntryPage(entry, widget.uid);
+                    },
+                  );
                 },
               ),
             ),
