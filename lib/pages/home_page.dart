@@ -20,30 +20,64 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class Storage {
-  static final CollectionReference _usersRef =
+Document _deltaToDoc(String delta) {
+  return Document.fromDelta(Delta.fromJson(jsonDecode(delta)));
+}
+
+String _docToDelta(Document doc) {
+  return jsonEncode(doc.toDelta().toJson());
+}
+
+class Entry {
+  Entry({required this.doc});
+
+  Entry.fromDbCollection(Map<String, Object?> json)
+      : this(
+          doc: _deltaToDoc(json['delta']! as String),
+        );
+
+  final Document doc;
+
+  Map<String, Object?> toDb() {
+    return {
+      'delta': _docToDelta(doc),
+    };
+  }
+}
+
+class EntryStore {
+  static final CollectionReference _users =
       FirebaseFirestore.instance.collection('journalists');
 
-  static write(String uid, DateTime date, Document? doc) async {
-    if (doc == null) return;
-    if (doc.isEmpty()) return;
-    final val = jsonEncode(doc.toDelta().toJson());
-    if (val == "") return;
-    await _usersRef.doc(_entryKey(uid, date)).set({
-      "delta": val,
-    });
+  static CollectionReference<Entry> readAll(String uid) {
+    return FirebaseFirestore.instance
+        .collection('journalists/${uid}/entries')
+        .withConverter<Entry>(
+          fromFirestore: (snapshot, _) =>
+              Entry.fromDbCollection(snapshot.data()!),
+          toFirestore: (entry, _) => entry.toDb(),
+        );
   }
 
-  static Future<Document?> read(String uid, DateTime date) async {
-    final entry = await _usersRef.doc(_entryKey(uid, date)).get();
+  static write(String uid, DateTime date, Entry? entry) async {
+    if (entry == null) return;
+    if (entry.doc.isEmpty()) return;
+    final val = entry.toDb();
+    if (val['delta'] == '') return;
+    await _users.doc(_entryKey(uid, date)).set(entry);
+  }
+
+  static Future<Entry?> read(String uid, DateTime date) async {
+    final snapshot = _users.doc(_entryKey(uid, date));
+    final entry = await snapshot.get();
     if (!entry.exists) return null;
     final delta = entry.get('delta');
     if (delta == null) return null;
-    return Document.fromDelta(Delta.fromJson(jsonDecode(delta)));
+    return Entry(doc: _deltaToDoc(delta));
   }
 
   static String _entryKey(String uid, DateTime date) {
-    return "${uid}/entries/${date.toString().substring(0, 10)}";
+    return '${uid}/entries/${date.toString().substring(0, 10)}';
   }
 }
 
@@ -69,14 +103,15 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _onNewDate(DateTime newDate) async {
     // save current entry if controller has been initiated
-    if (_controller != null) {
-      await Storage.write(widget.uid, _date, _controller?.document);
+    if (_controller != null && _controller?.document != null) {
+      await EntryStore.write(
+          widget.uid, _date, Entry(doc: _controller?.document as Document));
     }
     try {
-      final newDoc = await Storage.read(widget.uid, newDate) ?? Document();
+      final Entry? newEntry = await EntryStore.read(widget.uid, newDate);
       setState(() {
         _controller = QuillController(
-          document: newDoc,
+          document: newEntry?.doc ?? Document(),
           selection: const TextSelection.collapsed(offset: 0),
           onSelectionChanged: (textSelection) {
             setState(() {
@@ -251,6 +286,7 @@ class _HomePageState extends State<HomePage> {
               onPressed: () async {
                 DateTime? newDate = await showDatePicker(
                     context: context,
+                    initialEntryMode: DatePickerEntryMode.calendarOnly,
                     initialDate: _date,
                     firstDate: DateTime(2010),
                     lastDate: DateTime.now());
