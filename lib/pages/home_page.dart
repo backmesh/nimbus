@@ -70,8 +70,8 @@ class _HomePageState extends State<HomePage> {
                   if (snapshot.isFetching) {
                     return Center(child: CircularProgressIndicator());
                   }
-
                   return ListView.builder(
+                    reverse: true,
                     itemBuilder: (context, index) {
                       late Entry entry;
                       final isLastItem = index + 1 == snapshot.docs.length;
@@ -81,7 +81,7 @@ class _HomePageState extends State<HomePage> {
                         if (snapshot.hasMore) snapshot.fetchMore();
                         entry = Entry(
                             doc: Document(),
-                            date: _date.subtract(Duration(days: 1)));
+                            date: _date.subtract(Duration(days: index)));
                       } else {
                         entry = snapshot.docs[index].data();
                       }

@@ -133,7 +133,7 @@ class _EntryPageState extends State<EntryPage> {
       focusNode: _focusNode,
       autoFocus: false,
       readOnly: false,
-      placeholder: 'What is on your mind?',
+      placeholder: 'What is on your mind? (${widget.entry.date.toString()})',
       enableSelectionToolbar: isMobile(),
       expands: false,
       padding: EdgeInsets.zero,
