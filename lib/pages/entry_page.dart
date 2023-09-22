@@ -32,14 +32,26 @@ class _EntryPageState extends State<EntryPage> {
   @override
   void dispose() {
     _selectAllTimer?.cancel();
+    _selectAllTimer = null;
     _saveTimer?.cancel();
+    _saveTimer = null;
     _saveEntry();
+    _focusNode.removeListener(_handleFocusChange);
     super.dispose();
+  }
+
+  void _handleFocusChange() {
+    if (!_focusNode.hasFocus && _saveTimer != null) {
+      _saveEntry();
+      _saveTimer?.cancel();
+      _saveTimer = null;
+    }
   }
 
   @override
   void initState() {
     super.initState();
+    _focusNode.addListener(_handleFocusChange);
     setState(() {
       _controller = QuillController(
         document: widget.entry.doc,
@@ -127,7 +139,7 @@ class _EntryPageState extends State<EntryPage> {
 
   void _startSaveTimer() {
     _saveTimer?.cancel();
-    _saveTimer = Timer(const Duration(seconds: 10), () {
+    _saveTimer = Timer(const Duration(seconds: 5), () {
       _saveEntry();
       _saveTimer?.cancel();
       _saveTimer = null;
