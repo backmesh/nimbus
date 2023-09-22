@@ -59,32 +59,31 @@ class _HomePageState extends State<HomePage> {
             ),
           ]),
           Expanded(
-            flex: 15,
-            child: Container(
-              color: Colors.white,
-              padding: const EdgeInsets.only(left: 16, right: 16),
-              child: FirestoreQueryBuilder<Entry>(
-                query: EntryStore.readAll(widget.uid),
-                builder: (context, snapshot, _) {
-                  // Loading
-                  if (snapshot.isFetching) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-                  return ListView.builder(
-                    reverse: true,
-                    itemBuilder: (context, index) {
-                      final currDate = _date.subtract(Duration(days: index));
-                      late Entry entry;
-                      //final isLastItem = index + 1 == snapshot.docs.length;
-                      if (snapshot.hasMore) snapshot.fetchMore();
-                      entry = snapshot.docs.map((d) => d.data()).firstWhere(
-                          (e) => sameCalendarDay(e.date, currDate),
-                          orElse: () => Entry(doc: Document(), date: currDate));
-                      return EntryPage(entry, widget.uid);
-                    },
-                  );
-                },
-              ),
+            child: FirestoreQueryBuilder<Entry>(
+              query: EntryStore.readAll(widget.uid),
+              builder: (context, snapshot, _) {
+                // Loading
+                if (snapshot.isFetching) {
+                  return Center(child: CircularProgressIndicator());
+                }
+                return ListView.builder(
+                  reverse: true,
+                  itemBuilder: (context, index) {
+                    final currDate = _date.subtract(Duration(days: index));
+                    late Entry entry;
+                    if (snapshot.hasMore) snapshot.fetchMore();
+                    entry = snapshot.docs.map((d) => d.data()).firstWhere(
+                        (e) => sameCalendarDay(e.date, currDate),
+                        orElse: () => Entry(doc: Document(), date: currDate));
+                    double screenHeight = MediaQuery.of(context).size.height;
+                    double desiredHeight = screenHeight * 0.8;
+                    return Container(
+                      child: EntryPage(entry, widget.uid),
+                      height: desiredHeight,
+                    );
+                  },
+                );
+              },
             ),
           ),
         ],

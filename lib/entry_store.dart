@@ -15,6 +15,7 @@ bool sameCalendarDay(DateTime a, DateTime b) {
   return a.toString().substring(0, 10) == b.toString().substring(0, 10);
 }
 
+// TODO make sure transformations always use 00:00 UTC time
 class Entry {
   final Document doc;
   final DateTime date;

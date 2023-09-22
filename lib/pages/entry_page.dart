@@ -193,16 +193,10 @@ class _EntryPageState extends State<EntryPage> {
       afterButtonPressed: _focusNode.requestFocus,
     );
 
-    return Row(
-      children: <Widget>[
-        Container(child: _hasSelection ? toolbar : Container()),
-        Expanded(
-          flex: 15,
-          child: Container(
-            child: quillEditor,
-          ),
-        ),
-      ],
+    final els = [quillEditor];
+    if (_hasSelection) els.insert(0, toolbar);
+    return Column(
+      children: els,
     );
   }
 }
