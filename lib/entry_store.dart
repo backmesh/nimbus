@@ -53,7 +53,8 @@ class EntryStore {
 
   static Future<void> write(String uid, Entry? entry) async {
     if (entry == null) return;
-    if (entry.doc.isEmpty()) return;
+    if (entry.doc.isEmpty())
+      return _users.doc(_entryKey(uid, entry.date)).delete();
     final val = entry.toDb();
     if (val['delta'] == '') return;
     await _users.doc(_entryKey(uid, entry.date)).set(val);
