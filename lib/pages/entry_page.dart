@@ -163,7 +163,7 @@ class _EntryPageState extends State<EntryPage> {
       placeholder: 'What is on your mind? (${widget.entry.date.toString()})',
       enableSelectionToolbar: isMobile(),
       expands: false,
-      padding: EdgeInsets.zero,
+      padding: EdgeInsets.all(10),
       onTapUp: (details, p1) {
         return _onTripleClickSelection();
       },
@@ -205,10 +205,15 @@ class _EntryPageState extends State<EntryPage> {
       afterButtonPressed: _focusNode.requestFocus,
     );
 
-    final els = [quillEditor];
-    if (_hasSelection) els.insert(0, toolbar);
     return Column(
-      children: els,
+      children: [
+        AnimatedOpacity(
+          opacity: _hasSelection ? 1.0 : 0.0,
+          duration: Duration(milliseconds: 200),
+          child: toolbar,
+        ),
+        quillEditor,
+      ],
     );
   }
 }
