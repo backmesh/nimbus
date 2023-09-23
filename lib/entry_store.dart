@@ -15,6 +15,51 @@ bool sameCalendarDay(DateTime a, DateTime b) {
   return a.toString().substring(0, 10) == b.toString().substring(0, 10);
 }
 
+String getHumanReadableDate(DateTime date) {
+  // Get the month name from the DateTime object
+  String monthName = '';
+  switch (date.month) {
+    case 1:
+      monthName = 'January';
+      break;
+    case 2:
+      monthName = 'February';
+      break;
+    case 3:
+      monthName = 'March';
+      break;
+    case 4:
+      monthName = 'April';
+      break;
+    case 5:
+      monthName = 'May';
+      break;
+    case 6:
+      monthName = 'June';
+      break;
+    case 7:
+      monthName = 'July';
+      break;
+    case 8:
+      monthName = 'August';
+      break;
+    case 9:
+      monthName = 'September';
+      break;
+    case 10:
+      monthName = 'October';
+      break;
+    case 11:
+      monthName = 'November';
+      break;
+    case 12:
+      monthName = 'December';
+      break;
+  }
+
+  return '$monthName ${date.day}, ${date.year}';
+}
+
 // TODO make sure transformations always use 00:00 UTC time
 class Entry {
   final Document doc;

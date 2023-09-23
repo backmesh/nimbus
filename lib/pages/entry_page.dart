@@ -160,7 +160,7 @@ class _EntryPageState extends State<EntryPage> {
       focusNode: _focusNode,
       autoFocus: false,
       readOnly: false,
-      placeholder: 'What is on your mind? (${widget.entry.date.toString()})',
+      placeholder: 'What is on your mind?',
       enableSelectionToolbar: isMobile(),
       expands: false,
       padding: EdgeInsets.all(10),
@@ -207,10 +207,17 @@ class _EntryPageState extends State<EntryPage> {
 
     return Column(
       children: [
+        Text('${getHumanReadableDate(widget.entry.date)}'),
         AnimatedOpacity(
           opacity: _hasSelection ? 1.0 : 0.0,
           duration: Duration(milliseconds: 200),
-          child: toolbar,
+          child: Visibility(
+            visible: _hasSelection,
+            maintainSize: true,
+            maintainAnimation: true,
+            maintainState: true,
+            child: toolbar,
+          ),
         ),
         quillEditor,
       ],
