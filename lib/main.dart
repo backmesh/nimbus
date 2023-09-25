@@ -58,6 +58,14 @@ class MyApp extends StatelessWidget {
       home: SignInScreen(
         showAuthActionSwitch: false,
         actions: [
+          AuthStateChangeAction<AuthFailed>((context, state) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) {
+                return ErrorText(exception: state.exception);
+              }),
+            );
+          }),
           // TODO dry up
           AuthStateChangeAction<SignedIn>((context, state) {
             final uid = state.user?.uid;
