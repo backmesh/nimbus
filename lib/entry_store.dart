@@ -11,7 +11,7 @@ String _docToDelta(Document doc) {
   return jsonEncode(doc.toDelta().toJson());
 }
 
-bool sameCalendarDay(DateTime a, DateTime b) {
+bool isSameCalendarDay(DateTime a, DateTime b) {
   return a.toString().substring(0, 10) == b.toString().substring(0, 10);
 }
 

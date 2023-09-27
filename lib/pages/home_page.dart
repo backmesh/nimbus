@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
+import 'package:flutter_quill/flutter_quill.dart' hide Text;
 
 import '../entry_store.dart';
 import 'entry_page.dart';
@@ -21,6 +22,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildScrollableJournal(BuildContext context) {
+    double screenHeight = MediaQuery.of(context).size.height;
+    double minEntryHeight = screenHeight * 0.2;
     return SafeArea(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -42,13 +45,26 @@ class _HomePageState extends State<HomePage> {
                   return Center(child: CircularProgressIndicator());
                 }
                 return ListView.builder(
-                  reverse: true,
-                  itemCount: snapshot.docs.length,
                   itemBuilder: (context, index) {
-                    //if (snapshot.hasMore) snapshot.fetchMore();
-                    double screenHeight = MediaQuery.of(context).size.height;
-                    double desiredHeight = screenHeight * 0.8;
+                    // ignore indexes too large
+                    if (index > snapshot.docs.length) return null;
+                    // handle very first iteration after list length
+                    if (index == snapshot.docs.length) {
+                      final lastIndex = snapshot.docs.length - 1;
+                      final lastEntry = snapshot.docs[lastIndex].data();
+                      // return empty today if the last entry *was* not for today
+                      if (isSameCalendarDay(DateTime.now(), lastEntry.date)) {
+                        return null;
+                      }
+                      return ConstrainedBox(
+                        constraints: BoxConstraints(minHeight: minEntryHeight),
+                        child: EntryPage(
+                            Entry(date: DateTime.now(), doc: Document()),
+                            widget.uid),
+                      );
+                    }
                     final entry = snapshot.docs[index].data();
+                    //if (snapshot.hasMore) snapshot.fetchMore();
                     final yesterday =
                         entry.date.subtract(Duration(days: index));
                     // undbounded calendar widget into the past
@@ -57,16 +73,16 @@ class _HomePageState extends State<HomePage> {
                         : snapshot.docs.elementAtOrNull(index - 1);
                     if (prevSnapshot == null) {
                       return ConstrainedBox(
-                        constraints: BoxConstraints(minHeight: desiredHeight),
+                        constraints: BoxConstraints(minHeight: minEntryHeight),
                         child: EntryPage(entry, widget.uid),
                       );
                     }
                     // bounded calendar widget
                     final prevEntry = prevSnapshot.data();
-                    if (!sameCalendarDay(yesterday, prevEntry.date)) {}
+                    if (!isSameCalendarDay(yesterday, prevEntry.date)) {}
                     // consecutive days so no calendar widget
                     return ConstrainedBox(
-                      constraints: BoxConstraints(minHeight: desiredHeight),
+                      constraints: BoxConstraints(minHeight: minEntryHeight),
                       child: EntryPage(entry, widget.uid),
                     );
                   },
