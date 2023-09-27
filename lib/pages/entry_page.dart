@@ -204,10 +204,12 @@ class _EntryPageState extends State<EntryPage> {
       showQuote: false,
       afterButtonPressed: _focusNode.requestFocus,
     );
+    final MaterialLocalizations localizations =
+        MaterialLocalizations.of(context);
 
     return Column(
       children: [
-        Text('${getHumanReadableDate(widget.entry.date)}'),
+        Text(localizations.formatShortDate(widget.entry.date)),
         AnimatedOpacity(
           opacity: _hasSelection ? 1.0 : 0.0,
           duration: Duration(milliseconds: 200),

@@ -15,6 +15,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   DateTime _date = DateTime.now();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +27,16 @@ class _HomePageState extends State<HomePage> {
   bool _isTodaySelected() {
     return _date.toString().substring(0, 10) ==
         DateTime.now().toString().substring(0, 10);
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.atEdge) {
+      if (_scrollController.position.pixels == 0) {
+        print('ListView is at the top');
+      } else {
+        print('ListView is at the bottom, last item rendered');
+      }
+    }
   }
 
   Widget _buildScrollableJournal(BuildContext context) {
@@ -42,20 +53,10 @@ class _HomePageState extends State<HomePage> {
           Row(children: [
             Center(child: Text(dateText)),
             IconButton(
-              icon: Icon(Icons.date_range),
+              icon: Icon(Icons.settings),
               padding: EdgeInsets.zero,
-              onPressed: () async {
-                DateTime? newDate = await showDatePicker(
-                    context: context,
-                    initialEntryMode: DatePickerEntryMode.calendarOnly,
-                    initialDate: _date,
-                    firstDate: DateTime(2010),
-                    lastDate: DateTime.now());
-                if (newDate == null) return;
-                setState(() {
-                  _date = newDate;
-                });
-              },
+              // TODO show settings
+              onPressed: () async {},
             ),
           ]),
           Expanded(
@@ -77,9 +78,9 @@ class _HomePageState extends State<HomePage> {
                         orElse: () => Entry(doc: Document(), date: currDate));
                     double screenHeight = MediaQuery.of(context).size.height;
                     double desiredHeight = screenHeight * 0.8;
-                    return Container(
+                    return ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: desiredHeight),
                       child: EntryPage(entry, widget.uid),
-                      height: desiredHeight,
                     );
                   },
                 );
