@@ -47,6 +47,8 @@ class _HomePageState extends State<HomePage> {
                 return ListView.builder(
                   reverse: true,
                   itemBuilder: (context, index) {
+                    // should this be different?
+                    if (snapshot.hasMore) snapshot.fetchMore();
                     // ignore indexes too large
                     if (index >= snapshot.docs.length) return null;
                     // handle very first iteration which is the last entry
@@ -64,22 +66,33 @@ class _HomePageState extends State<HomePage> {
                       );
                     }
                     final entry = snapshot.docs[index].data();
-                    //if (snapshot.hasMore) snapshot.fetchMore();
                     final yesterday =
                         entry.date.subtract(Duration(days: index));
                     // undbounded calendar widget into the past
-                    final prevSnapshot = index == 0
-                        ? null
-                        : snapshot.docs.elementAtOrNull(index - 1);
+                    final prevSnapshot =
+                        snapshot.docs.elementAtOrNull(index + 1);
                     if (prevSnapshot == null) {
-                      return ConstrainedBox(
-                        constraints: BoxConstraints(minHeight: minEntryHeight),
-                        child: EntryPage(entry, widget.uid),
-                      );
+                      return Column(children: [
+                        Text('undbounded calendar widget into the past'),
+                        ConstrainedBox(
+                          constraints:
+                              BoxConstraints(minHeight: minEntryHeight),
+                          child: EntryPage(entry, widget.uid),
+                        )
+                      ]);
                     }
                     // bounded calendar widget
                     final prevEntry = prevSnapshot.data();
-                    if (!isSameCalendarDay(yesterday, prevEntry.date)) {}
+                    if (!isSameCalendarDay(yesterday, prevEntry.date)) {
+                      return Column(children: [
+                        Text('bounded calendar widget'),
+                        ConstrainedBox(
+                          constraints:
+                              BoxConstraints(minHeight: minEntryHeight),
+                          child: EntryPage(entry, widget.uid),
+                        )
+                      ]);
+                    }
                     // consecutive days so no calendar widget
                     return ConstrainedBox(
                       constraints: BoxConstraints(minHeight: minEntryHeight),
