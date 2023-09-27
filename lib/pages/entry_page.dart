@@ -153,6 +153,11 @@ class _EntryPageState extends State<EntryPage> {
   }
 
   Widget _buildWelcomeEditor(BuildContext context) {
+    final localizations = MaterialLocalizations.of(context);
+    final entryTitle = widget.entry.date.toString().substring(0, 10) ==
+            DateTime.now().toString().substring(0, 10)
+        ? 'Today'
+        : localizations.formatShortDate(widget.entry.date);
     Widget quillEditor = QuillEditor(
       controller: _controller!,
       scrollController: ScrollController(),
@@ -204,12 +209,10 @@ class _EntryPageState extends State<EntryPage> {
       showQuote: false,
       afterButtonPressed: _focusNode.requestFocus,
     );
-    final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context);
 
     return Column(
       children: [
-        Text(localizations.formatShortDate(widget.entry.date)),
+        Text(entryTitle),
         AnimatedOpacity(
           opacity: _hasSelection ? 1.0 : 0.0,
           duration: Duration(milliseconds: 200),

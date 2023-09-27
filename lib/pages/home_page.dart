@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' hide Text;
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 
 import '../entry_store.dart';
@@ -14,9 +13,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  DateTime _date = DateTime.now();
-  final ScrollController _scrollController = ScrollController();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,34 +20,12 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  bool _isTodaySelected() {
-    return _date.toString().substring(0, 10) ==
-        DateTime.now().toString().substring(0, 10);
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.atEdge) {
-      if (_scrollController.position.pixels == 0) {
-        print('ListView is at the top');
-      } else {
-        print('ListView is at the bottom, last item rendered');
-      }
-    }
-  }
-
   Widget _buildScrollableJournal(BuildContext context) {
-    final MaterialLocalizations localizations =
-        MaterialLocalizations.of(context);
-
-    var dateText =
-        _isTodaySelected() ? 'Today' : localizations.formatShortDate(_date);
-
     return SafeArea(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Row(children: [
-            Center(child: Text(dateText)),
             IconButton(
               icon: Icon(Icons.settings),
               padding: EdgeInsets.zero,
@@ -69,15 +43,28 @@ class _HomePageState extends State<HomePage> {
                 }
                 return ListView.builder(
                   reverse: true,
+                  itemCount: snapshot.docs.length,
                   itemBuilder: (context, index) {
-                    final currDate = _date.subtract(Duration(days: index));
-                    late Entry entry;
-                    if (snapshot.hasMore) snapshot.fetchMore();
-                    entry = snapshot.docs.map((d) => d.data()).firstWhere(
-                        (e) => sameCalendarDay(e.date, currDate),
-                        orElse: () => Entry(doc: Document(), date: currDate));
+                    //if (snapshot.hasMore) snapshot.fetchMore();
                     double screenHeight = MediaQuery.of(context).size.height;
                     double desiredHeight = screenHeight * 0.8;
+                    final entry = snapshot.docs[index].data();
+                    final yesterday =
+                        entry.date.subtract(Duration(days: index));
+                    // undbounded calendar widget into the past
+                    final prevSnapshot = index == 0
+                        ? null
+                        : snapshot.docs.elementAtOrNull(index - 1);
+                    if (prevSnapshot == null) {
+                      return ConstrainedBox(
+                        constraints: BoxConstraints(minHeight: desiredHeight),
+                        child: EntryPage(entry, widget.uid),
+                      );
+                    }
+                    // bounded calendar widget
+                    final prevEntry = prevSnapshot.data();
+                    if (!sameCalendarDay(yesterday, prevEntry.date)) {}
+                    // consecutive days so no calendar widget
                     return ConstrainedBox(
                       constraints: BoxConstraints(minHeight: desiredHeight),
                       child: EntryPage(entry, widget.uid),
