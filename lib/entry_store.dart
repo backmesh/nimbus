@@ -41,9 +41,10 @@ class EntryStore {
   static final CollectionReference _users =
       FirebaseFirestore.instance.collection('journalists');
 
-  static CollectionReference<Entry> readAll(String uid) {
+  static Query<Entry> readAll(String uid) {
     return FirebaseFirestore.instance
         .collection('journalists/${uid}/entries')
+        .orderBy('date', descending: true)
         .withConverter<Entry>(
           fromFirestore: (snapshot, _) =>
               Entry.fromDbCollection(snapshot.data()!),

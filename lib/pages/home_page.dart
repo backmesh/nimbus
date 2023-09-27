@@ -45,13 +45,14 @@ class _HomePageState extends State<HomePage> {
                   return Center(child: CircularProgressIndicator());
                 }
                 return ListView.builder(
+                  reverse: true,
                   itemBuilder: (context, index) {
                     // ignore indexes too large
-                    if (index > snapshot.docs.length) return null;
+                    if (index >= snapshot.docs.length) return null;
                     // handle very first iteration after list length
-                    if (index == snapshot.docs.length) {
-                      final lastIndex = snapshot.docs.length - 1;
-                      final lastEntry = snapshot.docs[lastIndex].data();
+                    if (index == 0) {
+                      //final lastIndex = snapshot.docs.length - 1;
+                      final lastEntry = snapshot.docs[0].data();
                       // return empty today if the last entry *was* not for today
                       if (isSameCalendarDay(DateTime.now(), lastEntry.date)) {
                         return null;
