@@ -49,9 +49,8 @@ class _HomePageState extends State<HomePage> {
                   itemBuilder: (context, index) {
                     // ignore indexes too large
                     if (index >= snapshot.docs.length) return null;
-                    // handle very first iteration after list length
+                    // handle very first iteration which is the last entry
                     if (index == 0) {
-                      //final lastIndex = snapshot.docs.length - 1;
                       final lastEntry = snapshot.docs[0].data();
                       // return empty today if the last entry *was* not for today
                       if (isSameCalendarDay(DateTime.now(), lastEntry.date)) {
