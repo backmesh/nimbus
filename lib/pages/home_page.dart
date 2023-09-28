@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
@@ -72,18 +71,31 @@ class _HomePageState extends State<HomePage> {
                   return Center(child: CircularProgressIndicator());
                 }
                 final today = DateTime.now();
+                final lastEntry = snapshot.docs.firstOrNull?.data();
+                final todayOffset = lastEntry != null &&
+                        isSameCalendarDay(today, lastEntry.date)
+                    ? 0
+                    : 1;
+                final itemCount = snapshot.docs.length + todayOffset;
+                print(todayOffset);
                 return Column(children: [
                   Expanded(
                       child: ListView.builder(
                     reverse: true,
+                    itemCount: itemCount,
                     itemBuilder: (context, index) {
                       if (snapshot.hasMore) snapshot.fetchMore();
                       // ignore indexes too large
-                      if (index >= snapshot.docs.length) return null;
-                      final entry = snapshot.docs[index].data();
+                      print(index);
+                      //if (index >= max(1, snapshot.docs.length)) return null;
+                      // today
+                      final Entry entry =
+                          snapshot.docs.elementAtOrNull(index)?.data() ??
+                              Entry(doc: Document(), date: today);
+
                       final List<Widget> children = [];
                       // first separator, unbounded calendar into the past
-                      if (index == snapshot.docs.length - 1) {
+                      if (index == itemCount - 1) {
                         children.add(_getDatePickerSeparator(
                             snapshot, entry.date, DateTime(2010)));
                       }
@@ -99,11 +111,10 @@ class _HomePageState extends State<HomePage> {
                       }
                       children.add(EntryPage(entry, widget.uid));
                       // today
-                      if (index == 0 && !isSameCalendarDay(entry.date, today)) {
-                        // last separator
-                        children.add(EntryPage(
-                            Entry(doc: Document(), date: today), widget.uid));
-                      }
+                      // if (index == 0 && !isSameCalendarDay(entry.date, today)) {
+                      //   children.add(EntryPage(
+                      //       Entry(doc: Document(), date: today), widget.uid));
+                      // }
                       return ConstrainedBox(
                         constraints: BoxConstraints(minHeight: minEntryHeight),
                         child: Column(children: children),
