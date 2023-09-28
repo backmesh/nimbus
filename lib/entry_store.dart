@@ -52,13 +52,16 @@ class EntryStore {
         );
   }
 
-  static Future<void> write(String uid, Entry? entry) async {
+  static Future<void> write(String uid, Entry? entry, bool saveIfEmpty) async {
     if (entry == null) return;
-    if (entry.doc.isEmpty())
-      return _users.doc(_entryKey(uid, entry.date)).delete();
+    // today is special
+    saveIfEmpty =
+        isSameCalendarDay(DateTime.now(), entry.date) ? true : saveIfEmpty;
+    final key = _entryKey(uid, entry.date);
+    if (!saveIfEmpty && entry.doc.isEmpty()) return _users.doc(key).delete();
     final val = entry.toDb();
-    if (val['delta'] == '') return;
-    await _users.doc(_entryKey(uid, entry.date)).set(val);
+    if (!saveIfEmpty && val['delta'] == '') return;
+    await _users.doc(key).set(val);
   }
 
   // TODO use withConverter or remove

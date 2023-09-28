@@ -40,9 +40,9 @@ class _HomePageState extends State<HomePage> {
             currentDate: end,
             lastDate: end);
         if (newDate == null) return;
-        // await EntryStore.write(
-        //    widget.uid, Entry(date: newDate, doc: Document()));
-        //snapshot.fetchMore();
+        await EntryStore.write(
+            widget.uid, Entry(date: newDate, doc: Document()), true);
+        snapshot.fetchMore();
       },
     );
   }
@@ -77,7 +77,10 @@ class _HomePageState extends State<HomePage> {
                     ? 0
                     : 1;
                 final itemCount = snapshot.docs.length + todayOffset;
+                print('todayOffset');
                 print(todayOffset);
+                print('snapshot.docs.length');
+                print(snapshot.docs.length);
                 return Column(children: [
                   Expanded(
                       child: ListView.builder(
