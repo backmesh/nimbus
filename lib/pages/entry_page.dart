@@ -218,14 +218,12 @@ class _EntryPageState extends State<EntryPage> {
             Text(entryTitle),
             IconButton.outlined(
               icon: Icon(Symbols.add),
-              padding: EdgeInsets.all(50),
               onPressed: () async {},
             ),
             if (!isToday)
               IconButton(
                 icon: Icon(Symbols.delete),
                 color: Colors.red,
-                padding: EdgeInsets.all(50),
                 onPressed: () async {
                   await EntryStore.delete(widget.uid, widget.entry);
                 },
