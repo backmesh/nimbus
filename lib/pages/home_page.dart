@@ -23,16 +23,17 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  IconButton _getDatePickerSeparator(
-      FirestoreQueryBuilderSnapshot<Entry> snapshot,
-      DateTime upperBound,
-      DateTime lowerBound) {
+  Widget _getDatePickerSeparator(FirestoreQueryBuilderSnapshot<Entry> snapshot,
+      DateTime upperBound, DateTime lowerBound) {
     final start = lowerBound.add(Duration(days: 1));
     final end = upperBound.subtract(Duration(days: 1));
-    return IconButton(
-      icon: Icon(Symbols.calendar_add_on),
-      padding: EdgeInsets.all(50),
-      onPressed: () async {
+    return GestureDetector(
+      child: Card(
+          child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 50, horizontal: 500),
+              child: Icon(Icons.add))),
+      onTap: () async {
         DateTime? newDate = await showDatePicker(
             context: context,
             confirmText: 'CREATE ENTRY',
@@ -44,7 +45,6 @@ class _HomePageState extends State<HomePage> {
         if (newDate == null) return;
         await EntryStore.create(
             widget.uid, Entry(date: newDate, doc: Document()));
-        snapshot.fetchMore();
       },
     );
   }
