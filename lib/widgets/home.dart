@@ -4,7 +4,7 @@ import 'package:flutter_quill/flutter_quill.dart' hide Text;
 
 import '../logger.dart';
 import '../entry_store.dart';
-import 'entry_page.dart';
+import 'entry.dart';
 
 class HomePage extends StatefulWidget {
   final String uid;
