@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'dart:io' show Platform;
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -6,9 +10,7 @@ import 'package:firebase_ui_oauth_apple/firebase_ui_oauth_apple.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:journal/firebase_options.dart';
 
-import 'dart:io' show Platform;
-
-import 'pages/home_page.dart';
+import 'widgets/home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,10 +26,26 @@ void main() async {
       AppleProvider(),
     ]);
   }
-  runApp(MyApp());
+  runApp(Main());
 }
 
-class MyApp extends StatelessWidget {
+class Main extends StatefulWidget {
+  // This widget is the root of your application.
+
+  @override
+  _MainState createState() => _MainState();
+}
+
+class _MainState extends State<Main> {
+  late StreamSubscription<User?> userStream;
+  User? user = FirebaseAuth.instance.currentUser;
+  void initState() {
+    super.initState();
+    userStream = FirebaseAuth.instance.authStateChanges().listen((fbUser) {
+      if (fbUser != null) user = fbUser;
+    });
+  }
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -57,40 +75,34 @@ class MyApp extends StatelessWidget {
       supportedLocales: [
         const Locale('en', 'US'),
       ],
-      home: SignInScreen(
-        showAuthActionSwitch: false,
-        actions: [
-          AuthStateChangeAction<AuthFailed>((context, state) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) {
-                return ErrorText(exception: state.exception);
-              }),
-            );
-          }),
-          // TODO dry up
-          AuthStateChangeAction<SignedIn>((context, state) {
-            final uid = state.user?.uid;
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) {
-                if (uid == null) Text(state.toString());
-                return HomePage(uid as String);
-              }),
-            );
-          }),
-          AuthStateChangeAction<UserCreated>((context, state) {
-            final uid = state.credential.user?.uid;
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) {
-                if (uid == null) Text(state.toString());
-                return HomePage(uid as String);
-              }),
-            );
-          }),
-        ],
-      ),
+      home: user != null
+          ? HomePage(user!.uid)
+          : SignInScreen(
+              showAuthActionSwitch: false,
+              actions: [
+                // TODO dry up
+                AuthStateChangeAction<SignedIn>((context, state) {
+                  final uid = state.user?.uid;
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) {
+                      if (uid == null) Text(state.toString());
+                      return HomePage(uid as String);
+                    }),
+                  );
+                }),
+                AuthStateChangeAction<UserCreated>((context, state) {
+                  final uid = state.credential.user?.uid;
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) {
+                      if (uid == null) Text(state.toString());
+                      return HomePage(uid as String);
+                    }),
+                  );
+                }),
+              ],
+            ),
     );
   }
 }
