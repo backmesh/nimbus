@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
@@ -14,12 +15,36 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final List<DateTime> newDates = [];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: _buildScrollableJournal(context),
+    );
+  }
+
+  IconButton _getDatePickerSeparator(
+      FirestoreQueryBuilderSnapshot<Entry> snapshot,
+      DateTime upperBound,
+      DateTime lowerBound) {
+    final start = lowerBound.add(Duration(days: 1));
+    final end = upperBound.subtract(Duration(days: 1));
+    return IconButton(
+      icon: Icon(Icons.add),
+      padding: EdgeInsets.all(50),
+      onPressed: () async {
+        DateTime? newDate = await showDatePicker(
+            context: context,
+            confirmText: 'CREATE ENTRY',
+            initialEntryMode: DatePickerEntryMode.calendarOnly,
+            firstDate: start,
+            initialDate: end,
+            currentDate: end,
+            lastDate: end);
+        if (newDate == null) return;
+        // await EntryStore.write(
+        //    widget.uid, Entry(date: newDate, doc: Document()));
+        //snapshot.fetchMore();
+      },
     );
   }
 
@@ -46,84 +71,46 @@ class _HomePageState extends State<HomePage> {
                 if (snapshot.isFetching) {
                   return Center(child: CircularProgressIndicator());
                 }
-                return ListView.builder(
-                  reverse: true,
-                  itemBuilder: (context, index) {
-                    if (snapshot.hasMore) snapshot.fetchMore();
-                    final today = DateTime.now();
-                    // ignore indexes too large
-                    if (index >= snapshot.docs.length) return null;
-                    // handle very first iteration which is the last entry
-                    if (index == 0) {
-                      final lastEntry = snapshot.docs[0].data();
-                      // return empty today if the last entry *was* not for today
-                      if (isSameCalendarDay(today, lastEntry.date)) return null;
-                      return Column(children: [
-                        if (!isSameCalendarDay(
-                            today.subtract(Duration(days: 1)), lastEntry.date))
-                          Text('bounded calendar widget'),
-                        ConstrainedBox(
-                          constraints:
-                              BoxConstraints(minHeight: minEntryHeight),
-                          child: EntryPage(
-                              Entry(date: DateTime.now(), doc: Document()),
-                              widget.uid),
-                        )
-                      ]);
-                    }
-                    final entry = snapshot.docs[index].data();
-                    // undbounded calendar widget into the past
-                    final prevSnapshot =
-                        snapshot.docs.elementAtOrNull(index + 1);
-                    if (prevSnapshot == null) {
-                      return Column(children: [
-                        IconButton(
-                          icon: Icon(Icons.add),
-                          padding: EdgeInsets.all(50),
-                          onPressed: () async {
-                            DateTime? newDate = await showDatePicker(
-                                context: context,
-                                confirmText: 'CREATE ENTRY',
-                                initialEntryMode:
-                                    DatePickerEntryMode.calendarOnly,
-                                initialDate: entry.date,
-                                currentDate: entry.date,
-                                firstDate: DateTime(2010),
-                                lastDate: entry.date);
-                            if (newDate == null) return;
-                            setState(() {
-                              newDates.add(newDate);
-                            });
-                          },
-                        ),
-                        ConstrainedBox(
-                          constraints:
-                              BoxConstraints(minHeight: minEntryHeight),
-                          child: EntryPage(entry, widget.uid),
-                        )
-                      ]);
-                    }
-                    // bounded calendar widget
-                    final prevEntry = prevSnapshot.data();
-                    if (!isSameCalendarDay(
-                        entry.date.subtract(Duration(days: 1)),
-                        prevEntry.date)) {
-                      return Column(children: [
-                        Text('bounded calendar widget'),
-                        ConstrainedBox(
-                          constraints:
-                              BoxConstraints(minHeight: minEntryHeight),
-                          child: EntryPage(entry, widget.uid),
-                        )
-                      ]);
-                    }
-                    // consecutive days so no calendar widget
-                    return ConstrainedBox(
-                      constraints: BoxConstraints(minHeight: minEntryHeight),
-                      child: EntryPage(entry, widget.uid),
-                    );
-                  },
-                );
+                final today = DateTime.now();
+                return Column(children: [
+                  Expanded(
+                      child: ListView.builder(
+                    reverse: true,
+                    itemBuilder: (context, index) {
+                      if (snapshot.hasMore) snapshot.fetchMore();
+                      // ignore indexes too large
+                      if (index >= snapshot.docs.length) return null;
+                      final entry = snapshot.docs[index].data();
+                      final List<Widget> children = [];
+                      // first separator, unbounded calendar into the past
+                      if (index == snapshot.docs.length - 1) {
+                        children.add(_getDatePickerSeparator(
+                            snapshot, entry.date, DateTime(2010)));
+                      }
+                      // bounded calendar widget
+                      final Entry? prevEntry =
+                          snapshot.docs.elementAtOrNull(index + 1)?.data();
+                      if (prevEntry != null) {
+                        final consecutiveDays = isSameCalendarDay(
+                            prevEntry.date.add(Duration(days: 1)), entry.date);
+                        if (!consecutiveDays)
+                          children.add(_getDatePickerSeparator(
+                              snapshot, entry.date, prevEntry.date));
+                      }
+                      children.add(EntryPage(entry, widget.uid));
+                      // today
+                      if (index == 0 && !isSameCalendarDay(entry.date, today)) {
+                        // last separator
+                        children.add(EntryPage(
+                            Entry(doc: Document(), date: today), widget.uid));
+                      }
+                      return ConstrainedBox(
+                        constraints: BoxConstraints(minHeight: minEntryHeight),
+                        child: Column(children: children),
+                      );
+                    },
+                  )),
+                ]);
               },
             ),
           ),
