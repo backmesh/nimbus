@@ -50,7 +50,6 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildScrollableJournal(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
-    double minEntryHeight = screenHeight * 0.2;
     return SafeArea(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -78,6 +77,7 @@ class _HomePageState extends State<HomePage> {
                     ? 0
                     : 1;
                 final itemCount = snapshot.docs.length + todayOffset;
+                double minEntryHeight = screenHeight / itemCount;
                 Logger.debug('todayOffset');
                 Logger.debug(todayOffset);
                 Logger.debug('snapshot.docs.length');
@@ -89,7 +89,6 @@ class _HomePageState extends State<HomePage> {
                     itemCount: itemCount,
                     itemBuilder: (context, index) {
                       if (snapshot.hasMore) snapshot.fetchMore();
-                      print(index);
                       final Entry entry =
                           snapshot.docs.elementAtOrNull(index)?.data() ??
                               Entry(doc: Document(), date: today);

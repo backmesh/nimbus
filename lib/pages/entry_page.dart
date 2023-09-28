@@ -41,7 +41,7 @@ class _EntryPageState extends State<EntryPage> {
   }
 
   void _handleFocusChange() {
-    if (!_focusNode.hasFocus && _saveTimer != null) {
+    if (!_focusNode.hasFocus) {
       _saveEntry();
       _saveTimer?.cancel();
       _saveTimer = null;
