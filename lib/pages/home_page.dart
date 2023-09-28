@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../logger.dart';
 import '../entry_store.dart';
@@ -29,7 +30,7 @@ class _HomePageState extends State<HomePage> {
     final start = lowerBound.add(Duration(days: 1));
     final end = upperBound.subtract(Duration(days: 1));
     return IconButton(
-      icon: Icon(Icons.add),
+      icon: Icon(Symbols.calendar_add_on),
       padding: EdgeInsets.all(50),
       onPressed: () async {
         DateTime? newDate = await showDatePicker(

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/extensions.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../entry_store.dart';
 
@@ -212,7 +213,16 @@ class _EntryPageState extends State<EntryPage> {
 
     return Column(
       children: [
-        Text(entryTitle),
+        Row(
+          children: [
+            Text(entryTitle),
+            IconButton(
+              icon: Icon(Symbols.new_label),
+              padding: EdgeInsets.all(50),
+              onPressed: () async {},
+            )
+          ],
+        ),
         AnimatedOpacity(
           opacity: _hasSelection ? 1.0 : 0.0,
           duration: Duration(milliseconds: 200),
