@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
 
+import '../logger.dart';
 import '../entry_store.dart';
 import 'entry_page.dart';
 
@@ -77,10 +78,10 @@ class _HomePageState extends State<HomePage> {
                     ? 0
                     : 1;
                 final itemCount = snapshot.docs.length + todayOffset;
-                print('todayOffset');
-                print(todayOffset);
-                print('snapshot.docs.length');
-                print(snapshot.docs.length);
+                Logger.debug('todayOffset');
+                Logger.debug(todayOffset);
+                Logger.debug('snapshot.docs.length');
+                Logger.debug(snapshot.docs.length);
                 return Column(children: [
                   Expanded(
                       child: ListView.builder(
@@ -88,14 +89,10 @@ class _HomePageState extends State<HomePage> {
                     itemCount: itemCount,
                     itemBuilder: (context, index) {
                       if (snapshot.hasMore) snapshot.fetchMore();
-                      // ignore indexes too large
                       print(index);
-                      //if (index >= max(1, snapshot.docs.length)) return null;
-                      // today
                       final Entry entry =
                           snapshot.docs.elementAtOrNull(index)?.data() ??
                               Entry(doc: Document(), date: today);
-
                       final List<Widget> children = [];
                       // first separator, unbounded calendar into the past
                       if (index == itemCount - 1) {
@@ -113,11 +110,6 @@ class _HomePageState extends State<HomePage> {
                               snapshot, entry.date, prevEntry.date));
                       }
                       children.add(EntryPage(entry, widget.uid));
-                      // today
-                      // if (index == 0 && !isSameCalendarDay(entry.date, today)) {
-                      //   children.add(EntryPage(
-                      //       Entry(doc: Document(), date: today), widget.uid));
-                      // }
                       return ConstrainedBox(
                         constraints: BoxConstraints(minHeight: minEntryHeight),
                         child: Column(children: children),

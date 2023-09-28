@@ -54,7 +54,7 @@ class EntryStore {
 
   static Future<void> write(String uid, Entry? entry, bool saveIfEmpty) async {
     if (entry == null) return;
-    // today is special
+    // today is special, always save it even if empty
     saveIfEmpty =
         isSameCalendarDay(DateTime.now(), entry.date) ? true : saveIfEmpty;
     final key = _entryKey(uid, entry.date);
