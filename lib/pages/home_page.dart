@@ -42,8 +42,8 @@ class _HomePageState extends State<HomePage> {
             currentDate: end,
             lastDate: end);
         if (newDate == null) return;
-        await EntryStore.write(
-            widget.uid, Entry(date: newDate, doc: Document()), true);
+        await EntryStore.create(
+            widget.uid, Entry(date: newDate, doc: Document()));
         snapshot.fetchMore();
       },
     );

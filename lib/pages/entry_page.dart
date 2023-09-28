@@ -36,7 +36,6 @@ class _EntryPageState extends State<EntryPage> {
     _selectAllTimer = null;
     _saveTimer?.cancel();
     _saveTimer = null;
-    _saveEntry();
     _focusNode.removeListener(_handleFocusChange);
     super.dispose();
   }
@@ -134,8 +133,9 @@ class _EntryPageState extends State<EntryPage> {
 
   void _saveEntry() {
     // async function but we are not waiting for it
-    EntryStore.write(widget.uid,
-        widget.entry.fromDoc(_controller?.document ?? Document()), false);
+    if (_controller?.document != null)
+      EntryStore.update(
+          widget.uid, widget.entry.fromDoc(_controller!.document));
   }
 
   void _startSaveTimer() {
@@ -155,10 +155,10 @@ class _EntryPageState extends State<EntryPage> {
 
   Widget _buildWelcomeEditor(BuildContext context) {
     final localizations = MaterialLocalizations.of(context);
-    final entryTitle = widget.entry.date.toString().substring(0, 10) ==
-            DateTime.now().toString().substring(0, 10)
-        ? 'Today'
-        : localizations.formatShortDate(widget.entry.date);
+    final isToday = widget.entry.date.toString().substring(0, 10) ==
+        DateTime.now().toString().substring(0, 10);
+    final entryTitle =
+        isToday ? 'Today' : localizations.formatShortDate(widget.entry.date);
     Widget quillEditor = QuillEditor(
       controller: _controller!,
       scrollController: ScrollController(),
@@ -220,7 +220,15 @@ class _EntryPageState extends State<EntryPage> {
               icon: Icon(Symbols.new_label),
               padding: EdgeInsets.all(50),
               onPressed: () async {},
-            )
+            ),
+            if (!isToday)
+              IconButton(
+                icon: Icon(Symbols.delete),
+                padding: EdgeInsets.all(50),
+                onPressed: () async {
+                  await EntryStore.delete(widget.uid, widget.entry);
+                },
+              )
           ],
         ),
         AnimatedOpacity(
