@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
-import 'package:material_symbols_icons/symbols.dart';
 
 import '../logger.dart';
 import '../entry_store.dart';
@@ -36,7 +35,7 @@ class _HomePageState extends State<HomePage> {
       onTap: () async {
         DateTime? newDate = await showDatePicker(
             context: context,
-            confirmText: 'CREATE ENTRY',
+            confirmText: 'Create Entry',
             initialEntryMode: DatePickerEntryMode.calendarOnly,
             firstDate: start,
             initialDate: end,

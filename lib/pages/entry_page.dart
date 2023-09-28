@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/extensions.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
-import 'package:material_symbols_icons/symbols.dart';
 
+import 'tags_text_field.dart';
 import '../entry_store.dart';
 
 enum _SelectionType {
@@ -216,13 +216,20 @@ class _EntryPageState extends State<EntryPage> {
         Row(
           children: [
             Text(entryTitle),
-            IconButton.outlined(
-              icon: Icon(Symbols.add),
-              onPressed: () async {},
+            SizedBox(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TagsTextField(),
+              ),
+              width: 600,
             ),
+            // IconButton.outlined(
+            //   icon: Icon(Icons.add),
+            //   onPressed: () async {},
+            // ),
             if (!isToday)
               IconButton(
-                icon: Icon(Symbols.delete),
+                icon: Icon(Icons.delete),
                 color: Colors.red,
                 onPressed: () async {
                   await EntryStore.delete(widget.uid, widget.entry);
