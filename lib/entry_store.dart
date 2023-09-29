@@ -15,37 +15,64 @@ bool isSameCalendarDay(DateTime a, DateTime b) {
   return a.toString().substring(0, 10) == b.toString().substring(0, 10);
 }
 
+class Journalist {
+  // ignore subcollection for now
+  // final List<Entry> entries;
+  final List<String> tags;
+
+  Journalist({required this.tags});
+
+  Journalist.fromDb(Map<String, Object?> json)
+      : this(
+          tags: (json['tags'] ?? []) as List<String>,
+        );
+
+  Map<String, Object?> toDb() {
+    return {'tags': tags};
+  }
+}
+
 // TODO make sure transformations always use 00:00 UTC time
 class Entry {
   final Document doc;
   final DateTime date;
+  final List<String> tags;
 
-  Entry({required this.doc, required this.date});
+  Entry({required this.doc, required this.date, required this.tags});
 
   Entry.fromDbCollection(Map<String, Object?> json)
       : this(
           doc: _deltaToDoc(json['delta']! as String),
           date: (json['date']! as Timestamp).toDate(),
+          tags: (json['tags'] ?? []) as List<String>,
         );
 
   Map<String, Object?> toDb() {
     return {'delta': _docToDelta(doc), 'date': Timestamp.fromDate(date)};
   }
 
-  Entry fromDoc(Document newDoc) {
-    return Entry(date: date, doc: newDoc);
+  Entry fromNewDoc(Document newDoc) {
+    return Entry(date: date, doc: newDoc, tags: tags);
   }
 }
 
 class EntryStore {
   final String uid;
+  final Stream<DocumentSnapshot<Journalist>> userStream;
 
   static EntryStore? _instance;
 
-  EntryStore._(this.uid);
+  EntryStore._(this.uid, this.userStream);
 
   factory EntryStore(String uid) {
-    _instance ??= EntryStore._(uid);
+    final stream = FirebaseFirestore.instance
+        .doc('journalists/${uid}')
+        .withConverter<Journalist>(
+          fromFirestore: (snapshot, _) => Journalist.fromDb(snapshot.data()!),
+          toFirestore: (user, _) => user.toDb(),
+        )
+        .snapshots();
+    _instance ??= EntryStore._(uid, stream);
     return _instance!;
   }
 

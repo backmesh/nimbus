@@ -133,7 +133,8 @@ class _EntryPageState extends State<EntryPage> {
   void _saveEntry() {
     // async function but we are not waiting for it
     if (_controller?.document != null)
-      EntryStore.instance.update(widget.entry.fromDoc(_controller!.document));
+      EntryStore.instance
+          .update(widget.entry.fromNewDoc(_controller!.document));
   }
 
   void _startSaveTimer() {

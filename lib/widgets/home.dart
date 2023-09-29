@@ -39,7 +39,8 @@ class _HomePageState extends State<HomePage> {
             currentDate: end,
             lastDate: end);
         if (newDate == null) return;
-        await EntryStore.instance.create(Entry(date: newDate, doc: Document()));
+        await EntryStore.instance
+            .create(Entry(date: newDate, doc: Document(), tags: []));
       },
     );
   }
@@ -89,7 +90,7 @@ class _HomePageState extends State<HomePage> {
                       if (snapshot.hasMore) snapshot.fetchMore();
                       final Entry entry =
                           snapshot.docs.elementAtOrNull(index)?.data() ??
-                              Entry(doc: Document(), date: today);
+                              Entry(doc: Document(), date: today, tags: []);
                       final List<Widget> children = [];
                       // first separator, unbounded calendar into the past
                       if (index == itemCount - 1) {
