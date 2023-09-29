@@ -15,6 +15,9 @@ bool isSameCalendarDay(DateTime a, DateTime b) {
   return a.toString().substring(0, 10) == b.toString().substring(0, 10);
 }
 
+List<String> _tagsMapper(Object? jsonField) =>
+    jsonField != null ? jsonField as List<String> : [].cast<String>();
+
 class Journalist {
   // ignore subcollection for now
   // final List<Entry> entries;
@@ -24,7 +27,7 @@ class Journalist {
 
   Journalist.fromDb(Map<String, Object?> json)
       : this(
-          tags: (json['tags'] ?? []) as List<String>,
+          tags: _tagsMapper(json['tags']),
         );
 
   Map<String, Object?> toDb() {
@@ -44,9 +47,7 @@ class Entry {
       : this(
           doc: _deltaToDoc(json['delta']! as String),
           date: (json['date']! as Timestamp).toDate(),
-          tags: json['tags'] != null
-              ? json['tags'] as List<String>
-              : [].cast<String>(),
+          tags: _tagsMapper(json['tags']),
         );
 
   Map<String, Object?> toDb() {
