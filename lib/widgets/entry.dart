@@ -15,8 +15,7 @@ enum _SelectionType {
 
 class EntryPage extends StatefulWidget {
   final Entry entry;
-  final String uid;
-  const EntryPage(this.entry, this.uid);
+  const EntryPage(this.entry);
 
   @override
   _EntryPageState createState() => _EntryPageState();
@@ -134,8 +133,7 @@ class _EntryPageState extends State<EntryPage> {
   void _saveEntry() {
     // async function but we are not waiting for it
     if (_controller?.document != null)
-      EntryStore.update(
-          widget.uid, widget.entry.fromDoc(_controller!.document));
+      EntryStore.instance.update(widget.entry.fromDoc(_controller!.document));
   }
 
   void _startSaveTimer() {
@@ -232,7 +230,7 @@ class _EntryPageState extends State<EntryPage> {
                 icon: Icon(Icons.delete),
                 color: Colors.red,
                 onPressed: () async {
-                  await EntryStore.delete(widget.uid, widget.entry);
+                  await EntryStore.instance.delete(widget.entry);
                 },
               )
           ],

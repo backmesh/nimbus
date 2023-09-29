@@ -38,10 +38,24 @@ class Entry {
 }
 
 class EntryStore {
-  static final CollectionReference _users =
-      FirebaseFirestore.instance.collection('journalists');
+  final String uid;
 
-  static Query<Entry> readAll(String uid) {
+  static EntryStore? _instance;
+
+  EntryStore._(this.uid);
+
+  factory EntryStore(String uid) {
+    _instance ??= EntryStore._(uid);
+    return _instance!;
+  }
+
+  static EntryStore get instance {
+    assert(
+        _instance != null, 'EntryStore must be initialized before accessing');
+    return _instance!;
+  }
+
+  Query<Entry> readAll() {
     return FirebaseFirestore.instance
         .collection('journalists/${uid}/entries')
         .orderBy('date', descending: true)
@@ -52,36 +66,33 @@ class EntryStore {
         );
   }
 
-  static Future<void> delete(String uid, Entry entry) async {
-    final key = _entryKey(uid, entry.date);
-    _users.doc(key).delete();
+  Future<void> delete(Entry entry) async {
+    final key = _entryKey(entry.date);
+    FirebaseFirestore.instance
+        .collection('journalists/${uid}/entries')
+        .doc(key)
+        .delete();
   }
 
-  static Future<void> create(String uid, Entry entry) async {
-    final key = _entryKey(uid, entry.date);
+  Future<void> create(Entry entry) async {
+    final key = _entryKey(entry.date);
     final val = entry.toDb();
-    await _users.doc(key).set(val);
+    await FirebaseFirestore.instance
+        .collection('journalists/${uid}/entries')
+        .doc(key)
+        .set(val);
   }
 
-  static Future<void> update(String uid, Entry entry) async {
-    final key = _entryKey(uid, entry.date);
+  Future<void> update(Entry entry) async {
+    final key = _entryKey(entry.date);
     final val = entry.toDb();
-    await _users.doc(key).update(val);
+    await FirebaseFirestore.instance
+        .collection('journalists/${uid}/entries')
+        .doc(key)
+        .update(val);
   }
 
-  // TODO use withConverter or remove
-  // static Future<Entry?> read(String uid, DateTime date) async {
-  //   final snapshot = _users.doc(_entryKey(uid, date));
-  //   final entry = await snapshot.get();
-  //   if (!entry.exists) return null;
-  //   final delta = entry.get('delta');
-  //   if (delta == null) return null;
-  //   return Entry(
-  //       doc: _deltaToDoc(delta),
-  //       date: (entry.get('date')! as Timestamp).toDate());
-  // }
-
-  static String _entryKey(String uid, DateTime date) {
+  String _entryKey(DateTime date) {
     return '${uid}/entries/${date.toString().substring(0, 10)}';
   }
 }

@@ -7,9 +7,6 @@ import '../entry_store.dart';
 import 'entry.dart';
 
 class HomePage extends StatefulWidget {
-  final String uid;
-  const HomePage(this.uid);
-
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -42,8 +39,7 @@ class _HomePageState extends State<HomePage> {
             currentDate: end,
             lastDate: end);
         if (newDate == null) return;
-        await EntryStore.create(
-            widget.uid, Entry(date: newDate, doc: Document()));
+        await EntryStore.instance.create(Entry(date: newDate, doc: Document()));
       },
     );
   }
@@ -59,12 +55,14 @@ class _HomePageState extends State<HomePage> {
               icon: Icon(Icons.settings),
               padding: EdgeInsets.zero,
               // TODO show settings
+              // add signout
+              // add delete account + data
               onPressed: () async {},
             ),
           ]),
           Expanded(
             child: FirestoreQueryBuilder<Entry>(
-              query: EntryStore.readAll(widget.uid),
+              query: EntryStore.instance.readAll(),
               builder: (context, snapshot, _) {
                 // Loading
                 if (snapshot.isFetching) {
@@ -108,7 +106,7 @@ class _HomePageState extends State<HomePage> {
                           children.add(_getDatePickerSeparator(
                               snapshot, entry.date, prevEntry.date));
                       }
-                      children.add(EntryPage(entry, widget.uid));
+                      children.add(EntryPage(entry));
                       return ConstrainedBox(
                         constraints: BoxConstraints(minHeight: minEntryHeight),
                         child: Column(children: children),
