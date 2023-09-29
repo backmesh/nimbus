@@ -8,7 +8,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:firebase_ui_oauth_apple/firebase_ui_oauth_apple.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:journal/entry_store.dart';
+import 'package:journal/user_store.dart';
 import 'package:journal/firebase_options.dart';
 
 import 'widgets/home.dart';
@@ -43,10 +43,10 @@ class _MainState extends State<Main> {
 
   void initState() {
     super.initState();
-    if (user != null) EntryStore(user!.uid);
+    if (user != null) UserStore(user!.uid);
     userStream = FirebaseAuth.instance.authStateChanges().listen((fbUser) {
       if (fbUser != null) {
-        EntryStore(fbUser.uid);
+        UserStore(fbUser.uid);
         setState(() {
           user = fbUser;
         });

@@ -44,7 +44,9 @@ class Entry {
       : this(
           doc: _deltaToDoc(json['delta']! as String),
           date: (json['date']! as Timestamp).toDate(),
-          tags: (json['tags'] ?? []) as List<String>,
+          tags: json['tags'] != null
+              ? json['tags'] as List<String>
+              : [].cast<String>(),
         );
 
   Map<String, Object?> toDb() {
@@ -56,15 +58,15 @@ class Entry {
   }
 }
 
-class EntryStore {
+class UserStore {
   final String uid;
-  final Stream<DocumentSnapshot<Journalist>> userStream;
+  final Stream<DocumentSnapshot<Journalist>> docStream;
 
-  static EntryStore? _instance;
+  static UserStore? _instance;
 
-  EntryStore._(this.uid, this.userStream);
+  UserStore._(this.uid, this.docStream);
 
-  factory EntryStore(String uid) {
+  factory UserStore(String uid) {
     final stream = FirebaseFirestore.instance
         .doc('journalists/${uid}')
         .withConverter<Journalist>(
@@ -72,17 +74,16 @@ class EntryStore {
           toFirestore: (user, _) => user.toDb(),
         )
         .snapshots();
-    _instance ??= EntryStore._(uid, stream);
+    _instance ??= UserStore._(uid, stream);
     return _instance!;
   }
 
-  static EntryStore get instance {
-    assert(
-        _instance != null, 'EntryStore must be initialized before accessing');
+  static UserStore get instance {
+    assert(_instance != null, 'UserStore must be initialized before accessing');
     return _instance!;
   }
 
-  Query<Entry> readAll() {
+  Query<Entry> readEntries() {
     return FirebaseFirestore.instance
         .collection('journalists/${uid}/entries')
         .orderBy('date', descending: true)
@@ -93,7 +94,7 @@ class EntryStore {
         );
   }
 
-  Future<void> delete(Entry entry) async {
+  Future<void> deleteEntry(Entry entry) async {
     final key = _entryKey(entry.date);
     FirebaseFirestore.instance
         .collection('journalists/${uid}/entries')
@@ -101,7 +102,7 @@ class EntryStore {
         .delete();
   }
 
-  Future<void> create(Entry entry) async {
+  Future<void> createEntry(Entry entry) async {
     final key = _entryKey(entry.date);
     final val = entry.toDb();
     await FirebaseFirestore.instance
@@ -110,7 +111,7 @@ class EntryStore {
         .set(val);
   }
 
-  Future<void> update(Entry entry) async {
+  Future<void> updateEntry(Entry entry) async {
     final key = _entryKey(entry.date);
     final val = entry.toDb();
     await FirebaseFirestore.instance

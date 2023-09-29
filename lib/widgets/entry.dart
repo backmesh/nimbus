@@ -5,7 +5,7 @@ import 'package:flutter_quill/extensions.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
 
 import 'tags_text_field.dart';
-import '../entry_store.dart';
+import '../user_store.dart';
 
 enum _SelectionType {
   none,
@@ -133,8 +133,8 @@ class _EntryPageState extends State<EntryPage> {
   void _saveEntry() {
     // async function but we are not waiting for it
     if (_controller?.document != null)
-      EntryStore.instance
-          .update(widget.entry.fromNewDoc(_controller!.document));
+      UserStore.instance
+          .updateEntry(widget.entry.fromNewDoc(_controller!.document));
   }
 
   void _startSaveTimer() {
@@ -231,7 +231,7 @@ class _EntryPageState extends State<EntryPage> {
                 icon: Icon(Icons.delete),
                 color: Colors.red,
                 onPressed: () async {
-                  await EntryStore.instance.delete(widget.entry);
+                  await UserStore.instance.deleteEntry(widget.entry);
                 },
               )
           ],

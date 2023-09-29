@@ -3,7 +3,7 @@ import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
 
 import '../logger.dart';
-import '../entry_store.dart';
+import '../user_store.dart';
 import 'entry.dart';
 
 class HomePage extends StatefulWidget {
@@ -39,8 +39,8 @@ class _HomePageState extends State<HomePage> {
             currentDate: end,
             lastDate: end);
         if (newDate == null) return;
-        await EntryStore.instance
-            .create(Entry(date: newDate, doc: Document(), tags: []));
+        await UserStore.instance
+            .createEntry(Entry(date: newDate, doc: Document(), tags: []));
       },
     );
   }
@@ -63,7 +63,7 @@ class _HomePageState extends State<HomePage> {
           ]),
           Expanded(
             child: FirestoreQueryBuilder<Entry>(
-              query: EntryStore.instance.readAll(),
+              query: UserStore.instance.readEntries(),
               builder: (context, snapshot, _) {
                 // Loading
                 if (snapshot.isFetching) {
