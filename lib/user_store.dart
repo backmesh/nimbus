@@ -3,20 +3,13 @@ import 'dart:convert';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-Document _deltaToDoc(String delta) {
-  return Document.fromDelta(Delta.fromJson(jsonDecode(delta)));
-}
-
-String _docToDelta(Document doc) {
-  return jsonEncode(doc.toDelta().toJson());
-}
-
 bool isSameCalendarDay(DateTime a, DateTime b) {
   return a.toString().substring(0, 10) == b.toString().substring(0, 10);
 }
 
-List<String> _tagsMapper(Object? jsonField) =>
-    jsonField != null ? jsonField as List<String> : [].cast<String>();
+List<String> _tagsMapper(Object? jsonField) => jsonField != null
+    ? (jsonField as List<dynamic>).cast<String>()
+    : [].cast<String>();
 
 class Journalist {
   // ignore subcollection for now
@@ -57,6 +50,14 @@ class Entry {
   Entry fromNewDoc(Document newDoc) {
     return Entry(date: date, doc: newDoc, tags: tags);
   }
+
+  static Document _deltaToDoc(String delta) {
+    return Document.fromDelta(Delta.fromJson(jsonDecode(delta)));
+  }
+
+  static String _docToDelta(Document doc) {
+    return jsonEncode(doc.toDelta().toJson());
+  }
 }
 
 class UserStore {
@@ -96,7 +97,7 @@ class UserStore {
   }
 
   Future<void> deleteEntry(Entry entry) async {
-    final key = _entryKey(entry.date);
+    final key = _formatDate(entry.date);
     FirebaseFirestore.instance
         .collection('journalists/${uid}/entries')
         .doc(key)
@@ -104,7 +105,7 @@ class UserStore {
   }
 
   Future<void> createEntry(Entry entry) async {
-    final key = _entryKey(entry.date);
+    final key = _formatDate(entry.date);
     final val = entry.toDb();
     await FirebaseFirestore.instance
         .collection('journalists/${uid}/entries')
@@ -113,7 +114,7 @@ class UserStore {
   }
 
   Future<void> updateEntry(Entry entry) async {
-    final key = _entryKey(entry.date);
+    final key = _formatDate(entry.date);
     final val = entry.toDb();
     await FirebaseFirestore.instance
         .collection('journalists/${uid}/entries')
@@ -121,7 +122,5 @@ class UserStore {
         .update(val);
   }
 
-  String _entryKey(DateTime date) {
-    return '${uid}/entries/${date.toString().substring(0, 10)}';
-  }
+  String _formatDate(DateTime date) => date.toString().substring(0, 10);
 }
