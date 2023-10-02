@@ -88,9 +88,12 @@ class _HomePageState extends State<HomePage> {
                     itemCount: itemCount,
                     itemBuilder: (context, index) {
                       if (snapshot.hasMore) snapshot.fetchMore();
-                      final Entry entry =
-                          snapshot.docs.elementAtOrNull(index)?.data() ??
-                              Entry(doc: Document(), date: today, tags: []);
+                      // index 0 is today
+                      final Entry entry = todayOffset == 1 && index == 0
+                          ? Entry(doc: Document(), date: today, tags: [])
+                          : snapshot.docs[index - 1].data();
+                      Logger.debugMany(['index', index]);
+                      Logger.debugMany(['date', entry.date]);
                       final List<Widget> children = [];
                       // first separator, unbounded calendar into the past
                       if (index == itemCount - 1) {
