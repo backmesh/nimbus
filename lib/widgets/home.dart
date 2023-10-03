@@ -7,8 +7,8 @@ import '../user_store.dart';
 import 'entry.dart';
 
 class HomePage extends StatefulWidget {
-  final Journalist user;
-  const HomePage(this.user);
+  final Map<String, Tag> tags;
+  const HomePage(this.tags);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -43,7 +43,7 @@ class _HomePageState extends State<HomePage> {
             lastDate: end);
         if (newDate == null) return;
         await UserStore.instance
-            .createEntry(Entry(date: newDate, doc: Document(), tags: []));
+            .createEntry(Entry(date: newDate, doc: Document(), tagIds: []));
       },
     );
   }
@@ -93,7 +93,7 @@ class _HomePageState extends State<HomePage> {
                       if (snapshot.hasMore) snapshot.fetchMore();
                       // index 0 is today
                       final Entry entry = todayOffset == 1 && index == 0
-                          ? Entry(doc: Document(), date: today, tags: [])
+                          ? Entry(doc: Document(), date: today, tagIds: [])
                           : snapshot.docs[index - todayOffset].data();
                       Logger.debugMany(['index', index]);
                       Logger.debugMany(['date', entry.date]);
@@ -113,7 +113,7 @@ class _HomePageState extends State<HomePage> {
                           children.add(_getDatePickerSeparator(
                               snapshot, entry.date, prevEntry.date));
                       }
-                      children.add(EntryPage(widget.user, entry));
+                      children.add(EntryPage(widget.tags, entry));
                       return ConstrainedBox(
                         constraints: BoxConstraints(minHeight: minEntryHeight),
                         child: Column(children: children),

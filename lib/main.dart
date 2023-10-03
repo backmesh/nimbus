@@ -70,10 +70,10 @@ class _MainState extends State<Main> {
         const Locale('en', 'US'),
       ],
       home: user != null
-          ? StreamBuilder<DocumentSnapshot<Journalist>>(
-              stream: UserStore.instance.userRef.snapshots(),
+          ? StreamBuilder<QuerySnapshot<Tag>>(
+              stream: UserStore.instance.tagsRef.snapshots(),
               builder: (BuildContext context,
-                  AsyncSnapshot<DocumentSnapshot<Journalist>> snapshot) {
+                  AsyncSnapshot<QuerySnapshot<Tag>> snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting ||
                     !snapshot.hasData) {
                   return Center(
@@ -84,8 +84,11 @@ class _MainState extends State<Main> {
                   return Text(snapshot.error
                       .toString()); // Show error or a placeholder when no data
                 }
-
-                return HomePage(snapshot.data!.data()!);
+                final docs = snapshot.data!.docs;
+                Map<String, Tag> tags = {
+                  for (var doc in docs) doc.id: doc.data()
+                };
+                return HomePage(tags);
               })
           : SignInScreen(
               showAuthActionSwitch: false,

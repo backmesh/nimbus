@@ -1,11 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:journal/user_store.dart';
 
 class TagsTextField extends StatefulWidget {
-  final Journalist user;
+  final Map<String, Tag> tags;
   final Entry entry;
-  const TagsTextField(this.user, this.entry);
+  const TagsTextField(this.tags, this.entry);
 
   @override
   _TagsTextFieldState createState() => _TagsTextFieldState();
@@ -13,51 +14,36 @@ class TagsTextField extends StatefulWidget {
 
 class _TagsTextFieldState extends State<TagsTextField> {
   final TextEditingController _controller = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
-  List<String> _filteredSuggestions = [];
+  Map<String, Tag> _filteredSuggestions = {};
 
   void _filterSuggestions() {
     final query = _controller.text.toLowerCase();
-    final List<String> suggestions = widget.user.tags;
-    print('_filterSuggestions');
-    print(suggestions);
-    _filteredSuggestions = suggestions
-        .where((tag) =>
-            !widget.entry.tags.contains(tag) &&
-            tag.toLowerCase().contains(query))
-        .toList();
+    _filteredSuggestions = {
+      for (var entry in widget.tags.entries)
+        if (entry.value.name.toLowerCase().contains(query))
+          entry.key: entry.value
+    };
   }
 
-  void _addTag(String text) {
-    if (text.isEmpty) return;
+  void _tagEntry(String tagId, Tag tag) {
     setState(() {
-      //_entryTags.add(text);
-      if (!widget.entry.tags.contains(text)) {
-        widget.entry.tags.add(text);
-        //print(widget.entry.tags);
+      if (!widget.entry.tagIds.contains(tagId)) {
+        widget.entry.tagIds.add(tagId);
         UserStore.instance.updateEntry(widget.entry);
-      }
-      if (!widget.user.tags.contains(text)) {
-        widget.user.tags.add(text);
-        //print(user!.tags);
-        UserStore.instance.updateUser(widget.user);
       }
       _controller.clear();
       _filteredSuggestions.clear();
     });
   }
 
-  void _removeTag(String tag) {
-    setState(() {
-      //_entryTags.remove(tag);
-      if (widget.entry.tags.remove(tag))
-        UserStore.instance.updateEntry(widget.entry);
-    });
+  void _untagEntry(String tagId, Tag tag) {
+    if (widget.entry.tagIds.remove(tagId))
+      UserStore.instance.updateEntry(widget.entry);
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<String> _entryTags = widget.entry.tags; // entry tags
+    final List<String> _entryTagIds = widget.entry.tagIds; // entry tags
 
     _filterSuggestions();
 
@@ -65,52 +51,54 @@ class _TagsTextFieldState extends State<TagsTextField> {
     return Column(children: [
       Padding(
         padding: const EdgeInsets.all(8.0),
-        child: RawKeyboardListener(
-          focusNode: _focusNode,
-          onKey: (RawKeyEvent event) {
-            if (event is RawKeyDownEvent &&
-                event.logicalKey == LogicalKeyboardKey.enter) {
-              _addTag(_controller.text.toLowerCase());
-            }
+        child: TextField(
+          controller: _controller,
+          onChanged: (value) {
+            setState(() {
+              _filterSuggestions();
+            });
           },
-          child: TextField(
-            controller: _controller,
-            onChanged: (value) {
-              setState(() {
-                _filterSuggestions();
-              });
-            },
-            decoration: InputDecoration(
-              hintText: '+ Tag',
-            ),
+          decoration: InputDecoration(
+            hintText: '+ Tag',
           ),
         ),
       ),
       Container(
         height: 100,
         child: ListView.builder(
-          itemCount: _filteredSuggestions.length,
+          itemCount: max(_filteredSuggestions.length, 1),
           itemBuilder: (context, index) {
-            final text = _filteredSuggestions.length == 0
-                ? _controller.text
-                : _filteredSuggestions[index];
-            return ListTile(
-              title: Text(text),
-              onTap: () => _addTag(text),
-            );
+            // new tag
+            if (_filteredSuggestions.length == 0) {
+              final text = _controller.text;
+              if (text.isEmpty) return null;
+              return ListTile(
+                title: Text(text),
+                onTap: () async {
+                  final tag = Tag(name: text, color: Tag.getRandomColor());
+                  final doc = await UserStore.instance.newTag(tag);
+                  _tagEntry(doc.id, tag);
+                },
+              );
+            } else {
+              final entry = _filteredSuggestions.entries.elementAt(index);
+              return ListTile(
+                title: Text(entry.value.name),
+                onTap: () => _tagEntry(entry.key, entry.value),
+              );
+            }
           },
         ),
       ),
       Wrap(
-        spacing: 8.0,
-        runSpacing: 4.0,
-        children: _entryTags
-            .map((tag) => Chip(
-                  label: Text(tag),
-                  onDeleted: () => _removeTag(tag),
-                ))
-            .toList(),
-      ),
+          spacing: 8.0,
+          runSpacing: 4.0,
+          children: _entryTagIds.map((tagId) {
+            final tag = widget.tags[tagId]!;
+            return Chip(
+                label: Text(tag.name),
+                onDeleted: () => _untagEntry(tagId, tag));
+          }).toList())
     ]);
   }
 }

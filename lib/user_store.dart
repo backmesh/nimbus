@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,39 +16,53 @@ bool isSameCalendarDay(DateTime a, DateTime b) =>
 
 bool isToday(DateTime a) => isSameCalendarDay(a, DateTime.now());
 
-List<String> _tagsMapper(Object? jsonField) => jsonField != null
-    ? (jsonField as List<dynamic>).cast<String>()
-    : [].cast<String>();
+class Tag {
+  final String name;
+  final String color;
+  static final List<String> _colors = ['#ffff'];
 
-class Journalist {
-  // ignore subcollection for now
-  // final List<Entry> entries;
-  final List<String> tags;
+  Tag({required this.name, required this.color});
 
-  Journalist({required this.tags});
+  static List<String> getNames(List<Tag> tags) {
+    return tags.map((tag) => tag.name).toList();
+  }
 
-  Journalist.fromDb(Map<String, Object?> json)
+  static String getRandomColor() {
+    final random = new Random();
+    final i = random.nextInt(_colors.length);
+    return _colors[i];
+  }
+
+  Tag.fromDb(String key, Map<String, Object?> json)
       : this(
-          tags: _tagsMapper(json['tags']),
+          name: json['name']! as String,
+          color: json['color']! as String,
         );
 
   Map<String, Object?> toDb() {
-    return {'tags': tags};
+    return {
+      'name': name,
+      'color': color,
+    };
   }
 }
 
 class Entry {
   final Document doc;
   final DateTime date;
-  final List<String> tags;
+  final List<String> tagIds;
 
-  Entry({required this.doc, required this.date, required this.tags});
+  Entry({required this.doc, required this.date, required this.tagIds});
 
-  Entry.fromDbCollection(DateTime date, Map<String, Object?> json)
+  static List<String> _tagIdsMapper(Object? jsonField) => jsonField != null
+      ? (jsonField as List<dynamic>).cast<String>()
+      : [].cast<String>();
+
+  Entry.fromDb(DateTime date, Map<String, Object?> json)
       : this(
           doc: _deltaToDoc(json['delta']! as String),
           date: date,
-          tags: _tagsMapper(json['tags']),
+          tagIds: _tagIdsMapper(json['tagIds']),
         );
 
   Map<String, Object?> toDb() {
@@ -55,12 +70,12 @@ class Entry {
       'delta': _docToDelta(doc),
       // use UTC in database which is just use for query ordering and not for display in UI
       'date': Timestamp.fromDate(DateTime.utc(date.year, date.month, date.day)),
-      'tags': tags
+      'tagIds': tagIds
     };
   }
 
   Entry fromNewDoc(Document newDoc) {
-    return Entry(date: date, doc: newDoc, tags: tags);
+    return Entry(date: date, doc: newDoc, tagIds: tagIds);
   }
 
   static Document _deltaToDoc(String delta) {
@@ -74,19 +89,20 @@ class Entry {
 
 class UserStore {
   final String uid;
-  final DocumentReference<Journalist> userRef;
   final CollectionReference<Entry> entriesRef;
+  final CollectionReference<Tag> tagsRef;
 
   static UserStore? _instance;
 
-  UserStore._(this.uid, this.userRef, this.entriesRef);
+  UserStore._(this.uid, this.entriesRef, this.tagsRef);
 
   factory UserStore(String uid) {
-    final userRef = FirebaseFirestore.instance
-        .doc('journalists/${uid}')
-        .withConverter<Journalist>(
-          fromFirestore: (snapshot, _) => Journalist.fromDb(snapshot.data()!),
-          toFirestore: (user, _) => user.toDb(),
+    final tagsRef = FirebaseFirestore.instance
+        .collection('journalists/${uid}/tags')
+        .withConverter<Tag>(
+          fromFirestore: (snapshot, _) =>
+              Tag.fromDb(snapshot.id, snapshot.data()!),
+          toFirestore: (tag, _) => tag.toDb(),
         );
     final entriesRef = FirebaseFirestore.instance
         .collection('journalists/${uid}/entries')
@@ -97,14 +113,14 @@ class UserStore {
             // dealing with timezone changes we use the document key seemingly
             // hacky but less prone to errors and simpler
             final key = snapshot.id.split('-');
-            return Entry.fromDbCollection(
+            return Entry.fromDb(
                 DateTime(
                     int.parse(key[0]), int.parse(key[1]), int.parse(key[2])),
                 snapshot.data()!);
           },
           toFirestore: (entry, _) => entry.toDb(),
         );
-    _instance ??= UserStore._(uid, userRef, entriesRef);
+    _instance ??= UserStore._(uid, entriesRef, tagsRef);
     return _instance!;
   }
 
@@ -142,7 +158,7 @@ class UserStore {
     }
   }
 
-  Future<void> updateUser(Journalist user) async {
-    await userRef.update(user.toDb());
+  Future<DocumentReference<Tag>> newTag(Tag tag) async {
+    return await tagsRef.add(tag);
   }
 }

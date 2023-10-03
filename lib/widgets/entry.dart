@@ -14,9 +14,9 @@ enum _SelectionType {
 }
 
 class EntryPage extends StatefulWidget {
-  final Journalist user;
+  final Map<String, Tag> tags;
   final Entry entry;
-  const EntryPage(this.user, this.entry);
+  const EntryPage(this.tags, this.entry);
 
   @override
   _EntryPageState createState() => _EntryPageState();
@@ -219,7 +219,7 @@ class _EntryPageState extends State<EntryPage> {
             SizedBox(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: TagsTextField(widget.user, widget.entry),
+                child: TagsTextField(widget.tags, widget.entry),
               ),
               width: 600,
             ),
