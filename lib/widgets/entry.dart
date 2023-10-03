@@ -155,10 +155,10 @@ class _EntryPageState extends State<EntryPage> {
 
   Widget _buildWelcomeEditor(BuildContext context) {
     final localizations = MaterialLocalizations.of(context);
-    final isToday = widget.entry.date.toString().substring(0, 10) ==
-        DateTime.now().toString().substring(0, 10);
-    final entryTitle =
-        isToday ? 'Today' : localizations.formatShortDate(widget.entry.date);
+    final isEntryToday = isToday(widget.entry.date);
+    final entryTitle = isEntryToday
+        ? 'Today'
+        : localizations.formatShortDate(widget.entry.date);
     Widget quillEditor = QuillEditor(
       controller: _controller!,
       scrollController: ScrollController(),
@@ -227,7 +227,7 @@ class _EntryPageState extends State<EntryPage> {
             //   icon: Icon(Icons.add),
             //   onPressed: () async {},
             // ),
-            if (!isToday)
+            if (!isEntryToday)
               IconButton(
                 icon: Icon(Icons.delete),
                 color: Colors.red,

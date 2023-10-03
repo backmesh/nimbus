@@ -72,7 +72,7 @@ class _HomePageState extends State<HomePage> {
                 if (snapshot.isFetching) {
                   return Center(child: CircularProgressIndicator());
                 }
-                final today = DateTime.now();
+                final today = getToday();
                 final lastEntry = snapshot.docs.firstOrNull?.data();
                 final todayOffset = lastEntry != null &&
                         isSameCalendarDay(today, lastEntry.date)

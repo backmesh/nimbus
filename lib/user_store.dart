@@ -3,6 +3,11 @@ import 'dart:convert';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+DateTime getToday() {
+  DateTime now = DateTime.now();
+  return DateTime(now.year, now.month, now.day);
+}
+
 String _formatDate(DateTime date) => date.toString().substring(0, 10);
 
 bool isSameCalendarDay(DateTime a, DateTime b) =>
@@ -31,7 +36,6 @@ class Journalist {
   }
 }
 
-// TODO make sure transformations always use 00:00 UTC time
 class Entry {
   final Document doc;
   final DateTime date;
@@ -39,17 +43,18 @@ class Entry {
 
   Entry({required this.doc, required this.date, required this.tags});
 
-  Entry.fromDbCollection(Map<String, Object?> json)
+  Entry.fromDbCollection(DateTime date, Map<String, Object?> json)
       : this(
           doc: _deltaToDoc(json['delta']! as String),
-          date: (json['date']! as Timestamp).toDate(),
+          date: date,
           tags: _tagsMapper(json['tags']),
         );
 
   Map<String, Object?> toDb() {
     return {
       'delta': _docToDelta(doc),
-      'date': Timestamp.fromDate(date),
+      // use UTC in database which is just use for query ordering and not for display in UI
+      'date': Timestamp.fromDate(DateTime.utc(date.year, date.month, date.day)),
       'tags': tags
     };
   }
@@ -86,8 +91,17 @@ class UserStore {
     final entriesRef = FirebaseFirestore.instance
         .collection('journalists/${uid}/entries')
         .withConverter<Entry>(
-          fromFirestore: (snapshot, _) =>
-              Entry.fromDbCollection(snapshot.data()!),
+          fromFirestore: (snapshot, _) {
+            // Firestore's Timestamp <-> Dart's TimeDate conversion cannot strip
+            // time and timezone from a simple calendar day easily so instead of
+            // dealing with timezone changes we use the document key seemingly
+            // hacky but less prone to errors and simpler
+            final key = snapshot.id.split('-');
+            return Entry.fromDbCollection(
+                DateTime(
+                    int.parse(key[0]), int.parse(key[1]), int.parse(key[2])),
+                snapshot.data()!);
+          },
           toFirestore: (entry, _) => entry.toDb(),
         );
     _instance ??= UserStore._(uid, userRef, entriesRef);
