@@ -91,7 +91,7 @@ class _HomePageState extends State<HomePage> {
                       // index 0 is today
                       final Entry entry = todayOffset == 1 && index == 0
                           ? Entry(doc: Document(), date: today, tags: [])
-                          : snapshot.docs[index - 1].data();
+                          : snapshot.docs[index - todayOffset].data();
                       Logger.debugMany(['index', index]);
                       Logger.debugMany(['date', entry.date]);
                       final List<Widget> children = [];
