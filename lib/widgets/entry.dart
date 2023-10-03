@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/extensions.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
 
-import 'tags_text_field.dart';
+import 'input_tags.dart';
 import '../user_store.dart';
 
 enum _SelectionType {
@@ -219,7 +219,7 @@ class _EntryPageState extends State<EntryPage> {
             SizedBox(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: TagsTextField(widget.tags, widget.entry),
+                child: InputTags(widget.tags, widget.entry),
               ),
               width: 600,
             ),

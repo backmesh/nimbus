@@ -5,11 +5,4 @@ class Logger {
     if (kReleaseMode) return;
     print(obj);
   }
-
-  static debugMany(List<Object?> obj) {
-    if (kReleaseMode) return;
-    for (var o in obj) {
-      print(o);
-    }
-  }
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
 
-import '../logger.dart';
 import '../user_store.dart';
 import 'entry.dart';
 
@@ -80,10 +79,10 @@ class _HomePageState extends State<HomePage> {
                     : 1;
                 final itemCount = snapshot.docs.length + todayOffset;
                 double minEntryHeight = screenHeight / itemCount;
-                Logger.debug('todayOffset');
-                Logger.debug(todayOffset);
-                Logger.debug('snapshot.docs.length');
-                Logger.debug(snapshot.docs.length);
+                // Logger.debug('todayOffset');
+                // Logger.debug(todayOffset);
+                // Logger.debug('snapshot.docs.length');
+                // Logger.debug(snapshot.docs.length);
                 return Column(children: [
                   Expanded(
                       child: ListView.builder(
@@ -95,8 +94,6 @@ class _HomePageState extends State<HomePage> {
                       final Entry entry = todayOffset == 1 && index == 0
                           ? Entry(doc: Document(), date: today, tagIds: [])
                           : snapshot.docs[index - todayOffset].data();
-                      Logger.debugMany(['index', index]);
-                      Logger.debugMany(['date', entry.date]);
                       final List<Widget> children = [];
                       // first separator, unbounded calendar into the past
                       if (index == itemCount - 1) {
