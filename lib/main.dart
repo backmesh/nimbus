@@ -43,20 +43,18 @@ class _MainState extends State<Main> {
 
   void initState() {
     super.initState();
-    if (user != null) UserStore(user!.uid);
     userStream = FirebaseAuth.instance.authStateChanges().listen((fbUser) {
-      if (fbUser != null) {
-        UserStore(fbUser.uid);
-        setState(() {
-          user = fbUser;
-        });
-      }
+      if (fbUser == null) return;
+      setState(() {
+        user = fbUser;
+      });
     });
   }
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    if (user != null) UserStore(user!.uid);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Journal',
@@ -73,19 +71,14 @@ class _MainState extends State<Main> {
       ],
       home: user != null
           ? StreamBuilder<DocumentSnapshot<Journalist>>(
-              stream: FirebaseFirestore.instance
-                  .doc('journalists/${UserStore.instance.uid}')
-                  .withConverter<Journalist>(
-                    fromFirestore: (snapshot, _) =>
-                        Journalist.fromDb(snapshot.data()!),
-                    toFirestore: (user, _) => user.toDb(),
-                  )
-                  .snapshots(),
+              stream: UserStore.instance.userRef.snapshots(),
               builder: (BuildContext context,
                   AsyncSnapshot<DocumentSnapshot<Journalist>> snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting ||
                     !snapshot.hasData) {
-                  return CircularProgressIndicator(); // Show a loading indicator while waiting
+                  return Center(
+                      child:
+                          CircularProgressIndicator()); // Show a loading indicator while waiting
                 }
                 if (snapshot.hasError) {
                   return Text(snapshot.error

@@ -69,13 +69,28 @@ class Entry {
 
 class UserStore {
   final String uid;
+  final DocumentReference<Journalist> userRef;
+  final CollectionReference<Entry> entriesRef;
 
   static UserStore? _instance;
 
-  UserStore._(this.uid);
+  UserStore._(this.uid, this.userRef, this.entriesRef);
 
   factory UserStore(String uid) {
-    _instance ??= UserStore._(uid);
+    final userRef = FirebaseFirestore.instance
+        .doc('journalists/${uid}')
+        .withConverter<Journalist>(
+          fromFirestore: (snapshot, _) => Journalist.fromDb(snapshot.data()!),
+          toFirestore: (user, _) => user.toDb(),
+        );
+    final entriesRef = FirebaseFirestore.instance
+        .collection('journalists/${uid}/entries')
+        .withConverter<Entry>(
+          fromFirestore: (snapshot, _) =>
+              Entry.fromDbCollection(snapshot.data()!),
+          toFirestore: (entry, _) => entry.toDb(),
+        );
+    _instance ??= UserStore._(uid, userRef, entriesRef);
     return _instance!;
   }
 
@@ -85,56 +100,35 @@ class UserStore {
   }
 
   Query<Entry> readEntries() {
-    return FirebaseFirestore.instance
-        .collection('journalists/${uid}/entries')
-        .orderBy('date', descending: true)
-        .withConverter<Entry>(
-          fromFirestore: (snapshot, _) =>
-              Entry.fromDbCollection(snapshot.data()!),
-          toFirestore: (entry, _) => entry.toDb(),
-        );
+    return entriesRef.orderBy('date', descending: true);
   }
 
   Future<void> deleteEntry(Entry entry) async {
     final key = _formatDate(entry.date);
-    FirebaseFirestore.instance
-        .collection('journalists/${uid}/entries')
-        .doc(key)
-        .delete();
+    entriesRef.doc(key).delete();
   }
 
   Future<void> createEntry(Entry entry) async {
     final key = _formatDate(entry.date);
-    final val = entry.toDb();
-    await FirebaseFirestore.instance
-        .collection('journalists/${uid}/entries')
-        .doc(key)
-        .set(val);
+    await entriesRef.doc(key).set(entry);
   }
 
   Future<void> updateEntry(Entry entry) async {
-    print('update entry ${_formatDate(entry.date)}');
     final key = _formatDate(entry.date);
-    final val = entry.toDb();
     try {
-      await FirebaseFirestore.instance
-          .collection('journalists/${uid}/entries')
-          .doc(key)
-          .update(val);
+      await entriesRef.doc(key).update(entry.toDb());
     } catch (e) {
       if (e is FirebaseException &&
           e.code == 'not-found' &&
           isToday(entry.date)) {
         // today is a special case
-        return await createEntry(entry);
+        return await entriesRef.doc(key).set(entry);
       }
       throw e;
     }
   }
 
   Future<void> updateUser(Journalist user) async {
-    await FirebaseFirestore.instance
-        .doc('journalists/${uid}')
-        .update(user.toDb());
+    await userRef.update(user.toDb());
   }
 }
