@@ -7,6 +7,9 @@ import '../user_store.dart';
 import 'entry.dart';
 
 class HomePage extends StatefulWidget {
+  final Journalist user;
+  const HomePage(this.user);
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -110,7 +113,7 @@ class _HomePageState extends State<HomePage> {
                           children.add(_getDatePickerSeparator(
                               snapshot, entry.date, prevEntry.date));
                       }
-                      children.add(EntryPage(entry));
+                      children.add(EntryPage(widget.user, entry));
                       return ConstrainedBox(
                         constraints: BoxConstraints(minHeight: minEntryHeight),
                         child: Column(children: children),

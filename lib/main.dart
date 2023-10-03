@@ -72,7 +72,28 @@ class _MainState extends State<Main> {
         const Locale('en', 'US'),
       ],
       home: user != null
-          ? HomePage()
+          ? StreamBuilder<DocumentSnapshot<Journalist>>(
+              stream: FirebaseFirestore.instance
+                  .doc('journalists/${UserStore.instance.uid}')
+                  .withConverter<Journalist>(
+                    fromFirestore: (snapshot, _) =>
+                        Journalist.fromDb(snapshot.data()!),
+                    toFirestore: (user, _) => user.toDb(),
+                  )
+                  .snapshots(),
+              builder: (BuildContext context,
+                  AsyncSnapshot<DocumentSnapshot<Journalist>> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting ||
+                    !snapshot.hasData) {
+                  return CircularProgressIndicator(); // Show a loading indicator while waiting
+                }
+                if (snapshot.hasError) {
+                  return Text(snapshot.error
+                      .toString()); // Show error or a placeholder when no data
+                }
+
+                return HomePage(snapshot.data!.data()!);
+              })
           : SignInScreen(
               showAuthActionSwitch: false,
             ),

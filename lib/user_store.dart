@@ -3,9 +3,12 @@ import 'dart:convert';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-bool isSameCalendarDay(DateTime a, DateTime b) {
-  return a.toString().substring(0, 10) == b.toString().substring(0, 10);
-}
+String _formatDate(DateTime date) => date.toString().substring(0, 10);
+
+bool isSameCalendarDay(DateTime a, DateTime b) =>
+    _formatDate(a) == _formatDate(b);
+
+bool isToday(DateTime a) => isSameCalendarDay(a, DateTime.now());
 
 List<String> _tagsMapper(Object? jsonField) => jsonField != null
     ? (jsonField as List<dynamic>).cast<String>()
@@ -44,7 +47,11 @@ class Entry {
         );
 
   Map<String, Object?> toDb() {
-    return {'delta': _docToDelta(doc), 'date': Timestamp.fromDate(date)};
+    return {
+      'delta': _docToDelta(doc),
+      'date': Timestamp.fromDate(date),
+      'tags': tags
+    };
   }
 
   Entry fromNewDoc(Document newDoc) {
@@ -62,21 +69,13 @@ class Entry {
 
 class UserStore {
   final String uid;
-  final Stream<DocumentSnapshot<Journalist>> docStream;
 
   static UserStore? _instance;
 
-  UserStore._(this.uid, this.docStream);
+  UserStore._(this.uid);
 
   factory UserStore(String uid) {
-    final stream = FirebaseFirestore.instance
-        .doc('journalists/${uid}')
-        .withConverter<Journalist>(
-          fromFirestore: (snapshot, _) => Journalist.fromDb(snapshot.data()!),
-          toFirestore: (user, _) => user.toDb(),
-        )
-        .snapshots();
-    _instance ??= UserStore._(uid, stream);
+    _instance ??= UserStore._(uid);
     return _instance!;
   }
 
@@ -114,13 +113,28 @@ class UserStore {
   }
 
   Future<void> updateEntry(Entry entry) async {
+    print('update entry ${_formatDate(entry.date)}');
     final key = _formatDate(entry.date);
     final val = entry.toDb();
-    await FirebaseFirestore.instance
-        .collection('journalists/${uid}/entries')
-        .doc(key)
-        .update(val);
+    try {
+      await FirebaseFirestore.instance
+          .collection('journalists/${uid}/entries')
+          .doc(key)
+          .update(val);
+    } catch (e) {
+      if (e is FirebaseException &&
+          e.code == 'not-found' &&
+          isToday(entry.date)) {
+        // today is a special case
+        return await createEntry(entry);
+      }
+      throw e;
+    }
   }
 
-  String _formatDate(DateTime date) => date.toString().substring(0, 10);
+  Future<void> updateUser(Journalist user) async {
+    await FirebaseFirestore.instance
+        .doc('journalists/${uid}')
+        .update(user.toDb());
+  }
 }
