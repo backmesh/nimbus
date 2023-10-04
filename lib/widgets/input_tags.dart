@@ -11,8 +11,6 @@ class InputTags extends StatefulWidget {
 }
 
 class _InputTagsState extends State<InputTags> {
-  double? _distanceToField;
-
   Future<void> _tagEntry(String tagId) async {
     if (!widget.entry.tagIds.contains(tagId)) {
       widget.entry.tagIds.add(tagId);
@@ -23,14 +21,6 @@ class _InputTagsState extends State<InputTags> {
   Future<void> _untagEntry(String tagId) async {
     if (widget.entry.tagIds.remove(tagId))
       UserStore.instance.updateEntry(widget.entry);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    setState(() {
-      _distanceToField = MediaQuery.of(context).size.width;
-    });
   }
 
   @override
@@ -50,7 +40,6 @@ class _InputTagsState extends State<InputTags> {
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxHeight: 200),
                     child: ListView.builder(
-                      shrinkWrap: true,
                       itemCount: options.length,
                       itemBuilder: (BuildContext context, int index) {
                         final MapEntry<String, Tag> option =
@@ -113,8 +102,8 @@ class _InputTagsState extends State<InputTags> {
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10.0),
               child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
+                scrollDirection: Axis.vertical,
+                child: Column(
                   children: [
                     InkWell(
                       onTap: () {

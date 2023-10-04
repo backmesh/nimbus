@@ -216,13 +216,6 @@ class _EntryPageState extends State<EntryPage> {
         Row(
           children: [
             Text(entryTitle),
-            SizedBox(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: InputTags(widget.tags, widget.entry),
-              ),
-              width: 600,
-            ),
             // IconButton.outlined(
             //   icon: Icon(Icons.add),
             //   onPressed: () async {},
@@ -237,6 +230,17 @@ class _EntryPageState extends State<EntryPage> {
               )
           ],
         ),
+        Row(children: [
+          Expanded(child: quillEditor),
+          SizedBox(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: InputTags(widget.tags, widget.entry),
+            ),
+            width: 400,
+            height: 400,
+          )
+        ]),
         AnimatedOpacity(
           opacity: _hasSelection ? 1.0 : 0.0,
           duration: Duration(milliseconds: 200),
@@ -248,7 +252,6 @@ class _EntryPageState extends State<EntryPage> {
             child: toolbar,
           ),
         ),
-        quillEditor,
       ],
     );
   }
