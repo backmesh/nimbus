@@ -53,17 +53,21 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Row(children: [
-            IconButton(
-              icon: Icon(Icons.settings),
-              padding: EdgeInsets.zero,
-              // TODO show settings
-              // add signout
-              // add delete account + data
-              onPressed: () async {},
-            ),
-          ]),
           Expanded(
+            child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+              Container(
+                  margin: const EdgeInsets.only(right: 10.0),
+                  child: IconButton(
+                    icon: Icon(Icons.more_horiz),
+                    // TODO show settings
+                    // add signout
+                    // add delete account + data
+                    onPressed: () async {},
+                  ))
+            ]),
+          ),
+          Expanded(
+            flex: 9,
             child: FirestoreQueryBuilder<Entry>(
               query: UserStore.instance.readEntries(),
               builder: (context, snapshot, _) {
