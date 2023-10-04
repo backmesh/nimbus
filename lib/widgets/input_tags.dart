@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:journal/user_store.dart';
-import 'package:textfield_tags/textfield_tags.dart';
 
 class InputTags extends StatefulWidget {
   final Map<String, Tag> tags;
@@ -13,7 +12,30 @@ class InputTags extends StatefulWidget {
 
 class _InputTagsState extends State<InputTags> {
   double? _distanceToField;
-  TextfieldTagsController? _controller;
+  Map<String, Tag> _filteredSuggestions = {};
+
+  void _filterSuggestions(String query) {
+    _filteredSuggestions = {
+      for (var entry in widget.tags.entries)
+        if (entry.value.name.toLowerCase().contains(query))
+          entry.key: entry.value
+    };
+  }
+
+  void _tagEntry(String tagId) {
+    setState(() {
+      if (!widget.entry.tagIds.contains(tagId)) {
+        widget.entry.tagIds.add(tagId);
+        UserStore.instance.updateEntry(widget.entry);
+      }
+      _filteredSuggestions.clear();
+    });
+  }
+
+  void _untagEntry(String tagId) {
+    if (widget.entry.tagIds.remove(tagId))
+      UserStore.instance.updateEntry(widget.entry);
+  }
 
   @override
   void didChangeDependencies() {
@@ -24,174 +46,137 @@ class _InputTagsState extends State<InputTags> {
   }
 
   @override
-  void dispose() {
-    _controller?.dispose();
-    _controller = null;
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    setState(() {
-      _controller = TextfieldTagsController();
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    List<String> _userTags = widget.tags.values.map((e) => e.name).toList();
-    List<String> _entryTags =
-        widget.entry.tagIds.map((e) => widget.tags[e]!.name).toList();
+    // List<String> _userTags = widget.tags.values.map((e) => e.name).toList();
+    // List<String> _entryTags =
+    //     widget.entry.tagIds.map((e) => widget.tags[e]!.name).toList();
     return Column(children: [
-      Autocomplete<String>(
-        optionsViewBuilder: (context, onSelected, options) {
-          return Container(
-            margin: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: Material(
-                elevation: 4.0,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 200),
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: options.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final dynamic option = options.elementAt(index);
-                      return TextButton(
-                        onPressed: () {
-                          onSelected(option);
-                        },
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 15.0),
-                            child: Text(
-                              '$option',
-                              textAlign: TextAlign.left,
-                              style: const TextStyle(
-                                color: Color.fromARGB(255, 74, 137, 92),
-                              ),
+      Autocomplete<MapEntry<String, Tag>>(
+          optionsViewBuilder: (context, onSelected, options) {
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: Material(
+              elevation: 4.0,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 200),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: options.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final MapEntry<String, Tag> option =
+                        options.elementAt(index);
+                    return TextButton(
+                      onPressed: () {
+                        onSelected(option);
+                      },
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 15.0),
+                          child: Text(
+                            '${option.value.name}',
+                            textAlign: TextAlign.left,
+                            style: const TextStyle(
+                              color: Color.fromARGB(255, 74, 137, 92),
                             ),
                           ),
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
-          );
-        },
-        optionsBuilder: (TextEditingValue textEditingValue) {
-          if (textEditingValue.text == '') {
-            return const Iterable<String>.empty();
-          }
-          final value = textEditingValue.text.toLowerCase();
-          return _userTags.where((String option) {
-            return option.contains(value);
-          }).followedBy([value]);
-        },
-        onSelected: (String selectedTag) {
-          _controller?.addTag = selectedTag;
-        },
-        fieldViewBuilder: (context, ttec, tfn, onFieldSubmitted) {
-          return TextFieldTags(
-            textEditingController: ttec,
+          ),
+        );
+      }, optionsBuilder: (TextEditingValue textEditingValue) {
+        if (textEditingValue.text == '') {
+          return const Iterable.empty();
+        }
+        final value = textEditingValue.text.toLowerCase();
+        _filterSuggestions(value);
+        return _filteredSuggestions.entries;
+        // return widget.tags.values.where((Tag option) {
+        //   return option.name.contains(value);
+        // });
+      }, onSelected: (MapEntry<String, Tag> selectedEntry) async {
+        print(selectedEntry);
+        //final doc = await UserStore.instance.newTag(selectedEntry.value);
+        _tagEntry(selectedEntry.key);
+      }, fieldViewBuilder: (context, ttec, tfn, onFieldSubmitted) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+          child: TextField(
+            controller: ttec,
             focusNode: tfn,
-            textfieldTagsController: _controller,
-            initialTags: _entryTags,
-            textSeparators: const [' ', ','],
-            letterCase: LetterCase.normal,
-            validator: (String tag) {
-              // if (tag == 'php') {
-              //   return 'No, please just no';
-              // } else if (_controller.getTags!.contains(tag)) {
-              //   return 'you already entered that';
-              // }
-              return null;
-            },
-            inputfieldBuilder:
-                (context, tec, fn, error, onChanged, onSubmitted) {
-              return ((context, sc, tags, onTagDelete) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: TextField(
-                    controller: tec,
-                    focusNode: fn,
-                    decoration: InputDecoration(
-                      border: const UnderlineInputBorder(
-                        borderSide:
-                            BorderSide(color: Colors.transparent, width: 3.0),
-                      ),
-                      focusedBorder: const UnderlineInputBorder(
-                        borderSide: BorderSide(
+            decoration: InputDecoration(
+              border: const UnderlineInputBorder(
+                borderSide: BorderSide(color: Colors.transparent, width: 3.0),
+              ),
+              focusedBorder: const UnderlineInputBorder(
+                borderSide: BorderSide(
+                    color: Color.fromARGB(255, 74, 137, 92), width: 3.0),
+              ),
+              hintText: widget.entry.tagIds.isNotEmpty ? '' : 'Tag +',
+              //errorText: error,
+              prefixIconConstraints:
+                  BoxConstraints(maxWidth: _distanceToField! * 0.74),
+              prefixIcon: widget.entry.tagIds.isNotEmpty
+                  ? SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                          children: widget.entry.tagIds.map((String tagId) {
+                        final tag = widget.tags[tagId]!;
+                        return Container(
+                          decoration: const BoxDecoration(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(20.0),
+                            ),
                             color: Color.fromARGB(255, 74, 137, 92),
-                            width: 3.0),
-                      ),
-                      hintText: _controller!.hasTags ? '' : 'Tag +',
-                      errorText: error,
-                      prefixIconConstraints:
-                          BoxConstraints(maxWidth: _distanceToField! * 0.74),
-                      prefixIcon: tags.isNotEmpty
-                          ? SingleChildScrollView(
-                              controller: sc,
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                  children: tags.map((String tag) {
-                                return Container(
-                                  decoration: const BoxDecoration(
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(20.0),
-                                    ),
-                                    color: Color.fromARGB(255, 74, 137, 92),
-                                  ),
-                                  margin: const EdgeInsets.only(right: 10.0),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10.0, vertical: 4.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      InkWell(
-                                        child: Text(
-                                          '$tag',
-                                          style: const TextStyle(
-                                              color: Colors.white),
-                                        ),
-                                        onTap: () {
-                                          //print("$tag selected");
-                                        },
-                                      ),
-                                      const SizedBox(width: 4.0),
-                                      InkWell(
-                                        child: const Icon(
-                                          Icons.cancel,
-                                          size: 14.0,
-                                          color: Color.fromARGB(
-                                              255, 233, 233, 233),
-                                        ),
-                                        onTap: () {
-                                          onTagDelete(tag);
-                                        },
-                                      )
-                                    ],
-                                  ),
-                                );
-                              }).toList()),
-                            )
-                          : null,
-                    ),
-                    onChanged: onChanged,
-                    onSubmitted: onSubmitted,
-                  ),
-                );
-              });
-            },
-          );
-        },
-      ),
+                          ),
+                          margin: const EdgeInsets.only(right: 10.0),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10.0, vertical: 4.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              InkWell(
+                                child: Text(
+                                  '${tag.name}',
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                                onTap: () {
+                                  //print("$tag selected");
+                                },
+                              ),
+                              const SizedBox(width: 4.0),
+                              InkWell(
+                                child: const Icon(
+                                  Icons.cancel,
+                                  size: 14.0,
+                                  color: Color.fromARGB(255, 233, 233, 233),
+                                ),
+                                onTap: () {
+                                  _untagEntry(tagId);
+                                },
+                              )
+                            ],
+                          ),
+                        );
+                      }).toList()),
+                    )
+                  : null,
+            ),
+            // onChanged: (String newValue) {
+            //   _filterSuggestions(newValue);
+            //   //print(newValue);
+            // },
+            // onSubmitted: onSubmitted,
+          ),
+        );
+      })
     ]);
   }
 }
