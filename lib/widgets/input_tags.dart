@@ -112,67 +112,80 @@ class _InputTagsState extends State<InputTags> {
           fieldViewBuilder: (context, ttec, tfn, onFieldSubmitted) {
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: TextField(
-                controller: ttec,
-                focusNode: tfn,
-                decoration: InputDecoration(
-                  border: const UnderlineInputBorder(
-                    borderSide:
-                        BorderSide(color: Colors.transparent, width: 3.0),
-                  ),
-                  focusedBorder: const UnderlineInputBorder(
-                    borderSide: BorderSide(
-                        color: Color.fromARGB(255, 74, 137, 92), width: 3.0),
-                  ),
-                  hintText: widget.entry.tagIds.isNotEmpty ? '' : '+Tag',
-                  //errorText: error,
-                  prefixIconConstraints:
-                      BoxConstraints(maxWidth: _distanceToField! * 0.74),
-                  prefixIcon: widget.entry.tagIds.isNotEmpty
-                      ? SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                              children: widget.entry.tagIds.map((String tagId) {
-                            final tag = widget.tags[tagId]!;
-                            return Container(
-                              decoration: const BoxDecoration(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(20.0),
-                                ),
-                                color: Color.fromARGB(255, 74, 137, 92),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        // Handle tap here if needed
+                      },
+                      child: Container(
+                        width: 200, // You can adjust this width as needed
+                        child: TextField(
+                          controller: ttec,
+                          focusNode: tfn,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(25.0),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(25.0),
+                              borderSide: tfn.hasFocus
+                                  ? BorderSide(
+                                      color: Color.fromARGB(255, 74, 137, 92),
+                                      width: 3.0)
+                                  : BorderSide.none,
+                            ),
+                            filled: true,
+                            fillColor: Colors.grey[200],
+                            hintText:
+                                widget.entry.tagIds.isNotEmpty ? '' : '+Tag',
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 20.0, vertical: 10.0),
+                          ),
+                        ),
+                      ),
+                    ),
+                    ...widget.entry.tagIds.map((String tagId) {
+                      final tag = widget.tags[tagId]!;
+                      return Container(
+                        decoration: const BoxDecoration(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(20.0),
+                          ),
+                          color: Color.fromARGB(255, 74, 137, 92),
+                        ),
+                        margin: const EdgeInsets.only(right: 10.0),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10.0, vertical: 4.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            InkWell(
+                              child: Text(
+                                '${tag.name}',
+                                style: const TextStyle(color: Colors.white),
                               ),
-                              margin: const EdgeInsets.only(right: 10.0),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10.0, vertical: 4.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  InkWell(
-                                    child: Text(
-                                      '${tag.name}',
-                                      style:
-                                          const TextStyle(color: Colors.white),
-                                    ),
-                                    onTap: () {},
-                                  ),
-                                  const SizedBox(width: 4.0),
-                                  InkWell(
-                                    child: const Icon(
-                                      Icons.cancel,
-                                      size: 14.0,
-                                      color: Color.fromARGB(255, 233, 233, 233),
-                                    ),
-                                    onTap: () {
-                                      _untagEntry(tagId);
-                                    },
-                                  )
-                                ],
+                              onTap: () {},
+                            ),
+                            const SizedBox(width: 4.0),
+                            InkWell(
+                              child: const Icon(
+                                Icons.cancel,
+                                size: 14.0,
+                                color: Color.fromARGB(255, 233, 233, 233),
                               ),
-                            );
-                          }).toList()),
-                        )
-                      : null,
+                              onTap: () {
+                                _untagEntry(tagId);
+                              },
+                            )
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ],
                 ),
               ),
             );
