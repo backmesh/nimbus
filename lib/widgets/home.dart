@@ -83,7 +83,7 @@ class _HomePageState extends State<HomePage> {
                         ? 0
                         : 1;
                     final itemCount = snapshot.docs.length + todayOffset;
-                    double minEntryHeight = screenHeight / 3;
+                    double minEntryHeight = screenHeight / 4;
                     // Logger.debug('todayOffset');
                     // Logger.debug(todayOffset);
                     // Logger.debug('snapshot.docs.length');
