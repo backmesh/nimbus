@@ -211,6 +211,7 @@ class _EntryPageState extends State<EntryPage> {
       afterButtonPressed: _focusNode.requestFocus,
     );
 
+    double screenWidth = MediaQuery.of(context).size.width;
     return Column(
       children: [
         Row(
@@ -231,15 +232,9 @@ class _EntryPageState extends State<EntryPage> {
           ],
         ),
         Row(children: [
-          Expanded(child: quillEditor),
-          SizedBox(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: InputTags(widget.tags, widget.entry),
-            ),
-            width: 400,
-            height: 400,
-          )
+          Expanded(flex: 3, child: quillEditor),
+          if (screenWidth > 600)
+            Expanded(child: InputTags(widget.tags, widget.entry)),
         ]),
         AnimatedOpacity(
           opacity: _hasSelection ? 1.0 : 0.0,
