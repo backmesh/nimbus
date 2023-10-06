@@ -144,7 +144,6 @@ class _InputTagsState extends State<InputTags> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 15.0, vertical: 4.0),
                   child: TextField(
-                    textAlign: TextAlign.end,
                     style: TextStyle(
                       fontSize: 12.0,
                     ),
