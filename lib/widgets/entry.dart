@@ -231,11 +231,6 @@ class _EntryPageState extends State<EntryPage> {
               )
           ],
         ),
-        Row(children: [
-          Expanded(flex: 4, child: quillEditor),
-          if (screenWidth > 500)
-            Expanded(child: InputTags(widget.tags, widget.entry)),
-        ]),
         AnimatedOpacity(
           opacity: _hasSelection ? 1.0 : 0.0,
           duration: Duration(milliseconds: 200),
@@ -247,6 +242,11 @@ class _EntryPageState extends State<EntryPage> {
             child: toolbar,
           ),
         ),
+        Row(children: [
+          Expanded(flex: 4, child: quillEditor),
+          if (screenWidth > 500)
+            Expanded(child: InputTags(widget.tags, widget.entry)),
+        ]),
       ],
     );
   }
