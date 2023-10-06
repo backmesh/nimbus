@@ -11,6 +11,28 @@ class InputTags extends StatefulWidget {
 }
 
 class _InputTagsState extends State<InputTags> {
+  bool _isFocused = false;
+  FocusNode? _autoCompletefocusNode;
+
+  void _trackFocus() {
+    if (_autoCompletefocusNode != null &&
+        _autoCompletefocusNode!.hasFocus != _isFocused) {
+      setState(() {
+        _isFocused = _autoCompletefocusNode!.hasFocus;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    if (_autoCompletefocusNode != null) {
+      _autoCompletefocusNode!.removeListener(_trackFocus);
+      // let autocomplete manage disposal
+      _autoCompletefocusNode = null;
+    }
+    super.dispose();
+  }
+
   Future<void> _tagEntry(String tagId) async {
     if (!widget.entry.tagIds.contains(tagId)) {
       widget.entry.tagIds.add(tagId);
@@ -32,7 +54,7 @@ class _InputTagsState extends State<InputTags> {
           optionsViewBuilder: (context, onSelected, options) {
             return Container(
               margin:
-                  const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                  const EdgeInsets.symmetric(horizontal: 10.0, vertical: 1.0),
               child: Align(
                 alignment: Alignment.topCenter,
                 child: Material(
@@ -101,6 +123,8 @@ class _InputTagsState extends State<InputTags> {
             await _tagEntry(selectedEntry.key);
           },
           fieldViewBuilder: (context, ttec, tfn, onFieldSubmitted) {
+            _autoCompletefocusNode = tfn;
+            tfn.addListener(_trackFocus);
             return Column(
               children: [
                 ...widget.entry.tagIds.map((String tagId) {
@@ -138,8 +162,12 @@ class _InputTagsState extends State<InputTags> {
                     ),
                   );
                 }).toList(),
-                Container(
+                AnimatedContainer(
+                  duration: Duration(milliseconds: 100),
+                  alignment: Alignment.center,
+                  width: _isFocused ? 200 : 100,
                   height: 40,
+                  curve: Curves.easeInOut,
                   margin: const EdgeInsets.only(right: 10.0),
                   padding: const EdgeInsets.symmetric(
                       horizontal: 15.0, vertical: 4.0),
@@ -155,7 +183,8 @@ class _InputTagsState extends State<InputTags> {
                         borderSide: BorderSide.none,
                       ),
                       filled: true,
-                      fillColor: Colors.grey[200],
+                      fillColor:
+                          _isFocused ? Colors.grey[200] : Colors.transparent,
                       hintText: '+ Tag',
                       hintStyle: TextStyle(fontSize: 12),
                       contentPadding: const EdgeInsets.symmetric(
