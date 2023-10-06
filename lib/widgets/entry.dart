@@ -216,19 +216,41 @@ class _EntryPageState extends State<EntryPage> {
       children: [
         Row(
           children: [
-            Text(entryTitle),
-            // IconButton.outlined(
-            //   icon: Icon(Icons.add),
-            //   onPressed: () async {},
-            // ),
+            Text(
+              entryTitle,
+              style: TextStyle(color: Colors.grey[500]),
+            ),
             if (!isEntryToday)
-              IconButton(
-                icon: Icon(Icons.delete),
-                color: Colors.red,
-                onPressed: () async {
-                  await UserStore.instance.deleteEntry(widget.entry);
+              MenuAnchor(
+                builder: (BuildContext context, MenuController controller,
+                    Widget? child) {
+                  return IconButton(
+                    onPressed: () {
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
+                    },
+                    icon: Icon(
+                      controller.isOpen ? Icons.expand_less : Icons.expand_more,
+                      color: Colors.grey[500],
+                    ),
+                  );
                 },
-              )
+                menuChildren: [
+                  MenuItemButton(
+                    onPressed: () async =>
+                        await UserStore.instance.deleteEntry(widget.entry),
+                    child: Row(
+                      children: [
+                        Icon(Icons.delete, color: Colors.red),
+                        Text('Delete', style: TextStyle(color: Colors.red)),
+                      ],
+                    ),
+                  )
+                ],
+              ),
           ],
         ),
         AnimatedOpacity(
