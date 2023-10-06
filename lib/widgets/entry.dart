@@ -232,8 +232,8 @@ class _EntryPageState extends State<EntryPage> {
           ],
         ),
         Row(children: [
-          Expanded(flex: 3, child: quillEditor),
-          if (screenWidth > 600)
+          Expanded(flex: 4, child: quillEditor),
+          if (screenWidth > 500)
             Expanded(child: InputTags(widget.tags, widget.entry)),
         ]),
         AnimatedOpacity(

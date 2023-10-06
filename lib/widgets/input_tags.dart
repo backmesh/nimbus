@@ -1,4 +1,3 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:journal/user_store.dart';
 
@@ -38,8 +37,9 @@ class _InputTagsState extends State<InputTags> {
                 alignment: Alignment.topCenter,
                 child: Material(
                   elevation: 4.0,
+                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxHeight: 200),
+                    constraints: const BoxConstraints(maxHeight: 150),
                     child: ListView.builder(
                       itemCount: options.length,
                       itemBuilder: (BuildContext context, int index) {
@@ -53,11 +53,12 @@ class _InputTagsState extends State<InputTags> {
                             alignment: Alignment.centerLeft,
                             child: Padding(
                               padding:
-                                  const EdgeInsets.symmetric(vertical: 15.0),
+                                  const EdgeInsets.symmetric(vertical: 10.0),
                               child: Text(
                                 '${option.value.name}',
                                 textAlign: TextAlign.left,
                                 style: const TextStyle(
+                                  fontSize: 12,
                                   color: Color.fromARGB(255, 74, 137, 92),
                                 ),
                               ),
@@ -111,18 +112,16 @@ class _InputTagsState extends State<InputTags> {
                       ),
                       color: Color.fromARGB(255, 74, 137, 92),
                     ),
-                    margin: const EdgeInsets.only(right: 10.0),
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 10.0, vertical: 3.0),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 10.0, vertical: 4.0),
+                        horizontal: 5.0, vertical: 5.0),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        InkWell(
-                          child: Text(
-                            '${tag.name}',
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                          onTap: () {},
+                        Text(
+                          '${tag.name}',
+                          style: const TextStyle(color: Colors.white),
                         ),
                         const SizedBox(width: 4.0),
                         InkWell(
@@ -139,33 +138,29 @@ class _InputTagsState extends State<InputTags> {
                     ),
                   );
                 }).toList(),
-                InkWell(
-                  onTap: () {
-                    // Handle tap here if needed
-                  },
-                  child: Container(
-                    child: TextField(
-                      controller: ttec,
-                      focusNode: tfn,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(25.0),
-                          borderSide: BorderSide.none,
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(25.0),
-                          borderSide: tfn.hasFocus
-                              ? BorderSide(
-                                  color: Color.fromARGB(255, 74, 137, 92),
-                                  width: 3.0)
-                              : BorderSide.none,
-                        ),
-                        filled: true,
-                        fillColor: Colors.grey[200],
-                        hintText: widget.entry.tagIds.isNotEmpty ? '' : '+Tag',
-                        contentPadding: EdgeInsets.symmetric(
-                            horizontal: 20.0, vertical: 10.0),
+                Container(
+                  height: 40,
+                  margin: const EdgeInsets.only(right: 10.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 15.0, vertical: 4.0),
+                  child: TextField(
+                    textAlign: TextAlign.end,
+                    style: TextStyle(
+                      fontSize: 12.0,
+                    ),
+                    controller: ttec,
+                    focusNode: tfn,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25.0),
+                        borderSide: BorderSide.none,
                       ),
+                      filled: true,
+                      fillColor: Colors.grey[200],
+                      hintText: '+ Tag',
+                      hintStyle: TextStyle(fontSize: 12),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 10.0, vertical: 5.0),
                     ),
                   ),
                 ),
