@@ -174,6 +174,13 @@ class _EntryPageState extends State<EntryPage> {
         return _onTripleClickSelection();
       },
       customStyles: DefaultStyles(
+          placeHolder: DefaultTextBlockStyle(
+              TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey), // Your desired font size and color
+              const VerticalSpacing(16, 0), // Adjust spacing as required
+              const VerticalSpacing(0, 0), // Adjust spacing as required
+              null),
           h1: DefaultTextBlockStyle(
               const TextStyle(
                 fontSize: 32,
@@ -216,9 +223,12 @@ class _EntryPageState extends State<EntryPage> {
       children: [
         Row(
           children: [
-            Text(
-              entryTitle,
-              style: TextStyle(color: Colors.grey[500]),
+            Padding(
+              padding: EdgeInsets.all(10),
+              child: Text(
+                entryTitle,
+                style: TextStyle(color: Colors.grey[500]),
+              ),
             ),
             if (!isEntryToday)
               MenuAnchor(
@@ -258,16 +268,9 @@ class _EntryPageState extends State<EntryPage> {
               ),
           ],
         ),
-        AnimatedOpacity(
-          opacity: _hasSelection ? 1.0 : 0.0,
-          duration: Duration(milliseconds: 200),
-          child: Visibility(
-            visible: _hasSelection,
-            maintainSize: true,
-            maintainAnimation: true,
-            maintainState: true,
-            child: toolbar,
-          ),
+        AnimatedSwitcher(
+          duration: Duration(milliseconds: 300),
+          child: _hasSelection ? toolbar : null,
         ),
         Row(children: [
           Expanded(flex: 4, child: quillEditor),
