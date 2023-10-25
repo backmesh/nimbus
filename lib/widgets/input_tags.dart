@@ -127,6 +127,7 @@ class _InputTagsState extends State<InputTags> {
             _autoCompletefocusNode = tfn;
             tfn.addListener(_trackFocus);
             return Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 ...widget.entry.tagIds.map((String tagId) {
                   final tag = widget.tags[tagId]!;
@@ -165,13 +166,11 @@ class _InputTagsState extends State<InputTags> {
                 }).toList(),
                 AnimatedContainer(
                   duration: Duration(milliseconds: 100),
-                  alignment: Alignment.center,
                   width: _isFocused ? 200 : 100,
                   height: 40,
                   curve: Curves.easeInOut,
-                  margin: const EdgeInsets.only(right: 10.0),
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 15.0, vertical: 4.0),
+                      horizontal: 10.0, vertical: 4.0),
                   child: TextField(
                     style: TextStyle(
                       fontSize: 12.0,
@@ -186,8 +185,10 @@ class _InputTagsState extends State<InputTags> {
                       filled: true,
                       fillColor:
                           _isFocused ? Colors.grey[200] : Colors.transparent,
+                      hintTextDirection: TextDirection.rtl,
                       hintText: '+ Tag',
-                      hintStyle: TextStyle(fontSize: 12),
+                      hintStyle:
+                          TextStyle(fontSize: 12, color: Colors.grey[500]),
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 10.0, vertical: 5.0),
                     ),
