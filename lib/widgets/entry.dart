@@ -244,8 +244,13 @@ class _EntryPageState extends State<EntryPage> {
                         await UserStore.instance.deleteEntry(widget.entry),
                     child: Row(
                       children: [
-                        Icon(Icons.delete),
-                        Text('Delete'),
+                        Icon(Icons.delete, size: 20),
+                        Padding(
+                            padding: EdgeInsets.only(left: 6.0),
+                            child: Text(
+                              'Delete',
+                              style: TextStyle(fontSize: 14),
+                            ))
                       ],
                     ),
                   )
