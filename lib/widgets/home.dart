@@ -27,25 +27,31 @@ class _HomePageState extends State<HomePage> {
     final end = upperBound.subtract(Duration(days: 1));
     return Container(
         height: height,
-        child: GestureDetector(
-          child: Card(
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [Icon(Icons.add)])),
-          onTap: () async {
-            DateTime? newDate = await showDatePicker(
-                context: context,
-                confirmText: 'Create Entry',
-                initialEntryMode: DatePickerEntryMode.calendarOnly,
-                firstDate: start,
-                initialDate: end,
-                currentDate: end,
-                lastDate: end);
-            if (newDate == null) return;
-            await UserStore.instance
-                .createEntry(Entry(date: newDate, doc: Document(), tagIds: []));
-          },
-        ));
+        child: OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              backgroundColor: Colors.white,
+              side: BorderSide(color: Colors.transparent),
+              shape: RoundedRectangleBorder(
+                borderRadius:
+                    BorderRadius.circular(5.0), // Adjust the border radius here
+              ),
+            ),
+            onPressed: () async {
+              DateTime? newDate = await showDatePicker(
+                  context: context,
+                  confirmText: 'Create Entry',
+                  initialEntryMode: DatePickerEntryMode.calendarOnly,
+                  firstDate: start,
+                  initialDate: end,
+                  currentDate: end,
+                  lastDate: end);
+              if (newDate == null) return;
+              await UserStore.instance.createEntry(
+                  Entry(date: newDate, doc: Document(), tagIds: []));
+            },
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [Icon(Icons.add)])));
   }
 
   Widget _buildScrollableJournal(BuildContext context) {
@@ -54,19 +60,19 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Expanded(
-            child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-              Container(
-                  margin: const EdgeInsets.only(right: 10.0),
-                  child: IconButton(
-                    icon: Icon(Icons.more_horiz),
-                    // TODO show settings
-                    // add signout
-                    // add delete account + data
-                    onPressed: () async {},
-                  ))
-            ]),
-          ),
+          // TODO show settings
+          // add signout
+          // add delete account + data
+          // Expanded(
+          //   child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+          //     Container(
+          //         margin: const EdgeInsets.only(right: 10.0),
+          //         child: IconButton(
+          //           icon: Icon(Icons.more_horiz),
+          //           onPressed: () async {},
+          //         ))
+          //   ]),
+          // ),
           Expanded(
               flex: 15,
               child: FirestoreQueryBuilder<Entry>(
