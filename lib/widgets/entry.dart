@@ -169,7 +169,7 @@ class _EntryPageState extends State<EntryPage> {
       placeholder: 'What is on your mind?',
       enableSelectionToolbar: isMobile(),
       expands: false,
-      padding: EdgeInsets.all(10),
+      padding: EdgeInsets.all(20),
       onTapUp: (details, p1) {
         return _onTripleClickSelection();
       },
@@ -219,63 +219,82 @@ class _EntryPageState extends State<EntryPage> {
     );
 
     double screenWidth = MediaQuery.of(context).size.width;
+    final entryHeader = Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 20),
+          child: Text(
+            entryTitle,
+            style: TextStyle(color: Colors.grey[500]),
+          ),
+        ),
+        if (!isEntryToday)
+          MenuAnchor(
+            builder: (BuildContext context, MenuController controller,
+                Widget? child) {
+              return IconButton(
+                onPressed: () {
+                  if (controller.isOpen) {
+                    controller.close();
+                  } else {
+                    controller.open();
+                  }
+                },
+                icon: Icon(
+                  controller.isOpen ? Icons.expand_less : Icons.expand_more,
+                  color: Colors.grey[500],
+                ),
+              );
+            },
+            menuChildren: [
+              MenuItemButton(
+                onPressed: () async =>
+                    await UserStore.instance.deleteEntry(widget.entry),
+                child: Row(
+                  children: [
+                    Icon(Icons.delete, size: 20),
+                    Padding(
+                        padding: EdgeInsets.only(left: 6.0),
+                        child: Text(
+                          'Delete',
+                          style: TextStyle(fontSize: 14),
+                        ))
+                  ],
+                ),
+              )
+            ],
+          ),
+      ],
+    );
     return Column(
       children: [
-        Row(
-          children: [
-            Padding(
-              padding: EdgeInsets.all(10),
-              child: Text(
-                entryTitle,
-                style: TextStyle(color: Colors.grey[500]),
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Expanded(
+              child: Column(
+            children: [
+              AnimatedSwitcher(
+                duration: Duration(milliseconds: 400),
+                reverseDuration: Duration(milliseconds: 400),
+                child: _hasSelection
+                    ? Padding(
+                        padding: EdgeInsets.all(10),
+                        child: toolbar,
+                      )
+                    : null,
               ),
-            ),
-            if (!isEntryToday)
-              MenuAnchor(
-                builder: (BuildContext context, MenuController controller,
-                    Widget? child) {
-                  return IconButton(
-                    onPressed: () {
-                      if (controller.isOpen) {
-                        controller.close();
-                      } else {
-                        controller.open();
-                      }
-                    },
-                    icon: Icon(
-                      controller.isOpen ? Icons.expand_less : Icons.expand_more,
-                      color: Colors.grey[500],
-                    ),
-                  );
-                },
-                menuChildren: [
-                  MenuItemButton(
-                    onPressed: () async =>
-                        await UserStore.instance.deleteEntry(widget.entry),
-                    child: Row(
-                      children: [
-                        Icon(Icons.delete, size: 20),
-                        Padding(
-                            padding: EdgeInsets.only(left: 6.0),
-                            child: Text(
-                              'Delete',
-                              style: TextStyle(fontSize: 14),
-                            ))
-                      ],
-                    ),
-                  )
-                ],
-              ),
-          ],
-        ),
-        AnimatedSwitcher(
-          duration: Duration(milliseconds: 300),
-          child: _hasSelection ? toolbar : null,
-        ),
-        Row(children: [
-          Expanded(flex: 4, child: quillEditor),
+              quillEditor
+            ],
+          )),
           if (screenWidth > 500)
-            Expanded(child: InputTags(widget.tags, widget.entry)),
+            Container(
+                width: 150,
+                child: Column(
+                  children: [
+                    entryHeader,
+                    InputTags(widget.tags, widget.entry),
+                  ],
+                ))
         ]),
       ],
     );
