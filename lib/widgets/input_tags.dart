@@ -79,9 +79,10 @@ class _InputTagsState extends State<InputTags> {
                               child: Text(
                                 '${option.value.name}',
                                 textAlign: TextAlign.left,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
-                                  color: Color.fromARGB(255, 74, 137, 92),
+                                  color:
+                                      Theme.of(context).colorScheme.secondary,
                                 ),
                               ),
                             ),
@@ -130,11 +131,11 @@ class _InputTagsState extends State<InputTags> {
                 ...widget.entry.tagIds.map((String tagId) {
                   final tag = widget.tags[tagId]!;
                   return Container(
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(
                         Radius.circular(20.0),
                       ),
-                      color: Color.fromARGB(255, 74, 137, 92),
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                     margin: const EdgeInsets.symmetric(
                         horizontal: 10.0, vertical: 3.0),

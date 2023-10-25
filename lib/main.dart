@@ -58,6 +58,8 @@ class _MainState extends State<Main> {
   @override
   Widget build(BuildContext context) {
     if (user != null) UserStore(user!.uid);
+    const primary = Color.fromRGBO(23, 89, 115, 1);
+    //const secondary = Color.fromRGBO(140, 184, 159, 1);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Journal',
@@ -65,7 +67,7 @@ class _MainState extends State<Main> {
         GlobalMaterialLocalizations.delegate,
       ],
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSeed(seedColor: primary),
         visualDensity: VisualDensity.adaptivePlatformDensity,
         useMaterial3: true,
       ),
