@@ -56,48 +56,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _getDatePickerSeparator(FirestoreQueryBuilderSnapshot<Entry> snapshot,
-      DateTime upperBound, DateTime lowerBound, double height) {
-    final start = lowerBound.add(Duration(days: 1));
-    final end = upperBound.subtract(Duration(days: 1));
-    return Container(
-        height: height * .5,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border(
-              top: BorderSide(
-                  width: 1.0,
-                  color: Colors.grey[200]!), // Your top border color and width
-              bottom: BorderSide(width: 1.0, color: Colors.grey[200]!),
-              // Your bottom border color and width
-            ),
-          ),
-          child: OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(0)),
-                side: BorderSide(color: Colors.transparent),
-              ),
-              onPressed: () async {
-                DateTime? newDate = await showDatePicker(
-                    context: context,
-                    confirmText: 'Create Entry',
-                    initialEntryMode: DatePickerEntryMode.calendarOnly,
-                    firstDate: start,
-                    initialDate: end,
-                    currentDate: end,
-                    lastDate: end);
-                if (newDate == null) return;
-                await UserStore.instance.createEntry(
-                    Entry(date: newDate, doc: Document(), tagIds: []));
-              },
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [Icon(Icons.add)])),
-        ));
-  }
-
   Widget _buildScrollableJournal(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
     return SafeArea(
@@ -129,26 +87,13 @@ class _HomePageState extends State<HomePage> {
                 final Entry entry = todayOffset == 1 && index == 0
                     ? Entry(doc: Document(), date: today, tagIds: [])
                     : snapshot.docs[index - todayOffset].data();
-                final List<Widget> children = [];
-                // first separator, unbounded calendar into the past
-                if (index == itemCount - 1) {
-                  children.add(_getDatePickerSeparator(
-                      snapshot, entry.date, DateTime(2010), minEntryHeight));
-                }
-                // bounded calendar widget
                 final Entry? prevEntry =
                     snapshot.docs.elementAtOrNull(index + 1)?.data();
-                if (prevEntry != null) {
-                  final consecutiveDays = isSameCalendarDay(
-                      prevEntry.date.add(Duration(days: 1)), entry.date);
-                  if (!consecutiveDays)
-                    children.add(_getDatePickerSeparator(
-                        snapshot, entry.date, prevEntry.date, minEntryHeight));
-                }
-                children.add(EntryPage(widget.tags, entry));
+                final prevEntryDate =
+                    prevEntry != null ? prevEntry.date : DateTime(2010);
                 return ConstrainedBox(
                   constraints: BoxConstraints(minHeight: minEntryHeight),
-                  child: Column(children: children),
+                  child: EntryPage(widget.tags, entry, prevEntryDate),
                 );
               },
             );

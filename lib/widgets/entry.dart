@@ -16,7 +16,8 @@ enum _SelectionType {
 class EntryPage extends StatefulWidget {
   final Map<String, Tag> tags;
   final Entry entry;
-  const EntryPage(this.tags, this.entry);
+  final DateTime prevEntryDate;
+  const EntryPage(this.tags, this.entry, this.prevEntryDate);
 
   @override
   _EntryPageState createState() => _EntryPageState();
@@ -219,6 +220,8 @@ class _EntryPageState extends State<EntryPage> {
     );
 
     double screenWidth = MediaQuery.of(context).size.width;
+    final hasEntryPrevDay = isSameCalendarDay(
+        widget.prevEntryDate.add(Duration(days: 1)), widget.entry.date);
     final entryHeader = Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -229,26 +232,49 @@ class _EntryPageState extends State<EntryPage> {
             style: TextStyle(color: Colors.grey[500]),
           ),
         ),
-        if (!isEntryToday)
-          MenuAnchor(
-            alignmentOffset: Offset.fromDirection(0, -60),
-            builder: (BuildContext context, MenuController controller,
-                Widget? child) {
-              return IconButton(
-                onPressed: () {
-                  if (controller.isOpen) {
-                    controller.close();
-                  } else {
-                    controller.open();
-                  }
+        MenuAnchor(
+          alignmentOffset: Offset.fromDirection(0, -60),
+          builder:
+              (BuildContext context, MenuController controller, Widget? child) {
+            return IconButton(
+              onPressed: () {
+                if (controller.isOpen) {
+                  controller.close();
+                } else {
+                  controller.open();
+                }
+              },
+              icon: Icon(
+                controller.isOpen ? Icons.expand_less : Icons.expand_more,
+                color: Colors.grey[500],
+              ),
+            );
+          },
+          menuChildren: [
+            if (!hasEntryPrevDay)
+              MenuItemButton(
+                leadingIcon: Icon(Icons.event, size: 20),
+                onPressed: () async {
+                  final start = widget.prevEntryDate.add(Duration(days: 1));
+                  final end = widget.entry.date.subtract(Duration(days: 1));
+                  DateTime? newDate = await showDatePicker(
+                      context: context,
+                      confirmText: 'Add Entry',
+                      initialEntryMode: DatePickerEntryMode.calendarOnly,
+                      firstDate: start,
+                      initialDate: end,
+                      currentDate: end,
+                      lastDate: end);
+                  if (newDate == null) return;
+                  await UserStore.instance.createEntry(
+                      Entry(date: newDate, doc: Document(), tagIds: []));
                 },
-                icon: Icon(
-                  controller.isOpen ? Icons.expand_less : Icons.expand_more,
-                  color: Colors.grey[500],
+                child: Text(
+                  'Add earlier entry',
+                  style: TextStyle(fontSize: 14),
                 ),
-              );
-            },
-            menuChildren: [
+              ),
+            if (!isEntryToday)
               MenuItemButton(
                 leadingIcon: Icon(Icons.delete_outline, size: 20),
                 onPressed: () async =>
@@ -258,8 +284,8 @@ class _EntryPageState extends State<EntryPage> {
                   style: TextStyle(fontSize: 14),
                 ),
               )
-            ],
-          ),
+          ],
+        ),
       ],
     );
     return Column(
@@ -281,7 +307,7 @@ class _EntryPageState extends State<EntryPage> {
               quillEditor
             ],
           )),
-          if (screenWidth > 500)
+          if (screenWidth > 300)
             Container(
                 width: 150,
                 child: Column(
