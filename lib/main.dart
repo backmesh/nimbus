@@ -47,7 +47,6 @@ class _MainState extends State<Main> {
   void initState() {
     super.initState();
     userStream = FirebaseAuth.instance.authStateChanges().listen((fbUser) {
-      if (fbUser == null) return;
       setState(() {
         user = fbUser;
       });

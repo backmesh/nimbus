@@ -231,6 +231,7 @@ class _EntryPageState extends State<EntryPage> {
         ),
         if (!isEntryToday)
           MenuAnchor(
+            alignmentOffset: Offset.fromDirection(0, -60),
             builder: (BuildContext context, MenuController controller,
                 Widget? child) {
               return IconButton(
@@ -249,18 +250,12 @@ class _EntryPageState extends State<EntryPage> {
             },
             menuChildren: [
               MenuItemButton(
+                leadingIcon: Icon(Icons.delete_outline, size: 20),
                 onPressed: () async =>
                     await UserStore.instance.deleteEntry(widget.entry),
-                child: Row(
-                  children: [
-                    Icon(Icons.delete, size: 20),
-                    Padding(
-                        padding: EdgeInsets.only(left: 6.0),
-                        child: Text(
-                          'Delete',
-                          style: TextStyle(fontSize: 14),
-                        ))
-                  ],
+                child: Text(
+                  'Delete',
+                  style: TextStyle(fontSize: 14),
                 ),
               )
             ],
