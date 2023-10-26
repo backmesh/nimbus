@@ -47,6 +47,7 @@ class _InputTagsState extends State<InputTags> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return Column(children: [
       Autocomplete<MapEntry<String, Tag>>(
           displayStringForOption: (MapEntry<String, Tag> option) =>
@@ -126,47 +127,12 @@ class _InputTagsState extends State<InputTags> {
           fieldViewBuilder: (context, ttec, tfn, onFieldSubmitted) {
             _autoCompletefocusNode = tfn;
             tfn.addListener(_trackFocus);
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+            if (!_isFocused) ttec.clear();
+            return Row(
               children: [
-                ...widget.entry.tagIds.map((String tagId) {
-                  final tag = widget.tags[tagId]!;
-                  return Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(20.0),
-                      ),
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    margin: const EdgeInsets.symmetric(
-                        horizontal: 10.0, vertical: 3.0),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 5.0, vertical: 5.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          '${tag.name}',
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                        const SizedBox(width: 4.0),
-                        InkWell(
-                          child: const Icon(
-                            Icons.cancel,
-                            size: 14.0,
-                            color: Color.fromARGB(255, 233, 233, 233),
-                          ),
-                          onTap: () {
-                            _untagEntry(tagId);
-                          },
-                        )
-                      ],
-                    ),
-                  );
-                }).toList(),
                 AnimatedContainer(
                   duration: Duration(milliseconds: 100),
-                  width: _isFocused ? 200 : 100,
+                  width: _isFocused && screenWidth > 400 ? 200 : 100,
                   height: 40,
                   curve: Curves.easeInOut,
                   padding: const EdgeInsets.symmetric(
@@ -185,15 +151,50 @@ class _InputTagsState extends State<InputTags> {
                       filled: true,
                       fillColor:
                           _isFocused ? Colors.grey[200] : Colors.transparent,
-                      hintTextDirection: TextDirection.rtl,
                       hintText: '+ Tag',
                       hintStyle:
                           TextStyle(fontSize: 12, color: Colors.grey[500]),
                       contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 10.0, vertical: 5.0),
+                          horizontal: 15.0, vertical: 5.0),
                     ),
                   ),
                 ),
+                ...widget.entry.tagIds.reversed.map((String tagId) {
+                  final tag = widget.tags[tagId]!;
+                  return Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(20.0),
+                      ),
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 5.0, vertical: 3.0),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 5.0, vertical: 5.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        const SizedBox(width: 4.0),
+                        Text(
+                          '${tag.name}',
+                          style: TextStyle(fontSize: 12.0, color: Colors.white),
+                        ),
+                        const SizedBox(width: 4.0),
+                        InkWell(
+                          child: const Icon(
+                            Icons.cancel,
+                            size: 14.0,
+                            color: Color.fromARGB(255, 233, 233, 233),
+                          ),
+                          onTap: () {
+                            _untagEntry(tagId);
+                          },
+                        )
+                      ],
+                    ),
+                  );
+                }).toList(),
               ],
             );
           })

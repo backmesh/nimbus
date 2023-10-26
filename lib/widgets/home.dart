@@ -58,7 +58,8 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildScrollableJournal(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
-    return SafeArea(
+    return Container(
+      padding: EdgeInsets.all(20),
       child: FirestoreQueryBuilder<Entry>(
           query: UserStore.instance.readEntries(),
           builder: (context, snapshot, _) {

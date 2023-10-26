@@ -160,6 +160,7 @@ class _EntryPageState extends State<EntryPage> {
     final entryTitle = isEntryToday
         ? 'Today'
         : localizations.formatShortDate(widget.entry.date);
+    double screenWidth = MediaQuery.of(context).size.width;
     Widget quillEditor = QuillEditor(
       controller: _controller!,
       scrollController: ScrollController(),
@@ -170,7 +171,7 @@ class _EntryPageState extends State<EntryPage> {
       placeholder: 'What is on your mind?',
       enableSelectionToolbar: isMobile(),
       expands: false,
-      padding: EdgeInsets.all(20),
+      padding: EdgeInsets.all(screenWidth > 400 ? 10 : 0),
       onTapUp: (details, p1) {
         return _onTripleClickSelection();
       },
@@ -219,24 +220,15 @@ class _EntryPageState extends State<EntryPage> {
       afterButtonPressed: _focusNode.requestFocus,
     );
 
-    double screenWidth = MediaQuery.of(context).size.width;
     final hasEntryPrevDay = isSameCalendarDay(
         widget.prevEntryDate.add(Duration(days: 1)), widget.entry.date);
     final entryHeader = Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 20),
-          child: Text(
-            entryTitle,
-            style: TextStyle(color: Colors.grey[500]),
-          ),
-        ),
         MenuAnchor(
-          alignmentOffset: Offset.fromDirection(0, -60),
           builder:
               (BuildContext context, MenuController controller, Widget? child) {
             return IconButton(
+              tooltip: 'Delete or add entry',
               onPressed: () {
                 if (controller.isOpen) {
                   controller.close();
@@ -286,10 +278,32 @@ class _EntryPageState extends State<EntryPage> {
               )
           ],
         ),
+        Padding(
+          padding: EdgeInsets.only(bottom: 20, top: 20, right: 10),
+          child: Text(
+            entryTitle,
+            style: TextStyle(color: Colors.grey[500]),
+          ),
+        ),
       ],
     );
+    final ScrollController _scrollController = ScrollController();
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Scrollbar(
+          controller: _scrollController, // Link ScrollController to Scrollbar
+          child: SingleChildScrollView(
+            controller: _scrollController, // Link ScrollController to Scrollbar
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                entryHeader,
+                InputTags(widget.tags, widget.entry),
+              ],
+            ),
+          ),
+        ),
         Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Expanded(
               child: Column(
@@ -307,15 +321,6 @@ class _EntryPageState extends State<EntryPage> {
               quillEditor
             ],
           )),
-          if (screenWidth > 300)
-            Container(
-                width: 150,
-                child: Column(
-                  children: [
-                    entryHeader,
-                    InputTags(widget.tags, widget.entry),
-                  ],
-                ))
         ]),
       ],
     );
