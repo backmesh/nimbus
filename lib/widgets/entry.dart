@@ -385,7 +385,7 @@ class _EntryPageState extends State<EntryPage> {
               if (_hasSelection)
                 Positioned(
                   top: toolbarPixelOffset.dy,
-                  left: toolbarPixelOffset.dx,
+                  left: 0, //toolbarPixelOffset.dx,
                   height: toolbarSize.height,
                   width: toolbarSize.width,
                   child: Material(
