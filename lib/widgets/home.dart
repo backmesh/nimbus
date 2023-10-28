@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
@@ -57,7 +59,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildScrollableJournal(BuildContext context) {
-    double screenHeight = MediaQuery.of(context).size.height;
+    double screenHeight = MediaQuery.of(context).size.height * .9;
     return Container(
       padding: EdgeInsets.all(20),
       child: FirestoreQueryBuilder<Entry>(
@@ -74,7 +76,7 @@ class _HomePageState extends State<HomePage> {
                     ? 0
                     : 1;
             final itemCount = snapshot.docs.length + todayOffset;
-            double minEntryHeight = screenHeight / 4;
+            double minEntryHeight = screenHeight / min(itemCount, 4);
             // Logger.debug('todayOffset');
             // Logger.debug(todayOffset);
             // Logger.debug('snapshot.docs.length');
