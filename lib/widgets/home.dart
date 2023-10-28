@@ -96,7 +96,8 @@ class _HomePageState extends State<HomePage> {
                     prevEntry != null ? prevEntry.date : DateTime(2010);
                 return ConstrainedBox(
                   constraints: BoxConstraints(minHeight: minEntryHeight),
-                  child: EntryPage(widget.tags, entry, prevEntryDate),
+                  child: EntryPage(
+                      widget.tags, entry, prevEntryDate, minEntryHeight * .9),
                 );
               },
             );

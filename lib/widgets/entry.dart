@@ -1,7 +1,7 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/extensions.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
 
 import 'input_tags.dart';
@@ -17,7 +17,9 @@ class EntryPage extends StatefulWidget {
   final Map<String, Tag> tags;
   final Entry entry;
   final DateTime prevEntryDate;
-  const EntryPage(this.tags, this.entry, this.prevEntryDate);
+  final double minEditorHeight;
+  const EntryPage(
+      this.tags, this.entry, this.prevEntryDate, this.minEditorHeight);
 
   @override
   _EntryPageState createState() => _EntryPageState();
@@ -154,6 +156,70 @@ class _EntryPageState extends State<EntryPage> {
     });
   }
 
+  Offset estimatePixelOffset(
+      QuillController quillController, Size toolbarSize, Size editorSize,
+      {double lineHeightMultiplier = 1.5, double defaultFontSize = 16.0}) {
+    int selectionOffset = quillController.selection.start;
+    Document document = quillController.document;
+    String plainText = document.getPlainText(0, document.length);
+
+    if (plainText.isEmpty) {
+      return Offset(0.0, 0.0);
+    }
+
+    double verticalOffset = 0.0;
+    double horizontalOffset = 0.0;
+    double maxFontSizeInLine = defaultFontSize;
+    int charactersInLine = 0;
+    double currentLineWidth = 0.0;
+
+    for (int i = 0; i < selectionOffset; i++) {
+      String char = plainText[i];
+
+      if (char == '\n' || currentLineWidth >= editorSize.width) {
+        verticalOffset += maxFontSizeInLine * lineHeightMultiplier;
+        maxFontSizeInLine = defaultFontSize;
+        horizontalOffset = 0.0;
+        charactersInLine = 0;
+        currentLineWidth = 0.0;
+        if (char == '\n') continue;
+      }
+
+      Style style = document.collectStyle(i, i + 1);
+
+      Attribute<dynamic>? sizeAttribute = style.attributes[Attribute.size.key];
+      if (sizeAttribute != null) {
+        double? fontSize = double.tryParse(sizeAttribute.value.toString());
+        if (fontSize != null) {
+          if (fontSize > maxFontSizeInLine) {
+            maxFontSizeInLine = fontSize;
+          }
+        }
+      }
+
+      horizontalOffset += maxFontSizeInLine;
+      currentLineWidth += maxFontSizeInLine;
+      charactersInLine++;
+    }
+
+    if (charactersInLine > 0) {
+      horizontalOffset = (horizontalOffset / charactersInLine) *
+          (selectionOffset % charactersInLine);
+    }
+
+    verticalOffset += maxFontSizeInLine * lineHeightMultiplier;
+
+    // Limiting the horizontal offset to the width of the toolbar
+    horizontalOffset =
+        horizontalOffset.clamp(0, editorSize.width - toolbarSize.width);
+
+    // Limiting the vertical offset to the height of the editor
+    verticalOffset = verticalOffset.clamp(
+        toolbarSize.height, editorSize.height - toolbarSize.height);
+
+    return Offset(horizontalOffset, verticalOffset);
+  }
+
   Widget _buildWelcomeEditor(BuildContext context) {
     final localizations = MaterialLocalizations.of(context);
     final isEntryToday = isToday(widget.entry.date);
@@ -169,7 +235,8 @@ class _EntryPageState extends State<EntryPage> {
       autoFocus: false,
       readOnly: false,
       placeholder: 'What is on your mind?',
-      enableSelectionToolbar: isMobile(),
+      minHeight: widget.minEditorHeight,
+      enableSelectionToolbar: false,
       expands: false,
       padding: EdgeInsets.all(screenWidth > 400 ? 10 : 0),
       onTapUp: (details, p1) {
@@ -288,6 +355,12 @@ class _EntryPageState extends State<EntryPage> {
       ],
     );
     final ScrollController _scrollController = ScrollController();
+    Size toolbarSize = Size(min(300, screenWidth * .8), 50);
+    // TODO pick toolbar elements if small width
+    Offset toolbarPixelOffset = estimatePixelOffset(
+        _controller!, toolbarSize, Size(screenWidth, widget.minEditorHeight));
+    // print(toolbarPixelOffset);
+    // print(widget.minEditorHeight);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -306,19 +379,21 @@ class _EntryPageState extends State<EntryPage> {
         ),
         Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Expanded(
-              child: Column(
+              child: Stack(
             children: [
-              AnimatedSwitcher(
-                duration: Duration(milliseconds: 400),
-                reverseDuration: Duration(milliseconds: 400),
-                child: _hasSelection
-                    ? Padding(
-                        padding: EdgeInsets.all(10),
-                        child: toolbar,
-                      )
-                    : null,
-              ),
-              quillEditor
+              quillEditor,
+              if (_hasSelection)
+                Positioned(
+                  top: toolbarPixelOffset.dy,
+                  left: toolbarPixelOffset.dx,
+                  height: toolbarSize.height,
+                  width: toolbarSize.width,
+                  child: Material(
+                    elevation: 4.0,
+                    color: Colors.white,
+                    child: toolbar,
+                  ),
+                ),
             ],
           )),
         ]),
