@@ -357,8 +357,6 @@ class _EntryPageState extends State<EntryPage> {
     final ScrollController _scrollController = ScrollController();
     Size toolbarSize = Size(min(300, screenWidth * .8), 50);
     // TODO pick toolbar elements if small width
-    Offset toolbarPixelOffset = estimatePixelOffset(
-        _controller!, toolbarSize, Size(screenWidth, widget.minEditorHeight));
     // print(toolbarPixelOffset);
     // print(widget.minEditorHeight);
     return Column(
@@ -384,7 +382,9 @@ class _EntryPageState extends State<EntryPage> {
               quillEditor,
               if (_hasSelection)
                 Positioned(
-                  top: toolbarPixelOffset.dy,
+                  top: estimatePixelOffset(_controller!, toolbarSize,
+                          Size(screenWidth, widget.minEditorHeight))
+                      .dy,
                   left: 0, //toolbarPixelOffset.dx,
                   height: toolbarSize.height,
                   width: toolbarSize.width,
