@@ -56,41 +56,38 @@ class _InputTagsState extends State<InputTags> {
             return Container(
               margin:
                   const EdgeInsets.symmetric(horizontal: 10.0, vertical: 1.0),
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: Material(
-                  elevation: 4.0,
-                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxHeight: 150),
-                    child: ListView.builder(
-                      itemCount: options.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        final MapEntry<String, Tag> option =
-                            options.elementAt(index);
-                        return TextButton(
-                          onPressed: () async {
-                            onSelected(option);
-                          },
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 10.0),
-                              child: Text(
-                                '${option.value.name}',
-                                textAlign: TextAlign.left,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color:
-                                      Theme.of(context).colorScheme.secondary,
-                                ),
+              alignment: Alignment.topLeft,
+              child: Material(
+                elevation: 4.0,
+                borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                child: ConstrainedBox(
+                  constraints:
+                      const BoxConstraints(maxHeight: 150, maxWidth: 150),
+                  child: ListView.builder(
+                    itemCount: options.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final MapEntry<String, Tag> option =
+                          options.elementAt(index);
+                      return TextButton(
+                        onPressed: () async {
+                          onSelected(option);
+                        },
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 10.0),
+                            child: Text(
+                              '${option.value.name}',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Theme.of(context).colorScheme.secondary,
                               ),
                             ),
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),
