@@ -71,25 +71,22 @@ class _HomePageState extends State<HomePage> {
             }
             final today = getToday();
             final lastEntry = snapshot.docs.firstOrNull?.data();
-            final todayOffset =
-                lastEntry != null && isSameCalendarDay(today, lastEntry.date)
-                    ? 0
-                    : 1;
-            final itemCount = snapshot.docs.length + todayOffset;
+            if (lastEntry == null ||
+                !isSameCalendarDay(today, lastEntry.date)) {
+              // create today and fetch more
+              UserStore.instance
+                  .updateEntry(Entry(doc: Document(), date: today, tagIds: []))
+                  .then((_) => snapshot.fetchMore());
+            }
+            final itemCount = snapshot.docs.length;
             double minEntryHeight = screenHeight / min(itemCount, 4);
-            // Logger.debug('todayOffset');
-            // Logger.debug(todayOffset);
-            // Logger.debug('snapshot.docs.length');
-            // Logger.debug(snapshot.docs.length);
             return ListView.builder(
               reverse: true,
               itemCount: itemCount,
               itemBuilder: (context, index) {
                 if (snapshot.hasMore) snapshot.fetchMore();
                 // index 0 is today
-                final Entry entry = todayOffset == 1 && index == 0
-                    ? Entry(doc: Document(), date: today, tagIds: [])
-                    : snapshot.docs[index - todayOffset].data();
+                final Entry entry = snapshot.docs[index].data();
                 final Entry? prevEntry =
                     snapshot.docs.elementAtOrNull(index + 1)?.data();
                 final prevEntryDate =
