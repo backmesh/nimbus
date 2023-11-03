@@ -102,7 +102,6 @@ class _InputTagsState extends State<InputTags> {
               };
               return _filteredSuggestions.entries;
             }
-            ;
             final query = textEditingValue.text.toLowerCase();
             final _filteredSuggestions = {
               for (var entry in widget.tags.entries)
@@ -135,6 +134,19 @@ class _InputTagsState extends State<InputTags> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10.0, vertical: 4.0),
                   child: TextField(
+                    onSubmitted: (value) async {
+                      var entries = widget.tags.entries
+                          .where((el) => el.value.name.toLowerCase() == value)
+                          .toList();
+                      var entry = entries.length == 1 ? entries.single : null;
+                      if (entry == null) {
+                        final doc = await UserStore.instance.newTag(
+                            Tag(name: value, color: Tag.getRandomColor()));
+                        await _tagEntry(doc.id);
+                      } else {
+                        await _tagEntry(entry.key);
+                      }
+                    },
                     style: TextStyle(
                       fontSize: 12.0,
                     ),
