@@ -66,7 +66,7 @@ class _HomePageState extends State<HomePage> {
           query: UserStore.instance.readEntries(),
           builder: (context, snapshot, _) {
             // Loading
-            if (snapshot.isFetching) {
+            if (snapshot.isFetching || snapshot.isFetchingMore) {
               return Center(child: CircularProgressIndicator());
             }
             final today = getToday();
