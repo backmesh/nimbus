@@ -31,7 +31,6 @@ class _EntryPageState extends State<EntryPage> {
   Timer? _selectAllTimer;
   Timer? _saveTimer;
   _SelectionType _selectionType = _SelectionType.none;
-  bool _hasSelection = false;
 
   @override
   void dispose() {
@@ -59,11 +58,6 @@ class _EntryPageState extends State<EntryPage> {
       _controller = QuillController(
         document: widget.entry.doc,
         selection: const TextSelection.collapsed(offset: 0),
-        onSelectionChanged: (textSelection) {
-          setState(() {
-            _hasSelection = !textSelection.isCollapsed;
-          });
-        },
       );
     });
   }
@@ -156,73 +150,6 @@ class _EntryPageState extends State<EntryPage> {
     });
   }
 
-  Offset estimatePixelOffset(
-      QuillController quillController, Size toolbarSize, double editorWidth,
-      {double lineHeightMultiplier = 2.0, double defaultFontSize = 16.0}) {
-    int selectionOffset = quillController.selection.start;
-    Document document = quillController.document;
-    String plainText = document.getPlainText(0, document.length);
-
-    if (plainText.isEmpty) {
-      return Offset(0.0, 0.0);
-    }
-
-    double verticalOffset = 0.0;
-    double horizontalOffset = 0.0;
-    double maxFontSizeInLine = defaultFontSize;
-    int charactersInLine = 0;
-    double currentLineWidth = 0.0;
-
-    for (int i = 0; i < selectionOffset; i++) {
-      String char = plainText[i];
-
-      if (char == '\n' || currentLineWidth >= editorWidth) {
-        verticalOffset += maxFontSizeInLine * lineHeightMultiplier;
-        maxFontSizeInLine = defaultFontSize;
-        horizontalOffset = 0.0;
-        charactersInLine = 0;
-        currentLineWidth = 0.0;
-        if (char == '\n') continue;
-      }
-
-      Style style = document.collectStyle(i, i + 1);
-
-      Attribute<dynamic>? sizeAttribute = style.attributes[Attribute.size.key];
-      if (sizeAttribute != null) {
-        double? fontSize = double.tryParse(sizeAttribute.value.toString());
-        if (fontSize != null) {
-          if (fontSize > maxFontSizeInLine) {
-            maxFontSizeInLine = fontSize;
-          }
-        }
-      }
-
-      horizontalOffset += maxFontSizeInLine;
-      currentLineWidth += maxFontSizeInLine;
-      charactersInLine++;
-    }
-
-    if (charactersInLine > 0) {
-      horizontalOffset = (horizontalOffset / charactersInLine) *
-          (selectionOffset % charactersInLine);
-    }
-
-    verticalOffset += maxFontSizeInLine * lineHeightMultiplier;
-
-    // Limiting the horizontal offset to the width of the toolbar
-    horizontalOffset =
-        horizontalOffset.clamp(0, editorWidth - toolbarSize.width);
-
-    // Limiting the vertical offset to the height of the editor
-    final editorHeight = (plainText.split('\n').length - 1) *
-        maxFontSizeInLine *
-        lineHeightMultiplier;
-    verticalOffset = verticalOffset.clamp(
-        toolbarSize.height, editorHeight - toolbarSize.height);
-
-    return Offset(horizontalOffset, verticalOffset);
-  }
-
   Widget _buildWelcomeEditor(BuildContext context) {
     final localizations = MaterialLocalizations.of(context);
     final isEntryToday = isToday(widget.entry.date);
@@ -239,7 +166,36 @@ class _EntryPageState extends State<EntryPage> {
       readOnly: false,
       placeholder: 'What is on your mind?',
       minHeight: widget.minEditorHeight,
-      enableSelectionToolbar: false,
+      enableSelectionToolbar: true,
+      contextMenuBuilder: (context, state) {
+        var toolbar = QuillToolbar.basic(
+          controller: _controller!,
+          multiRowsDisplay: false,
+          showDividers: false,
+          showColorButton: false,
+          showSubscript: false,
+          showSuperscript: false,
+          showBackgroundColorButton: false,
+          showFontFamily: false,
+          showCodeBlock: false,
+          showInlineCode: false,
+          showClearFormat: false,
+          showIndent: false,
+          showSearchButton: false,
+          showLink: false,
+          showFontSize: false,
+          showRedo: false,
+          showUndo: false,
+          showListBullets: false,
+          showListNumbers: false,
+          showListCheck: false,
+          showQuote: false,
+        );
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [TextFieldTapRegion(child: toolbar)],
+        );
+      },
       expands: false,
       padding: EdgeInsets.all(screenWidth > 400 ? 10 : 0),
       onTapUp: (details, p1) {
@@ -264,30 +220,6 @@ class _EntryPageState extends State<EntryPage> {
               const VerticalSpacing(0, 0),
               null),
           sizeSmall: const TextStyle(fontSize: 9)),
-    );
-    var toolbar = QuillToolbar.basic(
-      controller: _controller!,
-      multiRowsDisplay: false,
-      showDividers: false,
-      showColorButton: false,
-      showSubscript: false,
-      showSuperscript: false,
-      showBackgroundColorButton: false,
-      showFontFamily: false,
-      showCodeBlock: false,
-      showInlineCode: false,
-      showClearFormat: false,
-      showIndent: false,
-      showSearchButton: false,
-      showLink: false,
-      showFontSize: false,
-      showRedo: false,
-      showUndo: false,
-      showListBullets: false,
-      showListNumbers: false,
-      showListCheck: false,
-      showQuote: false,
-      afterButtonPressed: _focusNode.requestFocus,
     );
 
     final hasEntryPrevDay = isSameCalendarDay(
@@ -358,10 +290,6 @@ class _EntryPageState extends State<EntryPage> {
       ],
     );
     final ScrollController _scrollController = ScrollController();
-    Size toolbarSize = Size(min(300, screenWidth * .8), 50);
-    // TODO pick toolbar elements if small width
-    // print(toolbarPixelOffset);
-    // print(widget.minEditorHeight);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -378,28 +306,7 @@ class _EntryPageState extends State<EntryPage> {
             ),
           ),
         ),
-        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Expanded(
-              child: Stack(
-            children: [
-              quillEditor,
-              if (_hasSelection)
-                Positioned(
-                  top: estimatePixelOffset(
-                          _controller!, toolbarSize, screenWidth)
-                      .dy,
-                  left: 0, //toolbarPixelOffset.dx,
-                  height: toolbarSize.height,
-                  width: toolbarSize.width,
-                  child: Material(
-                    elevation: 4.0,
-                    color: Colors.white,
-                    child: toolbar,
-                  ),
-                ),
-            ],
-          )),
-        ]),
+        quillEditor,
       ],
     );
   }
