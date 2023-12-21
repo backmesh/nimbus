@@ -65,18 +65,21 @@ class _HomePageState extends State<HomePage> {
       child: FirestoreQueryBuilder<Entry>(
           query: UserStore.instance.readEntries(),
           builder: (context, snapshot, _) {
-            // Loading
-            if (snapshot.isFetching || snapshot.isFetchingMore) {
-              return Center(child: CircularProgressIndicator());
-            }
             final today = getToday();
             final lastEntry = snapshot.docs.firstOrNull?.data();
-            if (lastEntry == null ||
-                !isSameCalendarDay(today, lastEntry.date)) {
+            final noTodayEntry =
+                lastEntry == null || !isSameCalendarDay(today, lastEntry.date);
+            if (noTodayEntry) {
               // create today and fetch more
               UserStore.instance
                   .updateEntry(Entry(doc: Document(), date: today, tagIds: []))
                   .then((_) => snapshot.fetchMore());
+            }
+            // Loading
+            if (snapshot.isFetching ||
+                snapshot.isFetchingMore ||
+                noTodayEntry) {
+              return Center(child: CircularProgressIndicator());
             }
             final itemCount = snapshot.docs.length;
             double minEntryHeight = screenHeight / min(itemCount, 4);
