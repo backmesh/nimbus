@@ -157,8 +157,8 @@ class _EntryPageState extends State<EntryPage> {
   }
 
   Offset estimatePixelOffset(
-      QuillController quillController, Size toolbarSize, Size editorSize,
-      {double lineHeightMultiplier = 1.5, double defaultFontSize = 16.0}) {
+      QuillController quillController, Size toolbarSize, double editorWidth,
+      {double lineHeightMultiplier = 2.0, double defaultFontSize = 16.0}) {
     int selectionOffset = quillController.selection.start;
     Document document = quillController.document;
     String plainText = document.getPlainText(0, document.length);
@@ -176,7 +176,7 @@ class _EntryPageState extends State<EntryPage> {
     for (int i = 0; i < selectionOffset; i++) {
       String char = plainText[i];
 
-      if (char == '\n' || currentLineWidth >= editorSize.width) {
+      if (char == '\n' || currentLineWidth >= editorWidth) {
         verticalOffset += maxFontSizeInLine * lineHeightMultiplier;
         maxFontSizeInLine = defaultFontSize;
         horizontalOffset = 0.0;
@@ -211,11 +211,14 @@ class _EntryPageState extends State<EntryPage> {
 
     // Limiting the horizontal offset to the width of the toolbar
     horizontalOffset =
-        horizontalOffset.clamp(0, editorSize.width - toolbarSize.width);
+        horizontalOffset.clamp(0, editorWidth - toolbarSize.width);
 
     // Limiting the vertical offset to the height of the editor
+    final editorHeight = (plainText.split('\n').length - 1) *
+        maxFontSizeInLine *
+        lineHeightMultiplier;
     verticalOffset = verticalOffset.clamp(
-        toolbarSize.height, editorSize.height - toolbarSize.height);
+        toolbarSize.height, editorHeight - toolbarSize.height);
 
     return Offset(horizontalOffset, verticalOffset);
   }
@@ -382,8 +385,8 @@ class _EntryPageState extends State<EntryPage> {
               quillEditor,
               if (_hasSelection)
                 Positioned(
-                  top: estimatePixelOffset(_controller!, toolbarSize,
-                          Size(screenWidth, widget.minEditorHeight))
+                  top: estimatePixelOffset(
+                          _controller!, toolbarSize, screenWidth)
                       .dy,
                   left: 0, //toolbarPixelOffset.dx,
                   height: toolbarSize.height,
