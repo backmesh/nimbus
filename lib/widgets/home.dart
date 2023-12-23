@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
@@ -66,7 +67,10 @@ class _HomePageState extends State<HomePage> {
           query: UserStore.instance.readEntries(),
           builder: (context, snapshot, _) {
             // Loading
-            if (snapshot.isFetching || snapshot.isFetchingMore) {
+            if (snapshot.hasMore ||
+                snapshot.isFetching ||
+                snapshot.isFetchingMore) {
+              snapshot.fetchMore();
               return Center(child: CircularProgressIndicator());
             }
             final today = getToday();
@@ -86,19 +90,26 @@ class _HomePageState extends State<HomePage> {
             return ListView.builder(
               reverse: true,
               itemCount: itemCount,
+              findChildIndexCallback: (Key key) {
+                final valueKey = key as ValueKey<String>;
+                return snapshot.docs
+                    .indexWhere((doc) => doc.id == valueKey.value);
+              },
               itemBuilder: (context, index) {
-                if (snapshot.hasMore) snapshot.fetchMore();
                 // index 0 is today
-                final Entry entry = snapshot.docs[index].data();
+                final QueryDocumentSnapshot<Entry> doc = snapshot.docs[index];
+                final Entry entry = doc.data();
                 final Entry? prevEntry =
                     snapshot.docs.elementAtOrNull(index + 1)?.data();
                 final prevEntryDate =
                     prevEntry != null ? prevEntry.date : DateTime(2010);
                 return ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: minEntryHeight),
-                  child: EntryPage(
-                      widget.tags, entry, prevEntryDate, minEntryHeight * .9),
-                );
+                    constraints: BoxConstraints(minHeight: minEntryHeight),
+                    child: KeyedSubtree(
+                      key: ValueKey(doc.id), // Unique key for each item
+                      child: EntryPage(widget.tags, entry, prevEntryDate,
+                          minEntryHeight * .9),
+                    ));
               },
             );
           }),
