@@ -41,11 +41,11 @@ class Main extends StatefulWidget {
 class _MainState extends State<Main> with WidgetsBindingObserver {
   late StreamSubscription<User?> userStream;
   User? user = FirebaseAuth.instance.currentUser;
-  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   void initState() {
     super.initState();
     userStream = FirebaseAuth.instance.authStateChanges().listen((fbUser) {
+      if (fbUser != null) UserStore(fbUser.uid);
       setState(() {
         user = fbUser;
       });
@@ -62,53 +62,40 @@ class _MainState extends State<Main> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      _showAuthenticationScreen();
-    } else if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.inactive) {
-      // TODO display splash screen
-      navigatorKey.currentState?.push(MaterialPageRoute(
-        builder: (context) => Scaffold(),
-      ));
-    }
-  }
-
-  Future<void> _showAuthenticationScreen() async {
-    final cred =
-        await FirebaseAuth.instance.signInWithProvider(AppleAuthProvider());
-    if (cred.user != null) {
-      navigatorKey.currentState?.push(MaterialPageRoute(
-        builder: (context) => HomeScreen(),
-      ));
+    if (state == AppLifecycleState.hidden) {
+      FirebaseAuth.instance.signOut();
     }
   }
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    if (user != null) UserStore(user!.uid);
     const primary = Color.fromRGBO(23, 89, 115, 1);
     //const secondary = Color.fromRGBO(140, 184, 159, 1);
     return MaterialApp(
-      navigatorKey: navigatorKey,
-      debugShowCheckedModeBanner: false,
-      title: 'Journal',
-      localizationsDelegates: [
-        GlobalMaterialLocalizations.delegate,
-      ],
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: primary),
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-        useMaterial3: true,
-      ),
-      supportedLocales: [
-        const Locale('en', 'US'),
-      ],
-      home: user != null
-          ? HomeScreen()
-          : SignInScreen(
-              showAuthActionSwitch: false,
-            ),
+        debugShowCheckedModeBanner: false,
+        title: 'Journal',
+        localizationsDelegates: [
+          GlobalMaterialLocalizations.delegate,
+        ],
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: primary),
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+          useMaterial3: true,
+        ),
+        supportedLocales: [
+          const Locale('en', 'US'),
+        ],
+        home: user == null ? ContinueWithApple() : HomeScreen());
+  }
+}
+
+class ContinueWithApple extends StatelessWidget {
+  // TODO modify to say continue instead of sign in
+  @override
+  Widget build(BuildContext context) {
+    return SignInScreen(
+      showAuthActionSwitch: false,
     );
   }
 }
