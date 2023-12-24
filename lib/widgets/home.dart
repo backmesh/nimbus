@@ -89,6 +89,7 @@ class _HomePageState extends State<HomePage> {
             double minEntryHeight = screenHeight / min(itemCount, 4);
             return ListView.builder(
               reverse: true,
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               itemCount: itemCount,
               findChildIndexCallback: (Key key) {
                 final valueKey = key as ValueKey<String>;
