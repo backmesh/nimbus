@@ -179,15 +179,9 @@ class _EntryPageState extends State<EntryPage> {
           showCodeBlock: false,
           showInlineCode: false,
           showClearFormat: false,
-          showIndent: false,
           showSearchButton: false,
           showLink: false,
           showFontSize: false,
-          showRedo: false,
-          showUndo: false,
-          showListBullets: false,
-          showListNumbers: false,
-          showListCheck: false,
           showQuote: false,
         );
         return Column(
