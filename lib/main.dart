@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart'
-    show defaultTargetPlatform, kIsWeb, TargetPlatform;
-import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
+    show defaultTargetPlatform, TargetPlatform;
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -24,10 +24,8 @@ void main() async {
     cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
   );
   FirebaseUIAuth.configureProviders([
-    if (kIsWeb) EmailAuthProvider(),
-    if (!kIsWeb &&
-        (defaultTargetPlatform == TargetPlatform.iOS ||
-            defaultTargetPlatform == TargetPlatform.macOS))
+    if (defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS)
       AppleProvider()
   ]);
   runApp(Main());
@@ -109,7 +107,7 @@ class _MainState extends State<Main> with WidgetsBindingObserver {
       home: user != null
           ? HomeScreen()
           : SignInScreen(
-              showAuthActionSwitch: kIsWeb,
+              showAuthActionSwitch: false,
             ),
     );
   }
