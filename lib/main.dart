@@ -62,7 +62,15 @@ class _MainState extends State<Main> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.hidden) {
+    if (state == AppLifecycleState.resumed) {
+      _showAuthenticationScreen();
+    }
+  }
+
+  Future<void> _showAuthenticationScreen() async {
+    try {
+      await FirebaseAuth.instance.signInWithProvider(AppleAuthProvider());
+    } catch (e) {
       FirebaseAuth.instance.signOut();
     }
   }
