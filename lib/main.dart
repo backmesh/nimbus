@@ -47,8 +47,12 @@ class _MainState extends State<Main> with WidgetsBindingObserver {
 
   void initState() {
     super.initState();
+    if (user != null) UserStore(user!.uid);
     userStream = FirebaseAuth.instance.authStateChanges().listen((fbUser) {
-      if (fbUser != null) UserStore(fbUser.uid);
+      if (fbUser != null)
+        UserStore(fbUser.uid);
+      else
+        UserStore.clear();
       setState(() {
         user = fbUser;
       });
