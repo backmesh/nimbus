@@ -1,5 +1,5 @@
 name: journal
-description: innerly.org minimalist journal
+description: innerly.org journal
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
