@@ -41,6 +41,9 @@ class Main extends StatefulWidget {
 class _MainState extends State<Main> with WidgetsBindingObserver {
   late StreamSubscription<User?> userStream;
   User? user = FirebaseAuth.instance.currentUser;
+  // ios only
+  bool isHidden = true;
+  bool isAuthing = false;
 
   void initState() {
     super.initState();
@@ -62,8 +65,21 @@ class _MainState extends State<Main> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      _showAuthenticationScreen();
+    if (defaultTargetPlatform == TargetPlatform.macOS) {
+      if (user != null && state == AppLifecycleState.resumed) {
+        _showAuthenticationScreen();
+      }
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+      if (!isAuthing && user != null && state != AppLifecycleState.resumed) {
+        isHidden = true;
+      } else if (!isAuthing &&
+          user != null &&
+          isHidden &&
+          state == AppLifecycleState.resumed) {
+        isAuthing = true;
+        isHidden = false;
+        _showAuthenticationScreen();
+      }
     }
   }
 
@@ -72,6 +88,10 @@ class _MainState extends State<Main> with WidgetsBindingObserver {
       await FirebaseAuth.instance.signInWithProvider(AppleAuthProvider());
     } catch (e) {
       FirebaseAuth.instance.signOut();
+    } finally {
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        isAuthing = false;
+      }
     }
   }
 
