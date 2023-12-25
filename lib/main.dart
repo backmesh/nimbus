@@ -41,7 +41,7 @@ class Main extends StatefulWidget {
 class _MainState extends State<Main> with WidgetsBindingObserver {
   late StreamSubscription<User?> userStream;
   User? user = FirebaseAuth.instance.currentUser;
-  // ios only
+  // ios only which hides the app when doing biometric authing making the logic more complicated
   bool isHidden = true;
   bool isAuthing = false;
 
