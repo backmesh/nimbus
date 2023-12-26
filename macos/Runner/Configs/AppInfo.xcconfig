@@ -5,7 +5,7 @@
 // 'flutter create' template.
 
 // The application's name. By default this is also the title of the Flutter window.
-PRODUCT_NAME = journal
+PRODUCT_NAME = Innerly.org Journal
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.lfdepombo.journal.macos
+PRODUCT_BUNDLE_IDENTIFIER = org.innerly.journal.macos
