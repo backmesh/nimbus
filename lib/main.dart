@@ -67,37 +67,37 @@ class _MainState extends State<Main> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (defaultTargetPlatform == TargetPlatform.macOS) {
-      if (user != null && state == AppLifecycleState.resumed) {
-        _showAuthenticationScreen();
-      }
-    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-      if (!isAuthing && user != null && state != AppLifecycleState.resumed) {
-        isHidden = true;
-      } else if (!isAuthing &&
-          user != null &&
-          isHidden &&
-          state == AppLifecycleState.resumed) {
-        isAuthing = true;
-        isHidden = false;
-        _showAuthenticationScreen();
-      }
-    }
-  }
+  // @override
+  // void didChangeAppLifecycleState(AppLifecycleState state) {
+  //   if (defaultTargetPlatform == TargetPlatform.macOS) {
+  //     if (user != null && state == AppLifecycleState.resumed) {
+  //       _showAuthenticationScreen();
+  //     }
+  //   } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+  //     if (!isAuthing && user != null && state != AppLifecycleState.resumed) {
+  //       isHidden = true;
+  //     } else if (!isAuthing &&
+  //         user != null &&
+  //         isHidden &&
+  //         state == AppLifecycleState.resumed) {
+  //       isAuthing = true;
+  //       isHidden = false;
+  //       _showAuthenticationScreen();
+  //     }
+  //   }
+  // }
 
-  Future<void> _showAuthenticationScreen() async {
-    try {
-      await FirebaseAuth.instance.signInWithProvider(AppleAuthProvider());
-    } catch (e) {
-      FirebaseAuth.instance.signOut();
-    } finally {
-      if (defaultTargetPlatform == TargetPlatform.iOS) {
-        isAuthing = false;
-      }
-    }
-  }
+  // Future<void> _showAuthenticationScreen() async {
+  //   try {
+  //     await FirebaseAuth.instance.signInWithProvider(AppleAuthProvider());
+  //   } catch (e) {
+  //     FirebaseAuth.instance.signOut();
+  //   } finally {
+  //     if (defaultTargetPlatform == TargetPlatform.iOS) {
+  //       isAuthing = false;
+  //     }
+  //   }
+  // }
 
   // This widget is the root of your application.
   @override
