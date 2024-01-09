@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
 
@@ -184,10 +186,13 @@ class _EntryPageState extends State<EntryPage> {
           showFontSize: false,
           showQuote: false,
         );
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [TextFieldTapRegion(child: toolbar)],
-        );
+        return Padding(
+            padding: EdgeInsets.only(
+                top: defaultTargetPlatform == TargetPlatform.iOS ? 50 : 0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [TextFieldTapRegion(child: toolbar)],
+            ));
       },
       expands: false,
       padding: EdgeInsets.all(screenWidth > 400 ? 10 : 0),
