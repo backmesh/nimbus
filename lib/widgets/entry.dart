@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 
 import 'input_tags.dart';
 import '../user_store.dart';
@@ -15,12 +16,13 @@ enum _SelectionType {
 }
 
 class EntryPage extends StatefulWidget {
+  final ScrollController scrollController;
   final Map<String, Tag> tags;
   final Entry entry;
   final DateTime prevEntryDate;
   final double minEditorHeight;
-  const EntryPage(
-      this.tags, this.entry, this.prevEntryDate, this.minEditorHeight);
+  const EntryPage(this.scrollController, this.tags, this.entry,
+      this.prevEntryDate, this.minEditorHeight);
 
   @override
   _EntryPageState createState() => _EntryPageState();
@@ -32,6 +34,9 @@ class _EntryPageState extends State<EntryPage> {
   Timer? _selectAllTimer;
   Timer? _saveTimer;
   _SelectionType _selectionType = _SelectionType.none;
+  KeyboardVisibilityController keyboardVisibilityController =
+      KeyboardVisibilityController();
+  StreamSubscription<bool>? keyboardStream;
 
   @override
   void dispose() {
@@ -152,6 +157,28 @@ class _EntryPageState extends State<EntryPage> {
   }
 
   Widget _buildWelcomeEditor(BuildContext context) {
+    double screenHeight = MediaQuery.of(context).size.height;
+    // this conditinal makes sure we only do this once and otherwise it doesn't work
+    if (keyboardStream == null) {
+      keyboardStream =
+          keyboardVisibilityController.onChange.listen((bool visible) {
+        if (_focusNode.hasFocus && visible) {
+          var pixelsFromEditorTopToCursor = _focusNode.size.height *
+              ((_controller!.selection.baseOffset + 1) /
+                  _controller!.document.length);
+          var pixelsFromScreenTopToCursor =
+              pixelsFromEditorTopToCursor + _focusNode.offset.dy;
+          // scroll up roughly by size of keyboard if in top half of screen
+          if (pixelsFromScreenTopToCursor < (screenHeight / 2)) {
+            widget.scrollController.jumpTo(
+              widget.scrollController.offset + (screenHeight / 3),
+              // duration: Duration(milliseconds: 200),
+              // curve: Curves.easeInOut,
+            );
+          }
+        }
+      });
+    }
     final localizations = MaterialLocalizations.of(context);
     final isEntryToday = isToday(widget.entry.date);
     final entryTitle = isEntryToday
