@@ -22,7 +22,7 @@ class _HomePageState extends State<HomePage> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         backgroundColor: Colors.white, // To make the AppBar transparent
-        toolbarHeight: 40,
+        toolbarHeight: 50,
         actions: [
           PopupMenuButton<int>(
             icon: Icon(Icons.more_horiz),
