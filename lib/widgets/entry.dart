@@ -215,7 +215,7 @@ class _EntryPageState extends State<EntryPage> {
         );
         return Padding(
             padding: EdgeInsets.only(
-                top: defaultTargetPlatform == TargetPlatform.iOS ? 50 : 0),
+                top: defaultTargetPlatform == TargetPlatform.macOS ? 5 : 50),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [TextFieldTapRegion(child: toolbar)],
