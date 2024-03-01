@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
@@ -34,7 +35,11 @@ class _JournalPageState extends State<JournalPage> {
     //   }
     // });
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: EdgeInsets.only(
+          top: defaultTargetPlatform == TargetPlatform.iOS ? 90 : 25,
+          bottom: 25,
+          left: 25,
+          right: 25),
       child: FirestoreQueryBuilder<Entry>(
           query: UserStore.instance.readEntries(),
           builder: (context, snapshot, _) {
@@ -69,6 +74,10 @@ class _JournalPageState extends State<JournalPage> {
                     .indexWhere((doc) => doc.id == valueKey.value);
               },
               itemBuilder: (context, index) {
+                // last element and has more, then load
+                if (snapshot.hasMore && index == snapshot.docs.length - 1) {
+                  snapshot.fetchMore();
+                }
                 // index 0 is today
                 final QueryDocumentSnapshot<Entry> doc = snapshot.docs[index];
                 final Entry entry = doc.data();

@@ -195,6 +195,7 @@ class _EntryPageState extends State<EntryPage> {
       contextMenuBuilder: (context, state) {
         var toolbar = QuillToolbar.basic(
           controller: _controller!,
+          // color: Theme.of(context).dialogBackgroundColor,
           multiRowsDisplay: false,
           showDividers: false,
           showColorButton: false,
