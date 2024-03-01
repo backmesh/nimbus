@@ -28,16 +28,18 @@ class _JournalPageState extends State<JournalPage> {
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height * .9;
+    // UserStore.instance.readEntries().snapshots().listen((snapshot) {
+    //   for (var change in snapshot.docChanges) {
+    //     debugPrint('Doc ${change.doc.id}, change type: ${change.type}');
+    //   }
+    // });
     return Container(
       padding: EdgeInsets.all(20),
       child: FirestoreQueryBuilder<Entry>(
           query: UserStore.instance.readEntries(),
           builder: (context, snapshot, _) {
             // Loading
-            if (snapshot.hasMore ||
-                snapshot.isFetching ||
-                snapshot.isFetchingMore) {
-              snapshot.fetchMore();
+            if (snapshot.isFetching) {
               return Center(child: CircularProgressIndicator());
             }
             final today = getToday();
@@ -77,9 +79,13 @@ class _JournalPageState extends State<JournalPage> {
                 return ConstrainedBox(
                     constraints: BoxConstraints(minHeight: minEntryHeight),
                     child: KeyedSubtree(
-                      key: ValueKey(doc.id), // Unique key for each item
-                      child: EntryPage(_controller, widget.tags, entry,
-                          prevEntryDate, minEntryHeight * .9),
+                      // Unique key for each item to keep the list in right order
+                      key: ValueKey(doc.id),
+                      child: KeyedSubtree(
+                          // Unique key from entry contents so ListView can rebuild when there is a change
+                          key: ValueKey(entry.doc.toDelta().toString()),
+                          child: EntryPage(_controller, widget.tags, entry,
+                              prevEntryDate, minEntryHeight * .9)),
                     ));
               },
             );

@@ -134,19 +134,16 @@ class _EntryPageState extends State<EntryPage> {
     return false;
   }
 
-  void _saveEntry() {
-    // async function but we are not waiting for it
+  Future<void> _saveEntry() async {
     if (_controller?.document != null)
-      UserStore.instance
+      await UserStore.instance
           .updateEntry(widget.entry.fromNewDoc(_controller!.document));
   }
 
   void _startSaveTimer() {
     _saveTimer?.cancel();
-    _saveTimer = Timer(const Duration(seconds: 5), () {
-      _saveEntry();
-      _saveTimer?.cancel();
-      _saveTimer = null;
+    _saveTimer = Timer(const Duration(seconds: 5), () async {
+      await _saveEntry();
     });
   }
 
