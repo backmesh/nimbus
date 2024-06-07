@@ -120,7 +120,7 @@ class _EntryPageState extends State<EntryPage> {
         extentOffset: offset + length,
       );
 
-      controller.updateSelection(selection, ChangeSource.REMOTE);
+      controller.updateSelection(selection, ChangeSource.remote);
 
       // _selectionType = _SelectionType.line;
 
@@ -183,66 +183,70 @@ class _EntryPageState extends State<EntryPage> {
         : localizations.formatShortDate(widget.entry.date);
     double screenWidth = MediaQuery.of(context).size.width;
     Widget quillEditor = QuillEditor(
-      controller: _controller!,
+      configurations: QuillEditorConfigurations(
+        controller: _controller!,
+        scrollable: true,
+        autoFocus: false,
+        //readOnly: false,
+        placeholder: 'What is on your mind?',
+        minHeight: widget.minEditorHeight,
+        enableSelectionToolbar: true,
+        contextMenuBuilder: (context, state) {
+          var toolbar = QuillToolbar.simple(
+            configurations: QuillSimpleToolbarConfigurations(
+              controller: _controller!,
+              // color: Theme.of(context).dialogBackgroundColor,
+              multiRowsDisplay: false,
+              showDividers: false,
+              showColorButton: false,
+              showSubscript: false,
+              showSuperscript: false,
+              showBackgroundColorButton: false,
+              showFontFamily: false,
+              showCodeBlock: false,
+              showInlineCode: false,
+              showClearFormat: false,
+              showSearchButton: false,
+              showLink: false,
+              showFontSize: false,
+              showQuote: false,
+            ),
+          );
+          return Padding(
+              padding: EdgeInsets.only(
+                  top: defaultTargetPlatform == TargetPlatform.macOS ? 5 : 50),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [TextFieldTapRegion(child: toolbar)],
+              ));
+        },
+        expands: false,
+        padding: EdgeInsets.all(screenWidth > 400 ? 10 : 0),
+        onTapUp: (details, p1) {
+          return _onTripleClickSelection();
+        },
+        customStyles: DefaultStyles(
+            placeHolder: DefaultTextBlockStyle(
+                TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey), // Your desired font size and color
+                const VerticalSpacing(16, 0), // Adjust spacing as required
+                const VerticalSpacing(0, 0), // Adjust spacing as required
+                null),
+            h1: DefaultTextBlockStyle(
+                const TextStyle(
+                  fontSize: 32,
+                  color: Colors.black,
+                  height: 1.15,
+                  fontWeight: FontWeight.w300,
+                ),
+                const VerticalSpacing(16, 0),
+                const VerticalSpacing(0, 0),
+                null),
+            sizeSmall: const TextStyle(fontSize: 9)),
+      ),
       scrollController: ScrollController(),
-      scrollable: true,
       focusNode: _focusNode,
-      autoFocus: false,
-      readOnly: false,
-      placeholder: 'What is on your mind?',
-      minHeight: widget.minEditorHeight,
-      enableSelectionToolbar: true,
-      contextMenuBuilder: (context, state) {
-        var toolbar = QuillToolbar.basic(
-          controller: _controller!,
-          // color: Theme.of(context).dialogBackgroundColor,
-          multiRowsDisplay: false,
-          showDividers: false,
-          showColorButton: false,
-          showSubscript: false,
-          showSuperscript: false,
-          showBackgroundColorButton: false,
-          showFontFamily: false,
-          showCodeBlock: false,
-          showInlineCode: false,
-          showClearFormat: false,
-          showSearchButton: false,
-          showLink: false,
-          showFontSize: false,
-          showQuote: false,
-        );
-        return Padding(
-            padding: EdgeInsets.only(
-                top: defaultTargetPlatform == TargetPlatform.macOS ? 5 : 50),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [TextFieldTapRegion(child: toolbar)],
-            ));
-      },
-      expands: false,
-      padding: EdgeInsets.all(screenWidth > 400 ? 10 : 0),
-      onTapUp: (details, p1) {
-        return _onTripleClickSelection();
-      },
-      customStyles: DefaultStyles(
-          placeHolder: DefaultTextBlockStyle(
-              TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey), // Your desired font size and color
-              const VerticalSpacing(16, 0), // Adjust spacing as required
-              const VerticalSpacing(0, 0), // Adjust spacing as required
-              null),
-          h1: DefaultTextBlockStyle(
-              const TextStyle(
-                fontSize: 32,
-                color: Colors.black,
-                height: 1.15,
-                fontWeight: FontWeight.w300,
-              ),
-              const VerticalSpacing(16, 0),
-              const VerticalSpacing(0, 0),
-              null),
-          sizeSmall: const TextStyle(fontSize: 9)),
     );
 
     final hasEntryPrevDay = isSameCalendarDay(

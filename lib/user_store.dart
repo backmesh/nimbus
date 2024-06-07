@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_quill/quill_delta.dart';
 
 DateTime getToday() {
   DateTime now = DateTime.now();
