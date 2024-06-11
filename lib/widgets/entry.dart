@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 
-import 'input_tags.dart';
 import '../user_store.dart';
+import 'input_tags.dart';
 
 enum _SelectionType {
   none,
@@ -16,13 +16,9 @@ enum _SelectionType {
 }
 
 class EntryPage extends StatefulWidget {
-  final ScrollController scrollController;
   final Map<String, Tag> tags;
   final Entry entry;
-  final DateTime prevEntryDate;
-  final double minEditorHeight;
-  const EntryPage(this.scrollController, this.tags, this.entry,
-      this.prevEntryDate, this.minEditorHeight);
+  const EntryPage(this.tags, this.entry);
 
   @override
   _EntryPageState createState() => _EntryPageState();
@@ -155,32 +151,7 @@ class _EntryPageState extends State<EntryPage> {
 
   Widget _buildWelcomeEditor(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
-    // this conditinal makes sure we only do this once and otherwise it doesn't work
-    if (keyboardStream == null) {
-      keyboardStream =
-          keyboardVisibilityController.onChange.listen((bool visible) {
-        if (_focusNode.hasFocus && visible) {
-          var pixelsFromEditorTopToCursor = _focusNode.size.height *
-              ((_controller!.selection.baseOffset + 1) /
-                  _controller!.document.length);
-          var pixelsFromScreenTopToCursor =
-              pixelsFromEditorTopToCursor + _focusNode.offset.dy;
-          // scroll up roughly by size of keyboard if in top half of screen
-          if (pixelsFromScreenTopToCursor < (screenHeight / 2)) {
-            widget.scrollController.jumpTo(
-              widget.scrollController.offset + (screenHeight / 3),
-              // duration: Duration(milliseconds: 200),
-              // curve: Curves.easeInOut,
-            );
-          }
-        }
-      });
-    }
     final localizations = MaterialLocalizations.of(context);
-    final isEntryToday = isToday(widget.entry.date);
-    final entryTitle = isEntryToday
-        ? 'Today'
-        : localizations.formatShortDate(widget.entry.date);
     double screenWidth = MediaQuery.of(context).size.width;
     Widget quillEditor = QuillEditor(
       configurations: QuillEditorConfigurations(
@@ -189,7 +160,7 @@ class _EntryPageState extends State<EntryPage> {
         autoFocus: false,
         //readOnly: false,
         placeholder: 'What is on your mind?',
-        minHeight: widget.minEditorHeight,
+        minHeight: screenHeight * .8,
         enableSelectionToolbar: true,
         contextMenuBuilder: (context, state) {
           var toolbar = QuillToolbar.simple(
@@ -249,92 +220,46 @@ class _EntryPageState extends State<EntryPage> {
       focusNode: _focusNode,
     );
 
-    final hasEntryPrevDay = isSameCalendarDay(
-        widget.prevEntryDate.add(Duration(days: 1)), widget.entry.date);
-    final entryHeader = Row(
-      children: [
-        MenuAnchor(
-          builder:
-              (BuildContext context, MenuController controller, Widget? child) {
-            return IconButton(
-              tooltip: 'Delete or add entry',
-              onPressed: () {
-                if (controller.isOpen) {
-                  controller.close();
-                } else {
-                  controller.open();
-                }
-              },
-              icon: Icon(
-                controller.isOpen ? Icons.expand_less : Icons.expand_more,
-                color: Colors.grey[500],
-              ),
-            );
-          },
-          menuChildren: [
-            if (!hasEntryPrevDay)
-              MenuItemButton(
-                leadingIcon: Icon(Icons.event, size: 20),
-                onPressed: () async {
-                  final start = widget.prevEntryDate.add(Duration(days: 1));
-                  final end = widget.entry.date.subtract(Duration(days: 1));
-                  DateTime? newDate = await showDatePicker(
-                      context: context,
-                      confirmText: 'Add Entry',
-                      initialEntryMode: DatePickerEntryMode.calendarOnly,
-                      firstDate: start,
-                      initialDate: end,
-                      currentDate: end,
-                      lastDate: end);
-                  if (newDate == null) return;
-                  await UserStore.instance.createEntry(
-                      Entry(date: newDate, doc: Document(), tagIds: []));
-                },
-                child: Text(
-                  'Add earlier entry',
-                  style: TextStyle(fontSize: 14),
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        toolbarHeight: 50,
+        centerTitle: false,
+      ),
+      body: Container(
+          padding: EdgeInsets.only(top: 25, bottom: 25, left: 25, right: 25),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(children: [
+                Text(localizations.formatShortDate(widget.entry.date)),
+                InkWell(
+                    onTap: () async {
+                      await UserStore.instance.deleteEntry(widget.entry);
+                      Navigator.pop(context);
+                    },
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.delete_outline,
+                          size: 20,
+                        ),
+                        Text(
+                          'Delete',
+                          style: TextStyle(fontSize: 14),
+                        )
+                      ],
+                    ))
+              ]),
+              Scrollbar(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: InputTags(widget.tags, widget.entry),
                 ),
               ),
-            if (!isEntryToday)
-              MenuItemButton(
-                leadingIcon: Icon(Icons.delete_outline, size: 20),
-                onPressed: () async =>
-                    await UserStore.instance.deleteEntry(widget.entry),
-                child: Text(
-                  'Delete',
-                  style: TextStyle(fontSize: 14),
-                ),
-              )
-          ],
-        ),
-        Padding(
-          padding: EdgeInsets.only(bottom: 20, top: 20, right: 10),
-          child: Text(
-            entryTitle,
-            style: TextStyle(color: Colors.grey[500]),
-          ),
-        ),
-      ],
-    );
-    final ScrollController _scrollController = ScrollController();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Scrollbar(
-          controller: _scrollController, // Link ScrollController to Scrollbar
-          child: SingleChildScrollView(
-            controller: _scrollController, // Link ScrollController to Scrollbar
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                entryHeader,
-                InputTags(widget.tags, widget.entry),
-              ],
-            ),
-          ),
-        ),
-        quillEditor,
-      ],
+              quillEditor,
+            ],
+          )),
     );
   }
 }

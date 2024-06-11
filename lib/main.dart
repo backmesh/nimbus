@@ -12,7 +12,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:journal/user_store.dart';
 import 'package:journal/firebase_options.dart';
 
-import 'widgets/home.dart';
+import 'widgets/entry_list.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -66,38 +66,6 @@ class _MainState extends State<Main> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
-
-  // @override
-  // void didChangeAppLifecycleState(AppLifecycleState state) {
-  //   if (defaultTargetPlatform == TargetPlatform.macOS) {
-  //     if (user != null && state == AppLifecycleState.resumed) {
-  //       _showAuthenticationScreen();
-  //     }
-  //   } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-  //     if (!isAuthing && user != null && state != AppLifecycleState.resumed) {
-  //       isHidden = true;
-  //     } else if (!isAuthing &&
-  //         user != null &&
-  //         isHidden &&
-  //         state == AppLifecycleState.resumed) {
-  //       isAuthing = true;
-  //       isHidden = false;
-  //       _showAuthenticationScreen();
-  //     }
-  //   }
-  // }
-
-  // Future<void> _showAuthenticationScreen() async {
-  //   try {
-  //     await FirebaseAuth.instance.signInWithProvider(AppleAuthProvider());
-  //   } catch (e) {
-  //     FirebaseAuth.instance.signOut();
-  //   } finally {
-  //     if (defaultTargetPlatform == TargetPlatform.iOS) {
-  //       isAuthing = false;
-  //     }
-  //   }
-  // }
 
   // This widget is the root of your application.
   @override
