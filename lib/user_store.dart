@@ -5,18 +5,6 @@ import 'package:flutter_quill/flutter_quill.dart' hide Text;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_quill/quill_delta.dart';
 
-DateTime getToday() {
-  DateTime now = DateTime.now();
-  return DateTime(now.year, now.month, now.day);
-}
-
-String _formatDate(DateTime date) => date.toString().substring(0, 10);
-
-bool isSameCalendarDay(DateTime a, DateTime b) =>
-    _formatDate(a) == _formatDate(b);
-
-bool isToday(DateTime a) => isSameCalendarDay(a, DateTime.now());
-
 class Tag {
   final String name;
   final String color;
@@ -59,10 +47,11 @@ class Entry {
       ? (jsonField as List<dynamic>).cast<String>()
       : [].cast<String>();
 
-  Entry.fromDb(DateTime date, Map<String, Object?> json)
+  Entry.fromDb(Map<String, Object?> json)
       : this(
           doc: _deltaToDoc(json['delta']! as String),
-          date: date,
+          date: (json['date']! as Timestamp)
+              .toDate(), // DateTime.parse(json['date']! as String), //
           tagIds: _tagIdsMapper(json['tagIds']),
         );
 
@@ -109,15 +98,7 @@ class UserStore {
         .collection('journalists/${uid}/entries')
         .withConverter<Entry>(
           fromFirestore: (snapshot, _) {
-            // Firestore's Timestamp <-> Dart's TimeDate conversion cannot strip
-            // time and timezone from a simple calendar day easily so instead of
-            // dealing with timezone changes we use the document key seemingly
-            // hacky but less prone to errors and simpler
-            final key = snapshot.id.split('-');
-            return Entry.fromDb(
-                DateTime(
-                    int.parse(key[0]), int.parse(key[1]), int.parse(key[2])),
-                snapshot.data()!);
+            return Entry.fromDb(snapshot.data()!);
           },
           toFirestore: (entry, _) => entry.toDb(),
         );
@@ -139,28 +120,11 @@ class UserStore {
   }
 
   Future<void> deleteEntry(Entry entry) async {
-    final key = _formatDate(entry.date);
-    entriesRef.doc(key).delete();
+    entriesRef.doc(entry.date.toIso8601String()).delete();
   }
 
-  Future<void> createEntry(Entry entry) async {
-    final key = _formatDate(entry.date);
-    await entriesRef.doc(key).set(entry);
-  }
-
-  Future<void> updateEntry(Entry entry) async {
-    final key = _formatDate(entry.date);
-    try {
-      await entriesRef.doc(key).update(entry.toDb());
-    } catch (e) {
-      if (e is FirebaseException &&
-          e.code == 'not-found' &&
-          isToday(entry.date)) {
-        // today is a special case
-        return await entriesRef.doc(key).set(entry);
-      }
-      throw e;
-    }
+  Future<void> saveEntry(Entry entry) async {
+    await entriesRef.doc(entry.date.toIso8601String()).set(entry);
   }
 
   Future<DocumentReference<Tag>> newTag(Tag tag) async {

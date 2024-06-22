@@ -133,7 +133,7 @@ class _EntryPageState extends State<EntryPage> {
   Future<void> _saveEntry() async {
     if (_controller?.document != null)
       await UserStore.instance
-          .updateEntry(widget.entry.fromNewDoc(_controller!.document));
+          .saveEntry(widget.entry.fromNewDoc(_controller!.document));
   }
 
   void _startSaveTimer() {

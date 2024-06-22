@@ -118,8 +118,10 @@ class _HomePageState extends State<HomePage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => EntryPage(widget.tags,
-                    new Entry(date: getToday(), doc: Document(), tagIds: []))),
+                builder: (context) => EntryPage(
+                    widget.tags,
+                    new Entry(
+                        date: DateTime.now(), doc: Document(), tagIds: []))),
           );
         },
         child: Icon(Icons.add),

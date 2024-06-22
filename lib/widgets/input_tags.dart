@@ -36,13 +36,13 @@ class _InputTagsState extends State<InputTags> {
   Future<void> _tagEntry(String tagId) async {
     if (!widget.entry.tagIds.contains(tagId)) {
       widget.entry.tagIds.add(tagId);
-      await UserStore.instance.updateEntry(widget.entry);
+      await UserStore.instance.saveEntry(widget.entry);
     }
   }
 
   Future<void> _untagEntry(String tagId) async {
     if (widget.entry.tagIds.remove(tagId))
-      UserStore.instance.updateEntry(widget.entry);
+      UserStore.instance.saveEntry(widget.entry);
   }
 
   @override
