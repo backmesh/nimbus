@@ -3,8 +3,9 @@ import 'package:journal/user_store.dart';
 
 class InputTags extends StatefulWidget {
   final Map<String, Tag> tags;
+  final String entryKey;
   final Entry entry;
-  const InputTags(this.tags, this.entry);
+  const InputTags(this.tags, this.entryKey, this.entry);
 
   @override
   State<InputTags> createState() => _InputTagsState();
@@ -36,13 +37,13 @@ class _InputTagsState extends State<InputTags> {
   Future<void> _tagEntry(String tagId) async {
     if (!widget.entry.tagIds.contains(tagId)) {
       widget.entry.tagIds.add(tagId);
-      await UserStore.instance.saveEntry(widget.entry);
+      await UserStore.instance.saveEntry(widget.entryKey, widget.entry);
     }
   }
 
   Future<void> _untagEntry(String tagId) async {
     if (widget.entry.tagIds.remove(tagId))
-      UserStore.instance.saveEntry(widget.entry);
+      UserStore.instance.saveEntry(widget.entryKey, widget.entry);
   }
 
   @override
@@ -109,9 +110,8 @@ class _InputTagsState extends State<InputTags> {
                     entry.value.name.toLowerCase().contains(query))
                   entry.key: entry.value
             };
-            return _filteredSuggestions.entries.followedBy([
-              MapEntry('create', Tag(color: Tag.getRandomColor(), name: query))
-            ]);
+            return _filteredSuggestions.entries
+                .followedBy([MapEntry('create', Tag(name: query))]);
           },
           onSelected: (MapEntry<String, Tag> selectedEntry) async {
             if (selectedEntry.key == 'create') {
@@ -140,8 +140,8 @@ class _InputTagsState extends State<InputTags> {
                           .toList();
                       var entry = entries.length == 1 ? entries.single : null;
                       if (entry == null) {
-                        final doc = await UserStore.instance.newTag(
-                            Tag(name: value, color: Tag.getRandomColor()));
+                        final doc =
+                            await UserStore.instance.newTag(Tag(name: value));
                         await _tagEntry(doc.id);
                       } else {
                         await _tagEntry(entry.key);

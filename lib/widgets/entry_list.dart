@@ -77,7 +77,7 @@ class _EntriesPageState extends State<EntriesPage> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
-                                      EntryPage(widget.tags, entry)),
+                                      EntryPage(widget.tags, doc.id, entry)),
                             );
                           },
                           child: Container(
@@ -120,6 +120,7 @@ class _HomePageState extends State<HomePage> {
             MaterialPageRoute(
                 builder: (context) => EntryPage(
                     widget.tags,
+                    DateTime.now().toIso8601String(),
                     new Entry(
                         date: DateTime.now(), doc: Document(), tagIds: []))),
           );

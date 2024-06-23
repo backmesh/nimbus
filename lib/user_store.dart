@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,31 +6,21 @@ import 'package:flutter_quill/quill_delta.dart';
 
 class Tag {
   final String name;
-  final String color;
-  static final List<String> _colors = ['#ffff'];
 
-  Tag({required this.name, required this.color});
+  Tag({required this.name});
 
   static List<String> getNames(List<Tag> tags) {
     return tags.map((tag) => tag.name).toList();
   }
 
-  static String getRandomColor() {
-    final random = new Random();
-    final i = random.nextInt(_colors.length);
-    return _colors[i];
-  }
-
   Tag.fromDb(String key, Map<String, Object?> json)
       : this(
           name: json['name']! as String,
-          color: json['color']! as String,
         );
 
   Map<String, Object?> toDb() {
     return {
       'name': name,
-      'color': color,
     };
   }
 }
@@ -51,15 +40,14 @@ class Entry {
       : this(
           doc: _deltaToDoc(json['delta']! as String),
           date: (json['date']! as Timestamp)
-              .toDate(), // DateTime.parse(json['date']! as String), //
+              .toDate(), // DateTime.parse(json['date']! as String),
           tagIds: _tagIdsMapper(json['tagIds']),
         );
 
   Map<String, Object?> toDb() {
     return {
       'delta': _docToDelta(doc),
-      // use UTC in database which is just use for query ordering and not for display in UI
-      'date': Timestamp.fromDate(DateTime.utc(date.year, date.month, date.day)),
+      'date': Timestamp.fromDate(date),
       'tagIds': tagIds
     };
   }
@@ -123,8 +111,8 @@ class UserStore {
     entriesRef.doc(entry.date.toIso8601String()).delete();
   }
 
-  Future<void> saveEntry(Entry entry) async {
-    await entriesRef.doc(entry.date.toIso8601String()).set(entry);
+  Future<void> saveEntry(String entryKey, Entry entry) async {
+    await entriesRef.doc(entryKey).set(entry);
   }
 
   Future<DocumentReference<Tag>> newTag(Tag tag) async {

@@ -17,8 +17,9 @@ enum _SelectionType {
 
 class EntryPage extends StatefulWidget {
   final Map<String, Tag> tags;
+  final String entryKey;
   final Entry entry;
-  const EntryPage(this.tags, this.entry);
+  const EntryPage(this.tags, this.entryKey, this.entry);
 
   @override
   _EntryPageState createState() => _EntryPageState();
@@ -132,8 +133,8 @@ class _EntryPageState extends State<EntryPage> {
 
   Future<void> _saveEntry() async {
     if (_controller?.document != null)
-      await UserStore.instance
-          .saveEntry(widget.entry.fromNewDoc(_controller!.document));
+      await UserStore.instance.saveEntry(
+          widget.entryKey, widget.entry.fromNewDoc(_controller!.document));
   }
 
   void _startSaveTimer() {
@@ -254,7 +255,7 @@ class _EntryPageState extends State<EntryPage> {
               Scrollbar(
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  child: InputTags(widget.tags, widget.entry),
+                  child: InputTags(widget.tags, widget.entryKey, widget.entry),
                 ),
               ),
               quillEditor,
