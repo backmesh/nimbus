@@ -34,6 +34,7 @@ class _EntryPageState extends State<EntryPage> {
   KeyboardVisibilityController keyboardVisibilityController =
       KeyboardVisibilityController();
   StreamSubscription<bool>? keyboardStream;
+  late DateTime _date;
 
   @override
   void dispose() {
@@ -58,6 +59,7 @@ class _EntryPageState extends State<EntryPage> {
     super.initState();
     _focusNode.addListener(_handleFocusChange);
     setState(() {
+      _date = widget.entry.date;
       _controller = QuillController(
         document: widget.entry.doc,
         selection: const TextSelection.collapsed(offset: 0),
@@ -222,23 +224,91 @@ class _EntryPageState extends State<EntryPage> {
     );
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        toolbarHeight: 50,
-        centerTitle: false,
-      ),
-      body: Container(
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          toolbarHeight: 50,
+          centerTitle: false,
+        ),
+        body: Container(
           padding: EdgeInsets.only(top: 50, bottom: 25, left: 25, right: 25),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            // crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(children: [
-                Text(localizations.formatShortDate(widget.entry.date)),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                const SizedBox(height: 4.0),
                 InkWell(
                     onTap: () async {
-                      await UserStore.instance
-                          .deleteEntry(widget.entryKey, widget.entry);
-                      Navigator.pop(context);
+                      final start = DateTime.now().subtract(Duration(days: 90));
+                      final end = DateTime.now();
+                      DateTime? newDate = await showDatePicker(
+                          context: context,
+                          confirmText: 'Change date',
+                          initialEntryMode: DatePickerEntryMode.calendarOnly,
+                          firstDate: start,
+                          initialDate: _date,
+                          currentDate: _date,
+                          lastDate: end);
+                      if (newDate == null) return;
+                      setState(() {
+                        _date = newDate;
+                      });
+                      await UserStore.instance.saveEntry(
+                          widget.entryKey,
+                          Entry(
+                              date: newDate,
+                              doc: widget.entry.doc,
+                              tagIds: widget.entry.tagIds));
+                    },
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_month,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 4.0),
+                        Text(
+                          localizations.formatShortDate(_date),
+                          style: TextStyle(fontSize: 16),
+                        )
+                      ],
+                    )),
+                InkWell(
+                    onTap: () async {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Delete entry?'),
+                            content: const Text(
+                                '''Are you sure you want to delete this entry?'''),
+                            actions: [
+                              TextButton(
+                                child: const Text('Cancel'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                              TextButton(
+                                child: const Text(
+                                  'Delete',
+                                  selectionColor: Colors.red,
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                                onPressed: () async {
+                                  try {
+                                    await UserStore.instance.deleteEntry(
+                                        widget.entryKey, widget.entry);
+                                    Navigator.of(context).pop();
+                                    Navigator.of(context).pop();
+                                  } catch (e) {
+                                    // TODO Handle exceptions
+                                  }
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
                     },
                     child: Row(
                       children: [
@@ -246,22 +316,25 @@ class _EntryPageState extends State<EntryPage> {
                           Icons.delete_outline,
                           size: 20,
                         ),
+                        const SizedBox(width: 4.0),
                         Text(
                           'Delete',
-                          style: TextStyle(fontSize: 14),
+                          style: TextStyle(fontSize: 16),
                         )
                       ],
                     ))
               ]),
+              const SizedBox(height: 4.0),
               Scrollbar(
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: InputTags(widget.tags, widget.entryKey, widget.entry),
                 ),
               ),
-              quillEditor,
+              const SizedBox(height: 4.0),
+              Expanded(child: quillEditor),
             ],
-          )),
-    );
+          ),
+        ));
   }
 }
