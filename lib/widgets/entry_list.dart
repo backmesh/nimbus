@@ -35,6 +35,7 @@ class _EntriesPageState extends State<EntriesPage> {
     //     debugPrint('Doc ${change.doc.id}, change type: ${change.type}');
     //   }
     // });
+    final localizations = MaterialLocalizations.of(context);
     return Container(
       padding: EdgeInsets.only(top: 25, bottom: 25, left: 25, right: 25),
       child: FirestoreQueryBuilder<Entry>(
@@ -88,8 +89,8 @@ class _EntriesPageState extends State<EntriesPage> {
                                     .getPlainText(0, min(20, entry.doc.length))
                                     .toString()),
                             Row(children: [
-                              Text(entry.date.toString()),
-                              Icon(Icons.arrow_forward)
+                              Text(localizations.formatShortDate(entry.date)),
+                              Icon(Icons.chevron_right)
                             ]),
                           ])),
                         )));
