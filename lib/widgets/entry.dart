@@ -228,7 +228,7 @@ class _EntryPageState extends State<EntryPage> {
         centerTitle: false,
       ),
       body: Container(
-          padding: EdgeInsets.only(top: 25, bottom: 25, left: 25, right: 25),
+          padding: EdgeInsets.only(top: 50, bottom: 25, left: 25, right: 25),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -236,7 +236,8 @@ class _EntryPageState extends State<EntryPage> {
                 Text(localizations.formatShortDate(widget.entry.date)),
                 InkWell(
                     onTap: () async {
-                      await UserStore.instance.deleteEntry(widget.entry);
+                      await UserStore.instance
+                          .deleteEntry(widget.entryKey, widget.entry);
                       Navigator.pop(context);
                     },
                     child: Row(

@@ -107,8 +107,8 @@ class UserStore {
     return entriesRef.orderBy('date', descending: true);
   }
 
-  Future<void> deleteEntry(Entry entry) async {
-    entriesRef.doc(entry.date.toIso8601String()).delete();
+  Future<void> deleteEntry(String entryKey, Entry entry) async {
+    entriesRef.doc(entryKey).delete();
   }
 
   Future<void> saveEntry(String entryKey, Entry entry) async {
