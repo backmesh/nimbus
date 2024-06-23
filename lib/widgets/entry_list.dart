@@ -48,7 +48,7 @@ class _EntriesPageState extends State<EntriesPage> {
             }
 
             final itemCount = snapshot.docs.length;
-            return ListView.builder(
+            return ListView.separated(
               reverse: true,
               padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -58,6 +58,13 @@ class _EntriesPageState extends State<EntriesPage> {
                 final valueKey = key as ValueKey<String>;
                 return snapshot.docs
                     .indexWhere((doc) => doc.id == valueKey.value);
+              },
+              separatorBuilder: (context, index) {
+                return Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: Color(0xFFE5E7EB), //TODO use design system
+                );
               },
               itemBuilder: (context, index) {
                 // last element and has more, then load
@@ -83,18 +90,49 @@ class _EntriesPageState extends State<EntriesPage> {
                             );
                           },
                           child: Container(
-                              child: Column(children: [
-                            Text(entry.doc.isEmpty()
-                                ? ""
-                                : entry.doc
-                                    .getPlainText(0, min(20, entry.doc.length))
-                                    .toString()),
-                            Row(children: [
-                              Text(localizations.formatShortDate(entry.date)),
-                              Tags(widget.tags, entry),
-                              Icon(Icons.chevron_right),
-                            ]),
-                          ])),
+                              padding: EdgeInsetsDirectional.all(12),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(0),
+                              ),
+                              child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment
+                                      .start, // Ensures the column's children are left-aligned
+                                  children: [
+                                    Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 10),
+                                      child: Text(
+                                          entry.doc.isEmpty()
+                                              ? ""
+                                              : entry.doc
+                                                      .getPlainText(
+                                                          0,
+                                                          min(20,
+                                                              entry.doc.length))
+                                                      .replaceAll("\n", "")
+                                                      .toString() +
+                                                  "...",
+                                          style: TextStyle(
+                                              color: Color(0xFF606A85))),
+                                    ),
+                                    Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 10),
+                                      child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                                localizations.formatShortDate(
+                                                    entry.date),
+                                                style: TextStyle(
+                                                    fontSize: 14,
+                                                    color: Color(0xFF606A85))),
+                                            Icon(Icons.chevron_right),
+                                          ]),
+                                    ),
+                                    Tags(widget.tags, entry),
+                                  ])),
                         )));
               },
             );

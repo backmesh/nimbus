@@ -235,14 +235,13 @@ class _EntryPageState extends State<EntryPage> {
             // crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-                const SizedBox(height: 4.0),
                 InkWell(
                     onTap: () async {
-                      final start = DateTime.now().subtract(Duration(days: 90));
+                      final start = _date.subtract(Duration(days: 180));
                       final end = DateTime.now();
                       DateTime? newDate = await showDatePicker(
                           context: context,
-                          confirmText: 'Change date',
+                          confirmText: 'Change entry date',
                           initialEntryMode: DatePickerEntryMode.calendarOnly,
                           firstDate: start,
                           initialDate: _date,
@@ -265,7 +264,7 @@ class _EntryPageState extends State<EntryPage> {
                           Icons.calendar_month,
                           size: 20,
                         ),
-                        const SizedBox(width: 4.0),
+                        const SizedBox(width: 6.0),
                         Text(
                           localizations.formatShortDate(_date),
                           style: TextStyle(fontSize: 16),
@@ -316,7 +315,7 @@ class _EntryPageState extends State<EntryPage> {
                           Icons.delete_outline,
                           size: 20,
                         ),
-                        const SizedBox(width: 4.0),
+                        const SizedBox(width: 5.0),
                         Text(
                           'Delete',
                           style: TextStyle(fontSize: 16),
@@ -324,7 +323,7 @@ class _EntryPageState extends State<EntryPage> {
                       ],
                     ))
               ]),
-              const SizedBox(height: 4.0),
+              const SizedBox(height: 8.0),
               Scrollbar(
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,

@@ -21,12 +21,11 @@ class _TagsState extends State<Tags> {
           borderRadius: BorderRadius.all(
             Radius.circular(20.0),
           ),
-          color: Theme.of(context).colorScheme.primary,
+          color: Theme.of(context).colorScheme.primary.withOpacity(.75),
         ),
-        margin: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 3.0),
-        padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
+        margin: const EdgeInsets.only(right: 3.0, top: 3.0, bottom: 3.0),
+        padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 4.0),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
           children: [
             const SizedBox(width: 4.0),
             Text(
