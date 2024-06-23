@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:journal/widgets/tags.dart';
 
 import '../user_store.dart';
 
@@ -90,7 +91,8 @@ class _EntriesPageState extends State<EntriesPage> {
                                     .toString()),
                             Row(children: [
                               Text(localizations.formatShortDate(entry.date)),
-                              Icon(Icons.chevron_right)
+                              Tags(widget.tags, entry),
+                              Icon(Icons.chevron_right),
                             ]),
                           ])),
                         )));
@@ -115,6 +117,11 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(50.0),
+        ),
         onPressed: () {
           Navigator.push(
             context,
