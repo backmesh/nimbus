@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
-import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 
 import '../user_store.dart';
 import 'input_tags.dart';
@@ -31,9 +30,6 @@ class _EntryPageState extends State<EntryPage> {
   Timer? _selectAllTimer;
   Timer? _saveTimer;
   _SelectionType _selectionType = _SelectionType.none;
-  KeyboardVisibilityController keyboardVisibilityController =
-      KeyboardVisibilityController();
-  StreamSubscription<bool>? keyboardStream;
   late DateTime _date;
 
   @override
