@@ -229,7 +229,11 @@ class _EntryPageState extends State<EntryPage> {
           toolbarHeight: 50,
         ),
         body: Container(
-          padding: EdgeInsets.only(top: 75, bottom: 25, left: 25, right: 25),
+          padding: EdgeInsets.only(
+              top: defaultTargetPlatform == TargetPlatform.iOS ? 100 : 75,
+              bottom: 25,
+              left: 25,
+              right: 25),
           child: Column(
             // crossAxisAlignment: CrossAxisAlignment.start,
             children: [

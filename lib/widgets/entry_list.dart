@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:journal/widgets/tags.dart';
@@ -38,7 +39,11 @@ class _EntriesPageState extends State<EntriesPage> {
     // });
     final localizations = MaterialLocalizations.of(context);
     return Container(
-      padding: EdgeInsets.only(top: 75, bottom: 25, left: 25, right: 25),
+      padding: EdgeInsets.only(
+          top: defaultTargetPlatform == TargetPlatform.iOS ? 100 : 75,
+          bottom: 25,
+          left: 25,
+          right: 25),
       child: FirestoreQueryBuilder<Entry>(
           query: UserStore.instance.readEntries(),
           builder: (context, snapshot, _) {
