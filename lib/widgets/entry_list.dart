@@ -38,7 +38,7 @@ class _EntriesPageState extends State<EntriesPage> {
     // });
     final localizations = MaterialLocalizations.of(context);
     return Container(
-      padding: EdgeInsets.only(top: 25, bottom: 25, left: 25, right: 25),
+      padding: EdgeInsets.only(top: 75, bottom: 25, left: 25, right: 25),
       child: FirestoreQueryBuilder<Entry>(
           query: UserStore.instance.readEntries(),
           builder: (context, snapshot, _) {
@@ -78,9 +78,9 @@ class _EntriesPageState extends State<EntriesPage> {
                     // Unique key for each item to keep the list in right order
                     key: ValueKey(doc.id),
                     child: KeyedSubtree(
-                        // Unique key from entry contents so ListView can rebuild when there is a change
-                        key: ValueKey(entry.doc.toDelta().toString()),
-                        child: InkWell(
+                      // Unique key from entry contents so ListView can rebuild when there is a change
+                      key: ValueKey(entry.doc.toDelta().toString()),
+                      child: InkWell(
                           onTap: () {
                             Navigator.push(
                               context,
@@ -94,46 +94,58 @@ class _EntriesPageState extends State<EntriesPage> {
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(0),
                               ),
-                              child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment
-                                      .start, // Ensures the column's children are left-aligned
-                                  children: [
-                                    Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(vertical: 10),
-                                      child: Text(
-                                          entry.doc.isEmpty()
-                                              ? ""
-                                              : entry.doc
-                                                      .getPlainText(
-                                                          0,
-                                                          min(20,
-                                                              entry.doc.length))
-                                                      .replaceAll("\n", "")
-                                                      .toString() +
-                                                  "...",
-                                          style: TextStyle(
-                                              color: Color(0xFF606A85))),
-                                    ),
-                                    Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(vertical: 10),
-                                      child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                                localizations.formatShortDate(
-                                                    entry.date),
-                                                style: TextStyle(
-                                                    fontSize: 14,
-                                                    color: Color(0xFF606A85))),
-                                            Icon(Icons.chevron_right),
-                                          ]),
-                                    ),
-                                    Tags(widget.tags, entry),
-                                  ])),
-                        )));
+                              child: Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 10),
+                                  child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Column(
+                                            crossAxisAlignment: CrossAxisAlignment
+                                                .start, // Ensures the column's children are left-aligned
+                                            children: [
+                                              Text(
+                                                  entry.doc.isEmpty()
+                                                      ? ""
+                                                      : entry.doc
+                                                              .getPlainText(
+                                                                  0,
+                                                                  min(
+                                                                      20,
+                                                                      entry.doc
+                                                                          .length))
+                                                              .replaceAll(
+                                                                  "\n", "")
+                                                              .toString() +
+                                                          "...",
+                                                  style: TextStyle(
+                                                      fontSize: 14,
+                                                      color:
+                                                          Color(0xFF606A85))),
+                                              Padding(
+                                                padding:
+                                                    EdgeInsets.only(top: 24),
+                                                child: Text(
+                                                    localizations
+                                                        .formatShortDate(
+                                                            entry.date),
+                                                    style: TextStyle(
+                                                        fontSize: 12,
+                                                        color:
+                                                            Color(0xFF606A85))),
+                                              ),
+                                              Padding(
+                                                  padding: EdgeInsets.only(
+                                                      top:
+                                                          widget.tags.length > 0
+                                                              ? 14
+                                                              : 0),
+                                                  child:
+                                                      Tags(widget.tags, entry)),
+                                            ]),
+                                        Icon(Icons.chevron_right),
+                                      ])))),
+                    ));
               },
             );
           }),
@@ -176,7 +188,6 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         toolbarHeight: 50,
         title: Text("Entries"),
-        centerTitle: false,
         actions: [
           PopupMenuButton<int>(
             icon: Icon(Icons.more_horiz),
