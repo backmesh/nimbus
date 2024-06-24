@@ -189,10 +189,23 @@ class _EntryPageState extends State<EntryPage> {
           return Padding(
               padding: EdgeInsets.only(
                   top: defaultTargetPlatform == TargetPlatform.macOS ? 5 : 50),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [TextFieldTapRegion(child: toolbar)],
-              ));
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                Container(
+                  child: TextFieldTapRegion(child: toolbar),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 5,
+                        blurRadius: 7,
+                        offset: Offset(0, 3), // changes position of shadow
+                      ),
+                    ],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                )
+              ]));
         },
         expands: false,
         padding: EdgeInsets.all(screenWidth > 400 ? 10 : 0),
