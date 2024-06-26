@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:posthog_flutter/posthog_flutter.dart';
 import 'package:journal/user_store.dart';
 
 class InputTags extends StatefulWidget {
@@ -38,12 +39,19 @@ class _InputTagsState extends State<InputTags> {
     if (!widget.entry.tagIds.contains(tagId)) {
       widget.entry.tagIds.add(tagId);
       await UserStore.instance.saveEntry(widget.entryKey, widget.entry);
+      await Posthog().capture(
+        eventName: 'TagEntry',
+      );
     }
   }
 
   Future<void> _untagEntry(String tagId) async {
-    if (widget.entry.tagIds.remove(tagId))
-      UserStore.instance.saveEntry(widget.entryKey, widget.entry);
+    if (widget.entry.tagIds.remove(tagId)) {
+      await UserStore.instance.saveEntry(widget.entryKey, widget.entry);
+      await Posthog().capture(
+        eventName: 'UntagEntry',
+      );
+    }
   }
 
   @override

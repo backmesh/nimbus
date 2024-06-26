@@ -5,13 +5,14 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:journal/widgets/tags.dart';
-
-import '../user_store.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
+import 'package:posthog_flutter/posthog_flutter.dart';
+
+import 'package:journal/widgets/tags.dart';
 import 'package:journal/widgets/entry.dart';
+
+import '../user_store.dart';
 
 class EntriesPage extends StatefulWidget {
   final Map<String, Tag> tags;
@@ -86,12 +87,15 @@ class _EntriesPageState extends State<EntriesPage> {
                       // Unique key from entry contents so ListView can rebuild when there is a change
                       key: ValueKey(entry.doc.toDelta().toString()),
                       child: InkWell(
-                          onTap: () {
+                          onTap: () async {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                   builder: (context) =>
                                       EntryPage(widget.tags, doc.id, entry)),
+                            );
+                            await Posthog().capture(
+                              eventName: 'ViewEntry',
                             );
                           },
                           child: Container(
@@ -177,7 +181,7 @@ class _HomePageState extends State<HomePage> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(50.0),
         ),
-        onPressed: () {
+        onPressed: () async {
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -186,6 +190,9 @@ class _HomePageState extends State<HomePage> {
                     DateTime.now().toIso8601String(),
                     new Entry(
                         date: DateTime.now(), doc: Document(), tagIds: []))),
+          );
+          await Posthog().capture(
+            eventName: 'NewEntry',
           );
         },
         child: Icon(Icons.add),

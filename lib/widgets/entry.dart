@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
+import 'package:posthog_flutter/posthog_flutter.dart';
 
 import '../user_store.dart';
 import 'input_tags.dart';
@@ -311,6 +312,9 @@ class _EntryPageState extends State<EntryPage> {
                                         widget.entryKey, widget.entry);
                                     Navigator.of(context).pop();
                                     Navigator.of(context).pop();
+                                    await Posthog().capture(
+                                      eventName: 'DeleteEntry',
+                                    );
                                   } catch (e) {
                                     // TODO Handle exceptions
                                   }
