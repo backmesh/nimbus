@@ -11,6 +11,7 @@ import 'package:firebase_ui_oauth_apple/firebase_ui_oauth_apple.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:journal/user_store.dart';
 import 'package:journal/firebase_options.dart';
+import 'package:posthog_flutter/posthog_flutter.dart';
 
 import 'widgets/entry_list.dart';
 
@@ -45,14 +46,18 @@ class _MainState extends State<Main> with WidgetsBindingObserver {
   bool isHidden = true;
   bool isAuthing = false;
 
+  final _posthogFlutterPlugin = Posthog();
+
   void initState() {
     super.initState();
     if (user != null) UserStore(user!.uid);
     userStream = FirebaseAuth.instance.authStateChanges().listen((fbUser) {
-      if (fbUser != null)
+      if (fbUser != null) {
+        Posthog().identify(userId: fbUser.uid);
         UserStore(fbUser.uid);
-      else
+      } else {
         UserStore.clear();
+      }
       setState(() {
         user = fbUser;
       });
@@ -73,6 +78,10 @@ class _MainState extends State<Main> with WidgetsBindingObserver {
     const primary = Color.fromRGBO(23, 89, 115, 1);
     //const secondary = Color.fromRGBO(140, 184, 159, 1);
     return MaterialApp(
+        navigatorObservers: [
+          // The PosthogObserver records screen views automatically
+          PosthogObserver()
+        ],
         debugShowCheckedModeBanner: false,
         title: 'Journal',
         localizationsDelegates: [
