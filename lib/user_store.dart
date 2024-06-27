@@ -26,11 +26,17 @@ class Tag {
 }
 
 class Entry {
-  final Document doc;
   final DateTime date;
+  final Document doc;
+  final String recording;
   final List<String> tagIds;
 
-  Entry({required this.doc, required this.date, required this.tagIds});
+  Entry(
+      {Document? doc, DateTime? date, List<String>? tagIds, String? recording})
+      : this.doc = doc ?? Document(),
+        this.tagIds = tagIds ?? [].cast<String>(),
+        this.recording = recording ?? "",
+        this.date = date ?? DateTime.now();
 
   static List<String> _tagIdsMapper(Object? jsonField) => jsonField != null
       ? (jsonField as List<dynamic>).cast<String>()
@@ -38,22 +44,30 @@ class Entry {
 
   Entry.fromDb(Map<String, Object?> json)
       : this(
-          doc: _deltaToDoc(json['delta']! as String),
-          date: (json['date']! as Timestamp)
-              .toDate(), // DateTime.parse(json['date']! as String),
-          tagIds: _tagIdsMapper(json['tagIds']),
-        );
+            doc: json.containsKey('delta')
+                ? _deltaToDoc(json['delta']! as String)
+                : Document(),
+            date: (json['date']! as Timestamp).toDate(),
+            tagIds: _tagIdsMapper(json['tagIds']),
+            recording: json.containsKey('recording')
+                ? json['recording']! as String
+                : "");
 
   Map<String, Object?> toDb() {
     return {
       'delta': _docToDelta(doc),
       'date': Timestamp.fromDate(date),
-      'tagIds': tagIds
+      'tagIds': tagIds,
+      'recording': recording,
     };
   }
 
   Entry fromNewDoc(Document newDoc) {
     return Entry(date: date, doc: newDoc, tagIds: tagIds);
+  }
+
+  Entry fromRecording(String recording) {
+    return Entry(date: date, recording: recording, tagIds: tagIds);
   }
 
   static Document _deltaToDoc(String delta) {
