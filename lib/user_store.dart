@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_quill/quill_delta.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class Tag {
   final String name;
@@ -60,6 +63,10 @@ class Entry {
       'tagIds': tagIds,
       'recording': recording,
     };
+  }
+
+  bool hasAudio() {
+    return recording.isNotEmpty;
   }
 
   Entry fromNewDoc(Document newDoc) {
@@ -122,7 +129,15 @@ class UserStore {
   }
 
   Future<void> deleteEntry(String entryKey, Entry entry) async {
-    entriesRef.doc(entryKey).delete();
+    await entriesRef.doc(entryKey).delete();
+    if (entry.hasAudio()) {
+      final localPath = await _getLocalRecordingPath(entryKey);
+      File file = File(localPath);
+      if (await file.exists()) file.delete();
+      await FirebaseStorage.instance
+          .ref(_getCloudRecordingPath(entryKey))
+          .delete();
+    }
   }
 
   Future<void> saveEntry(String entryKey, Entry entry) async {
@@ -131,5 +146,34 @@ class UserStore {
 
   Future<DocumentReference<Tag>> newTag(Tag tag) async {
     return await tagsRef.add(tag);
+  }
+
+  static Future<String> _getLocalRecordingPath(String entryKey) async {
+    final dir = await getApplicationDocumentsDirectory();
+    return '${dir.path}/${entryKey}.m4a';
+  }
+
+  String _getCloudRecordingPath(String entryKey) {
+    return 'recordings/${UserStore.instance.uid}/${entryKey}.m4a';
+  }
+
+  Future<void> backupLocalRecording(String entryKey, Entry entry) async {
+    final localPath = await _getLocalRecordingPath(entryKey);
+    final cloudStoragePath = _getCloudRecordingPath(entryKey);
+    File file = File(localPath);
+    await FirebaseStorage.instance.ref(cloudStoragePath).putFile(file);
+    await UserStore.instance
+        .saveEntry(entryKey, entry.fromRecording(cloudStoragePath));
+    await file.delete();
+  }
+
+  Future<String> setupLocalRecording(String entryKey, Entry entry) async {
+    final localPath = await _getLocalRecordingPath(entryKey);
+    if (entry.hasAudio()) {
+      final cloudStoragePath = _getCloudRecordingPath(entryKey);
+      File file = File(localPath);
+      await FirebaseStorage.instance.ref(cloudStoragePath).writeToFile(file);
+    }
+    return localPath;
   }
 }

@@ -98,15 +98,16 @@ class _EntriesPageState extends State<EntriesPage> {
                       key: ValueKey(entry.doc.toDelta().toString()),
                       child: InkWell(
                           onTap: () async {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      EntryPage(widget.tags, doc.id, entry)),
-                            );
-                            await Posthog().capture(
-                              eventName: 'ViewEntry',
-                            );
+                            await Navigator.push(context,
+                                MaterialPageRoute(builder: (context) {
+                              return entry.hasAudio()
+                                  ? AudioEntryPage(widget.tags, doc.id, entry)
+                                  : EntryPage(widget.tags, doc.id, entry);
+                            }));
+                            await Posthog()
+                                .capture(eventName: 'ViewEntry', properties: {
+                              'hasAudio': entry.hasAudio(),
+                            });
                           },
                           child: Container(
                               padding: EdgeInsetsDirectional.all(12),
@@ -190,28 +191,37 @@ class _HomePageState extends State<HomePage> {
         children: [
           ActionButton(
             onPressed: () async {
-              Navigator.push(
+              await Posthog().capture(
+                eventName: 'NewKeyboardEntry',
+              );
+              await Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) => EntryPage(widget.tags,
                         DateTime.now().toIso8601String(), new Entry())),
               );
               await Posthog().capture(
-                eventName: 'NewKeyboardEntry',
+                eventName: 'BackFromEntry',
               );
             },
             icon: const Icon(Icons.keyboard),
           ),
           ActionButton(
             onPressed: () async {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AudioEntryPage(widget.tags,
-                        DateTime.now().toIso8601String(), new Entry()),
-                  ));
               await Posthog().capture(
                 eventName: 'NewAudioEntry',
+              );
+              final entryKey = DateTime.now().toIso8601String();
+              final entry = Entry();
+              await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        AudioEntryPage(widget.tags, entryKey, entry),
+                  ));
+              await UserStore.instance.backupLocalRecording(entryKey, entry);
+              await Posthog().capture(
+                eventName: 'BackFromEntry',
               );
             },
             icon: const Icon(Icons.mic),

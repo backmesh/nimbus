@@ -1,11 +1,10 @@
 import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-import 'package:journal/user_store.dart';
+import 'package:journal/widgets/entry_actions.dart';
 import 'package:record/record.dart';
-import 'package:path_provider/path_provider.dart';
-// import 'package:firebase_storage/firebase_storage.dart';
-// import 'package:http/http.dart' as http;
+
+import 'package:journal/user_store.dart';
 // ref https://medium.com/@moeed366/uploading-and-recording-audio-in-flutter-124d95ec249f
 
 class AudioEntryPage extends StatefulWidget {
@@ -33,14 +32,14 @@ class _AudioEntryPageState extends State<AudioEntryPage> {
     super.initState();
     audioPlayer = AudioPlayer();
     audioRecord = AudioRecorder();
-    // cloudFilePath =
-    //     'recordings/${UserStore.instance.uid}/${widget.entryKey}.m4a';
-    getApplicationDocumentsDirectory().then((dir) {
-      localFilePath = '${dir.path}/${widget.entryKey}.mp3';
-      print(localFilePath);
-      File file = File(localFilePath);
+    UserStore.instance
+        .setupLocalRecording(widget.entryKey, widget.entry)
+        .then((localPath) {
+      // print(localPath);
+      File file = File(localPath);
       setState(() {
         isLoading = false;
+        localFilePath = localPath;
         localFileExists = file.existsSync();
       });
     });
@@ -53,32 +52,8 @@ class _AudioEntryPageState extends State<AudioEntryPage> {
     audioPlayer.dispose();
   }
 
-  // Future<void> getRecordingIfExists() async {
-  //   setState(() {
-  //     isLoading = true;
-  //   });
-  //   try {
-  //     // Get the download URL from Firebase Storage
-
-  //     final ref = FirebaseStorage.instance.ref().child(localFilePath);
-  //     final url = await ref.getDownloadURL();
-  //     // Download the file
-  //     final http.Response downloadData = await http.get(Uri.parse(url));
-  //     final bytes = downloadData.bodyBytes;
-
-  //     // Write the file to the local path
-  //     final file = File(localFilePath);
-  //     await file.writeAsBytes(bytes);
-  //   } catch (e) {
-  //     print('File does not exist in Firebase Storage.');
-  //     setState(() {
-  //       isLoading = false;
-  //     });
-  //   }
-  // }
-
   Future<void> startRecording() async {
-    if (await audioRecord.hasPermission() && !localFileExists) {
+    if (await audioRecord.hasPermission()) {
       await audioRecord.start(const RecordConfig(), path: localFilePath);
       setState(() {
         isRecording = true;
@@ -101,8 +76,8 @@ class _AudioEntryPageState extends State<AudioEntryPage> {
       isPlaying = true;
     });
 
-    Source src = UrlSource(localFilePath);
-    await audioPlayer.play(src, volume: 1);
+    Source src = DeviceFileSource(localFilePath);
+    await audioPlayer.play(src);
     // Add an event listener to be notified when the audio playback completes
     audioPlayer.onPlayerStateChanged.listen((PlayerState state) {
       if (state == PlayerState.completed) {
@@ -120,80 +95,49 @@ class _AudioEntryPageState extends State<AudioEntryPage> {
     });
   }
 
-  // Future<void> uploadAndDeleteRecording() async {
-  //   File file = File(localFilePath);
-  //   try {
-  //     await FirebaseStorage.instance.ref(cloudFilePath).putFile(file);
-  //     await UserStore.instance.saveEntry(
-  //         widget.entryKey, widget.entry.fromRecording(cloudFilePath));
-  //     file.deleteSync();
-  //   } on FirebaseException catch (e) {
-  //     print('Error occurred during upload: $e');
-  //   }
-  // }
-
-  Future<void> deleteRecording() async {
-    if (localFilePath.isNotEmpty) {
-      File file = File(localFilePath);
-      if (localFileExists) {
-        file.deleteSync();
-        setState(() {
-          localFileExists = false;
-        });
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
       return Center(child: CircularProgressIndicator());
     }
+    final color = Theme.of(context).colorScheme.primary;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Audio Recording with Firebase'),
+        toolbarHeight: 50,
       ),
       body: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            !localFileExists
-                ? IconButton(
-                    icon: !isRecording
-                        ? const Icon(
-                            Icons.mic_none,
-                            color: Colors.red,
-                            size: 50,
-                          )
-                        : const Icon(Icons.fiber_manual_record,
-                            color: Colors.red, size: 50),
-                    onPressed: isRecording ? stopRecording : startRecording,
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        icon: !isPlaying
-                            ? Icon(Icons.play_circle,
-                                color: Colors.green, size: 50)
-                            : Icon(Icons.pause_circle,
-                                color: Colors.green, size: 50),
-                        onPressed: !isPlaying ? playRecording : pauseRecording,
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete,
-                            color: Colors.red, size: 50),
-                        onPressed: deleteRecording,
-                      ),
-                      // IconButton(
-                      //   icon: const Icon(Icons.trending_up,
-                      //       color: Colors.green, size: 50),
-                      //   onPressed: uploadAndDeleteRecording,
-                      // ),
-                    ],
-                  ),
-          ],
-        ),
+        child: Column(children: [
+          EntryActions(widget.entryKey, widget.entry),
+          SizedBox(height: 40),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              !localFileExists
+                  ? IconButton(
+                      icon: !isRecording
+                          ? Icon(
+                              Icons.mic_none,
+                              color: color,
+                              size: 50,
+                            )
+                          : Icon(Icons.stop, color: color, size: 50),
+                      onPressed: isRecording ? stopRecording : startRecording,
+                    )
+                  : Row(
+                      children: [
+                        IconButton(
+                          icon: !isPlaying
+                              ? Icon(Icons.play_circle, color: color, size: 50)
+                              : Icon(Icons.pause_circle,
+                                  color: color, size: 50),
+                          onPressed:
+                              !isPlaying ? playRecording : pauseRecording,
+                        ),
+                      ],
+                    ),
+            ],
+          ),
+        ]),
       ),
     );
   }
