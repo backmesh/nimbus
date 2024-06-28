@@ -98,16 +98,23 @@ class _EntriesPageState extends State<EntriesPage> {
                       key: ValueKey(entry.doc.toDelta().toString()),
                       child: InkWell(
                           onTap: () async {
+                            await Posthog()
+                                .capture(eventName: 'ViewEntry', properties: {
+                              'hasAudio': entry.hasAudio(),
+                              'newEntry': false,
+                            });
                             await Navigator.push(context,
                                 MaterialPageRoute(builder: (context) {
                               return entry.hasAudio()
                                   ? AudioEntryPage(widget.tags, doc.id, entry)
                                   : EntryPage(widget.tags, doc.id, entry);
                             }));
-                            await Posthog()
-                                .capture(eventName: 'ViewEntry', properties: {
-                              'hasAudio': entry.hasAudio(),
-                            });
+                            await Posthog().capture(
+                                eventName: 'BackFromEntry',
+                                properties: {
+                                  'hasAudio': entry.hasAudio(),
+                                  'newEntry': false,
+                                });
                           },
                           child: Container(
                               padding: EdgeInsetsDirectional.all(12),
@@ -165,23 +172,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  static const _actionTitles = ['Audio Entry', 'Written Entry'];
-  void _showAction(BuildContext context, int index) {
-    showDialog<void>(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            content: Text(_actionTitles[index]),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('CLOSE'),
-              ),
-            ],
-          );
-        });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -191,66 +181,48 @@ class _HomePageState extends State<HomePage> {
         children: [
           ActionButton(
             onPressed: () async {
-              await Posthog().capture(
-                eventName: 'NewKeyboardEntry',
-              );
+              await Posthog().capture(eventName: 'ViewEntry', properties: {
+                'newEntry': true,
+                'hasAudio': false,
+              });
               await Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) => EntryPage(widget.tags,
                         DateTime.now().toIso8601String(), new Entry())),
               );
-              await Posthog().capture(
-                eventName: 'BackFromEntry',
-              );
+              await Posthog().capture(eventName: 'BackFromEntry', properties: {
+                'newEntry': true,
+                'hasAudio': false,
+              });
             },
             icon: const Icon(Icons.keyboard),
           ),
           ActionButton(
             onPressed: () async {
-              await Posthog().capture(
-                eventName: 'NewAudioEntry',
-              );
+              await Posthog().capture(eventName: 'ViewEntry', properties: {
+                'newEntry': true,
+                'hasAudio': true,
+              });
               final entryKey = DateTime.now().toIso8601String();
               final entry = Entry();
-              await Navigator.push(
+              final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
                         AudioEntryPage(widget.tags, entryKey, entry),
                   ));
-              await UserStore.instance.backupLocalRecording(entryKey, entry);
-              await Posthog().capture(
-                eventName: 'BackFromEntry',
-              );
+              if (result != 'deleted')
+                await UserStore.instance.backupLocalRecording(entryKey, entry);
+              await Posthog().capture(eventName: 'BackFromEntry', properties: {
+                'newEntry': true,
+                'hasAudio': true,
+              });
             },
             icon: const Icon(Icons.mic),
           ),
         ],
       ),
-
-      // floatingActionButton: FloatingActionButton(
-      //   backgroundColor: Theme.of(context).colorScheme.primary,
-      //   foregroundColor: Colors.white,
-      //   shape: RoundedRectangleBorder(
-      //     borderRadius: BorderRadius.circular(50.0),
-      //   ),
-      //   onPressed: () async {
-      //     Navigator.push(
-      //       context,
-      //       MaterialPageRoute(
-      //           builder: (context) => EntryPage(
-      //               widget.tags,
-      //               DateTime.now().toIso8601String(),
-      //               new Entry(
-      //                   date: DateTime.now(), doc: Document(), tagIds: []))),
-      //     );
-      //     await Posthog().capture(
-      //       eventName: 'NewEntry',
-      //     );
-      //   },
-      //   child: Icon(Icons.add),
-      // ),
       appBar: AppBar(
         toolbarHeight: 50,
         title: Text("Entries"),
@@ -263,11 +235,14 @@ class _HomePageState extends State<HomePage> {
               switch (value) {
                 case 1:
                   await FirebaseUIAuth.signOut();
+                  // TODO show modal like nutripic
+                  await Posthog().capture(eventName: 'Logout');
                   break;
                 case 2:
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
+                      Posthog().capture(eventName: 'DeleteAccountModal');
                       return AlertDialog(
                         title: const Text('Delete your account?'),
                         content: const Text(
@@ -279,6 +254,8 @@ Your app data will also be deleted and you won't be able to retrieve it.'''),
                             child: const Text('Cancel'),
                             onPressed: () {
                               Navigator.of(context).pop();
+                              Posthog()
+                                  .capture(eventName: 'DeleteAccountCancel');
                             },
                           ),
                           TextButton(
@@ -289,6 +266,8 @@ Your app data will also be deleted and you won't be able to retrieve it.'''),
                             ),
                             onPressed: () async {
                               try {
+                                await Posthog()
+                                    .capture(eventName: 'DeleteAccountConfirm');
                                 User? user = FirebaseAuth.instance.currentUser;
                                 await user?.delete();
                               } catch (e) {

@@ -144,6 +144,11 @@ class UserStore {
     await entriesRef.doc(entryKey).set(entry);
   }
 
+  // Future<bool> hasEntry(String entryKey) async {
+  //   final snapshot = await entriesRef.doc(entryKey).get();
+  //   return snapshot.data() != null;
+  // }
+
   Future<DocumentReference<Tag>> newTag(Tag tag) async {
     return await tagsRef.add(tag);
   }
@@ -159,12 +164,14 @@ class UserStore {
 
   Future<void> backupLocalRecording(String entryKey, Entry entry) async {
     final localPath = await _getLocalRecordingPath(entryKey);
-    final cloudStoragePath = _getCloudRecordingPath(entryKey);
     File file = File(localPath);
-    await FirebaseStorage.instance.ref(cloudStoragePath).putFile(file);
-    await UserStore.instance
-        .saveEntry(entryKey, entry.fromRecording(cloudStoragePath));
-    await file.delete();
+    if (await file.exists()) {
+      final cloudStoragePath = _getCloudRecordingPath(entryKey);
+      await FirebaseStorage.instance.ref(cloudStoragePath).putFile(file);
+      await UserStore.instance
+          .saveEntry(entryKey, entry.fromRecording(cloudStoragePath));
+      await file.delete();
+    }
   }
 
   Future<String> setupLocalRecording(String entryKey, Entry entry) async {

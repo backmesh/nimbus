@@ -47,6 +47,9 @@ class _EntryActionsState extends State<EntryActions> {
                     date: newDate,
                     doc: widget.entry.doc,
                     tagIds: widget.entry.tagIds));
+            await Posthog().capture(eventName: 'DateChangeEntry', properties: {
+              'hasAudio': widget.entry.hasAudio(),
+            });
           },
           child: Row(
             children: [
@@ -87,11 +90,12 @@ class _EntryActionsState extends State<EntryActions> {
                         try {
                           await UserStore.instance
                               .deleteEntry(widget.entryKey, widget.entry);
-                          Navigator.of(context).pop();
-                          Navigator.of(context).pop();
-                          await Posthog().capture(
-                            eventName: 'DeleteEntry',
-                          );
+                          Navigator.of(context).pop('deleted');
+                          Navigator.of(context).pop('deleted');
+                          await Posthog()
+                              .capture(eventName: 'DeleteEntry', properties: {
+                            'hasAudio': widget.entry.hasAudio(),
+                          });
                         } catch (e) {
                           // TODO Handle exceptions
                         }
