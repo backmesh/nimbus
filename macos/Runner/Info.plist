@@ -38,5 +38,7 @@
 	<string>https://app.posthog.com</string>
 	<key>com.posthog.posthog.CAPTURE_APPLICATION_LIFECYCLE_EVENTS</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Innerly.org Journal needs access to the microphone to record your audio entry.</string>
 </dict>
 </plist>

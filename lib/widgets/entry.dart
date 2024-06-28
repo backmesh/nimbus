@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
-import 'package:posthog_flutter/posthog_flutter.dart';
+import 'package:journal/widgets/entry_actions.dart';
 
 import '../user_store.dart';
 import 'input_tags.dart';
@@ -31,7 +31,6 @@ class _EntryPageState extends State<EntryPage> {
   Timer? _selectAllTimer;
   Timer? _saveTimer;
   _SelectionType _selectionType = _SelectionType.none;
-  late DateTime _date;
 
   @override
   void dispose() {
@@ -56,7 +55,6 @@ class _EntryPageState extends State<EntryPage> {
     super.initState();
     _focusNode.addListener(_handleFocusChange);
     setState(() {
-      _date = widget.entry.date;
       _controller = QuillController(
         document: widget.entry.doc,
         selection: const TextSelection.collapsed(offset: 0),
@@ -151,7 +149,6 @@ class _EntryPageState extends State<EntryPage> {
 
   Widget _buildWelcomeEditor(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
-    final localizations = MaterialLocalizations.of(context);
     double screenWidth = MediaQuery.of(context).size.width;
     Widget quillEditor = QuillEditor(
       configurations: QuillEditorConfigurations(
@@ -247,98 +244,7 @@ class _EntryPageState extends State<EntryPage> {
           child: Column(
             // crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-                InkWell(
-                    onTap: () async {
-                      final start = _date.subtract(Duration(days: 180));
-                      final end = DateTime.now();
-                      DateTime? newDate = await showDatePicker(
-                          context: context,
-                          confirmText: 'Change entry date',
-                          initialEntryMode: DatePickerEntryMode.calendarOnly,
-                          firstDate: start,
-                          initialDate: _date,
-                          currentDate: _date,
-                          lastDate: end);
-                      if (newDate == null) return;
-                      setState(() {
-                        _date = newDate;
-                      });
-                      await UserStore.instance.saveEntry(
-                          widget.entryKey,
-                          Entry(
-                              date: newDate,
-                              doc: widget.entry.doc,
-                              tagIds: widget.entry.tagIds));
-                    },
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.calendar_month,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 6.0),
-                        Text(
-                          localizations.formatShortDate(_date),
-                          style: TextStyle(fontSize: 16),
-                        )
-                      ],
-                    )),
-                InkWell(
-                    onTap: () async {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: const Text('Delete entry?'),
-                            content: const Text(
-                                '''Are you sure you want to delete this entry?'''),
-                            actions: [
-                              TextButton(
-                                child: const Text('Cancel'),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                              TextButton(
-                                child: const Text(
-                                  'Delete',
-                                  selectionColor: Colors.red,
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                                onPressed: () async {
-                                  try {
-                                    await UserStore.instance.deleteEntry(
-                                        widget.entryKey, widget.entry);
-                                    Navigator.of(context).pop();
-                                    Navigator.of(context).pop();
-                                    await Posthog().capture(
-                                      eventName: 'DeleteEntry',
-                                    );
-                                  } catch (e) {
-                                    // TODO Handle exceptions
-                                  }
-                                },
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.delete_outline,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 5.0),
-                        Text(
-                          'Delete',
-                          style: TextStyle(fontSize: 16),
-                        )
-                      ],
-                    ))
-              ]),
+              EntryActions(widget.entryKey, widget.entry),
               const SizedBox(height: 8.0),
               Scrollbar(
                 child: SingleChildScrollView(
