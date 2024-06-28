@@ -2,15 +2,20 @@
 
 demo app
 
-## Getting Started
+# submission
 
-This project is a starting point for a Flutter application.
+bump version in pubspec.yaml
 
-A few resources to get you started if this is your first Flutter project:
+## ios submission
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+- `flutter build ipa --release`
+- Submit on Transporter
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## macos submission
+
+https://docs.flutter.dev/deployment/macos#create-a-build-archive-with-xcode
+
+- `flutter build macos`
+- Open Xcode and select `Product > Archive` to open the archive created in the previous step.
+- Click the `Validate App` button
+- After the archive has been successfully validated, click `Distribute App`
