@@ -70,11 +70,15 @@ class Entry {
   }
 
   Entry fromNewDoc(Document newDoc) {
-    return Entry(date: date, doc: newDoc, tagIds: tagIds);
+    return Entry(date: date, doc: newDoc, recording: recording, tagIds: tagIds);
   }
 
-  Entry fromRecording(String recording) {
-    return Entry(date: date, recording: recording, tagIds: tagIds);
+  Entry fromNewRecording(String recording) {
+    return Entry(date: date, doc: doc, recording: recording, tagIds: tagIds);
+  }
+
+  Entry fromNewDate(DateTime newDate) {
+    return Entry(date: newDate, doc: doc, recording: recording, tagIds: tagIds);
   }
 
   static Document _deltaToDoc(String delta) {
@@ -169,7 +173,7 @@ class UserStore {
       final cloudStoragePath = _getCloudRecordingPath(entryKey);
       await FirebaseStorage.instance.ref(cloudStoragePath).putFile(file);
       await UserStore.instance
-          .saveEntry(entryKey, entry.fromRecording(cloudStoragePath));
+          .saveEntry(entryKey, entry.fromNewRecording(cloudStoragePath));
       await file.delete();
     }
   }

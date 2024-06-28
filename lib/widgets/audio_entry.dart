@@ -120,7 +120,7 @@ class _AudioEntryPageState extends State<AudioEntryPage> {
                               color: color,
                               size: 50,
                             )
-                          : Icon(Icons.stop, color: color, size: 50),
+                          : Icon(Icons.stop_circle, color: color, size: 50),
                       onPressed: isRecording ? stopRecording : startRecording,
                     )
                   : Row(

@@ -41,12 +41,8 @@ class _EntryActionsState extends State<EntryActions> {
             setState(() {
               date = newDate;
             });
-            await UserStore.instance.saveEntry(
-                widget.entryKey,
-                Entry(
-                    date: newDate,
-                    doc: widget.entry.doc,
-                    tagIds: widget.entry.tagIds));
+            await UserStore.instance
+                .saveEntry(widget.entryKey, widget.entry.fromNewDate(newDate));
             await Posthog().capture(eventName: 'DateChangeEntry', properties: {
               'hasAudio': widget.entry.hasAudio(),
             });

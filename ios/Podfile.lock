@@ -946,6 +946,8 @@ PODS:
     - abseil/meta/type_traits
     - abseil/xcprivacy
   - abseil/xcprivacy (1.20240116.2)
+  - audioplayers_darwin (0.0.1):
+    - Flutter
   - BoringSSL-GRPC (0.0.32):
     - BoringSSL-GRPC/Implementation (= 0.0.32)
     - BoringSSL-GRPC/Interface (= 0.0.32)
@@ -971,6 +973,9 @@ PODS:
   - Firebase/Firestore (10.27.0):
     - Firebase/CoreOnly
     - FirebaseFirestore (~> 10.27.0)
+  - Firebase/Storage (10.27.0):
+    - Firebase/CoreOnly
+    - FirebaseStorage (~> 10.27.0)
   - firebase_auth (5.1.1):
     - Firebase/Auth (= 10.27.0)
     - firebase_core
@@ -982,6 +987,10 @@ PODS:
     - Firebase/DynamicLinks (= 10.27.0)
     - firebase_core
     - Flutter
+  - firebase_storage (12.1.0):
+    - Firebase/Storage (= 10.27.0)
+    - firebase_core
+    - Flutter
   - FirebaseAppCheckInterop (10.28.0)
   - FirebaseAuth (10.27.0):
     - FirebaseAppCheckInterop (~> 10.17)
@@ -990,6 +999,7 @@ PODS:
     - GoogleUtilities/Environment (~> 7.8)
     - GTMSessionFetcher/Core (< 4.0, >= 2.1)
     - RecaptchaInterop (~> 100.0)
+  - FirebaseAuthInterop (10.28.0)
   - FirebaseCore (10.27.0):
     - FirebaseCoreInternal (~> 10.0)
     - GoogleUtilities/Environment (~> 7.12)
@@ -1021,6 +1031,13 @@ PODS:
     - leveldb-library (~> 1.22)
     - nanopb (< 2.30911.0, >= 2.30908.0)
   - FirebaseSharedSwift (10.28.0)
+  - FirebaseStorage (10.27.0):
+    - FirebaseAppCheckInterop (~> 10.0)
+    - FirebaseAuthInterop (~> 10.25)
+    - FirebaseCore (~> 10.0)
+    - FirebaseCoreExtension (~> 10.0)
+    - GoogleUtilities/Environment (~> 7.12)
+    - GTMSessionFetcher/Core (< 4.0, >= 2.1)
   - Flutter (1.0.0)
   - flutter_keyboard_visibility (0.0.1):
     - Flutter
@@ -1131,6 +1148,9 @@ PODS:
     - nanopb/encode (= 2.30910.0)
   - nanopb/decode (2.30910.0)
   - nanopb/encode (2.30910.0)
+  - path_provider_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - PostHog (3.5.2)
   - posthog_flutter (0.0.1):
     - Flutter
@@ -1138,19 +1158,26 @@ PODS:
     - PostHog (~> 3.0)
   - PromisesObjC (2.4.0)
   - RecaptchaInterop (100.0.0)
+  - record_darwin (1.0.0):
+    - Flutter
+    - FlutterMacOS
   - url_launcher_ios (0.0.1):
     - Flutter
 
 DEPENDENCIES:
+  - audioplayers_darwin (from `.symlinks/plugins/audioplayers_darwin/ios`)
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
   - desktop_webview_auth (from `.symlinks/plugins/desktop_webview_auth/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_dynamic_links (from `.symlinks/plugins/firebase_dynamic_links/ios`)
+  - firebase_storage (from `.symlinks/plugins/firebase_storage/ios`)
   - Flutter (from `Flutter`)
   - flutter_keyboard_visibility (from `.symlinks/plugins/flutter_keyboard_visibility/ios`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - posthog_flutter (from `.symlinks/plugins/posthog_flutter/ios`)
+  - record_darwin (from `.symlinks/plugins/record_darwin/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
 
 SPEC REPOS:
@@ -1160,6 +1187,7 @@ SPEC REPOS:
     - Firebase
     - FirebaseAppCheckInterop
     - FirebaseAuth
+    - FirebaseAuthInterop
     - FirebaseCore
     - FirebaseCoreExtension
     - FirebaseCoreInternal
@@ -1167,6 +1195,7 @@ SPEC REPOS:
     - FirebaseFirestore
     - FirebaseFirestoreInternal
     - FirebaseSharedSwift
+    - FirebaseStorage
     - GoogleUtilities
     - "gRPC-C++"
     - gRPC-Core
@@ -1178,6 +1207,8 @@ SPEC REPOS:
     - RecaptchaInterop
 
 EXTERNAL SOURCES:
+  audioplayers_darwin:
+    :path: ".symlinks/plugins/audioplayers_darwin/ios"
   cloud_firestore:
     :path: ".symlinks/plugins/cloud_firestore/ios"
   desktop_webview_auth:
@@ -1190,17 +1221,24 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_core/ios"
   firebase_dynamic_links:
     :path: ".symlinks/plugins/firebase_dynamic_links/ios"
+  firebase_storage:
+    :path: ".symlinks/plugins/firebase_storage/ios"
   Flutter:
     :path: Flutter
   flutter_keyboard_visibility:
     :path: ".symlinks/plugins/flutter_keyboard_visibility/ios"
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/darwin"
   posthog_flutter:
     :path: ".symlinks/plugins/posthog_flutter/ios"
+  record_darwin:
+    :path: ".symlinks/plugins/record_darwin/ios"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
 
 SPEC CHECKSUMS:
   abseil: d121da9ef7e2ff4cab7666e76c5a3e0915ae08c3
+  audioplayers_darwin: 877d9a4d06331c5c374595e46e16453ac7eafa40
   BoringSSL-GRPC: 1e2348957acdbcad360b80a264a90799984b2ba6
   cloud_firestore: 86deeb143dfbed1eeff564b93102d20459da2610
   desktop_webview_auth: d645139460ef203d50bd0cdb33356785dd939cce
@@ -1209,8 +1247,10 @@ SPEC CHECKSUMS:
   firebase_auth: cc4ea3f47dda7afc4c64f59540aa570aca60814d
   firebase_core: f8d0424c45e0f1e596811085fc12c638d628457c
   firebase_dynamic_links: 8a142e279cd3d683bbb8d501d0ff5521d72a8616
+  firebase_storage: de4465c9b82d29883c2a32b5b0210bf5f2a0cfa9
   FirebaseAppCheckInterop: 5315f40293191bfec04b2cfab0215760e441540a
   FirebaseAuth: 77a012b7e08042bf44d0db835ca2e86e6ca7bbd3
+  FirebaseAuthInterop: cec40cbafa1f9a6e0c3334c5c750a0cae7c97f80
   FirebaseCore: a2b95ae4ce7c83ceecfbbbe3b6f1cddc7415a808
   FirebaseCoreExtension: f63147b723e2a700fe0f34ec6fb7f358d6fe83e0
   FirebaseCoreInternal: 58d07f1362fddeb0feb6a857d1d1d1c5e558e698
@@ -1218,6 +1258,7 @@ SPEC CHECKSUMS:
   FirebaseFirestore: 7169b75e7db8f9796d4130e3c2157ed444f100d4
   FirebaseFirestoreInternal: 7ba63f170a554ae49392da44f9430e5b7915a7ff
   FirebaseSharedSwift: 48de4aec81a6b79bb30404e5e6db43ea74848fed
+  FirebaseStorage: 255526c3d04c49874d7a5e3886964a79f77d6f33
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_keyboard_visibility: 0339d06371254c3eb25eeb90ba8d17dca8f9c069
   GoogleUtilities: ea963c370a38a8069cc5f7ba4ca849a60b6d7d15
@@ -1226,10 +1267,12 @@ SPEC CHECKSUMS:
   GTMSessionFetcher: 8000756fc1c19d2e5697b90311f7832d2e33f6cd
   leveldb-library: e8eadf9008a61f9e1dde3978c086d2b6d9b9dc28
   nanopb: 438bc412db1928dac798aa6fd75726007be04262
+  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   PostHog: 5d7b01f915dab4ea110d6d0298d4cf8632edd554
   posthog_flutter: e80defebf021b13375b351c838c9b87d769d7546
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   RecaptchaInterop: 7d1a4a01a6b2cb1610a47ef3f85f0c411434cb21
+  record_darwin: df0a677188e5fed18472550298e675f19ddaffbe
   url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
 
 PODFILE CHECKSUM: 2f824734774f84bf47bad0b59a0682457af0229d
