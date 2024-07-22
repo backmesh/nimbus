@@ -42,7 +42,7 @@ class _ChatListPageState extends State<ChatListPage> {
                     context,
                     PageRouteBuilder(
                       pageBuilder: (context, animation, secondaryAnimation) =>
-                          ChatPage(doc.id, chat),
+                          ChatPage(chat),
                       transitionsBuilder:
                           (context, animation, secondaryAnimation, child) {
                         return child; // No animation

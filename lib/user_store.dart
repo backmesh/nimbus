@@ -3,25 +3,35 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Message {
   final DateTime date;
   final String? model;
+  final String content;
 
-  Message({DateTime? date, String? model})
+  Message({DateTime? date, String? model, required String content})
       : this.date = date ?? DateTime.now(),
-        this.model = model;
+        this.model = model,
+        this.content = content;
 
   Message.fromDb(Map<String, Object?> json)
       : this(
-            date: (json['date']! as Timestamp).toDate(),
-            model: json.containsKey('model') ? json['model']! as String : null);
+            date: json['date'] != null
+                ? (json['date']! as Timestamp).toDate()
+                : DateTime.now(),
+            content: json['content'] != null ? json['content'] as String : "",
+            model: json['model'] != null ? json['model'] as String : null);
 
   Map<String, Object?> toDb() {
     return {
       'date': Timestamp.fromDate(date),
       'model': model,
+      'content': content,
     };
   }
 
   bool user() {
     return model?.isNotEmpty ?? false;
+  }
+
+  String docKey() {
+    return date.toIso8601String();
   }
 }
 
@@ -43,6 +53,10 @@ class Chat {
       'date': Timestamp.fromDate(date),
       'model': model,
     };
+  }
+
+  String docKey() {
+    return date.toIso8601String();
   }
 }
 
@@ -84,13 +98,13 @@ class UserStore {
     await chatsRef.doc(chatKey).delete();
   }
 
-  Future<void> saveChat(String chatKey, Chat chat) async {
-    await chatsRef.doc(chatKey).set(chat);
+  Future<void> saveChat(Chat chat) async {
+    await chatsRef.doc(chat.docKey()).set(chat);
   }
 
-  Query<Message> readChat(String chatKey) {
+  Query<Message> readChatMessages(Chat chat) {
     return chatsRef
-        .doc(chatKey)
+        .doc(chat.docKey())
         .collection('messages')
         .withConverter<Message>(
           fromFirestore: (snapshot, _) {
@@ -98,21 +112,18 @@ class UserStore {
           },
           toFirestore: (message, _) => message.toDb(),
         )
-        .orderBy('date', descending: true);
+        .orderBy('date', descending: false);
   }
 
-  Future<void> addMessage(
-      String chatKey, String messageKey, Message message) async {
+  Future<void> addMessage(Chat chat, Message message) async {
     await chatsRef
-        .doc(chatKey)
+        .doc(chat.docKey())
         .collection('messages')
         .withConverter<Message>(
-          fromFirestore: (snapshot, _) {
-            return Message.fromDb(snapshot.data()!);
-          },
+          fromFirestore: (snapshot, _) => Message.fromDb(snapshot.data()!),
           toFirestore: (message, _) => message.toDb(),
         )
-        .add(message);
-    ;
+        .doc(message.docKey())
+        .set(message);
   }
 }

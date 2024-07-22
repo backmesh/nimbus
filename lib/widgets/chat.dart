@@ -1,21 +1,19 @@
-import 'package:flutter/foundation.dart'
-    show defaultTargetPlatform, TargetPlatform;
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:nimbus/widgets/common.dart';
 
 import '../user_store.dart';
 
 class ChatPage extends StatefulWidget {
-  final String chatKey;
   final Chat chat;
-  const ChatPage(this.chatKey, this.chat);
+  const ChatPage(this.chat);
 
   @override
   _ChatPageState createState() => _ChatPageState();
 }
 
 class _ChatPageState extends State<ChatPage> {
-  List<String> messages = []; // List to hold chat messages
   final TextEditingController _controller = TextEditingController();
 
   @override
@@ -26,7 +24,7 @@ class _ChatPageState extends State<ChatPage> {
       drawer: CommonDrawer(),
       body: Container(
         padding: EdgeInsets.only(
-          top: defaultTargetPlatform == TargetPlatform.iOS ? 100 : 75,
+          top: 75,
           bottom: 25,
           left: 25,
           right: 25,
@@ -34,21 +32,38 @@ class _ChatPageState extends State<ChatPage> {
         child: Column(
           children: [
             Expanded(
-              child: ListView.builder(
-                itemCount: messages.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    leading:
-                        Icon(Icons.message, size: 20), // Make the icon smaller
-                    title: Padding(
-                      padding: const EdgeInsets.only(
-                          left: 8.0), // Add space between icon and title
-                      child: Text(messages[index]), // Display each message
-                    ),
-                  );
-                },
-              ),
-            ),
+                child: FirestoreQueryBuilder<Message>(
+                    query: UserStore.instance.readChatMessages(widget.chat),
+                    builder: (context, snapshot, _) {
+                      if (snapshot.isFetching) {
+                        return Center(child: CircularProgressIndicator());
+                      }
+
+                      final itemCount = snapshot.docs.length;
+
+                      return ListView.builder(
+                          itemCount: itemCount,
+                          itemBuilder: (context, index) {
+                            final QueryDocumentSnapshot<Message> doc =
+                                snapshot.docs[index];
+                            final Message message = doc.data();
+                            final isUser = message.model?.isEmpty ?? true;
+                            return KeyedSubtree(
+                                // Unique key for each item to keep the list in right order
+                                key: ValueKey(doc.id),
+                                child: ListTile(
+                                    // Indent based on the sender
+                                    contentPadding: EdgeInsets.only(
+                                      left: isUser ? 50 : 0,
+                                      right: isUser ? 0 : 50,
+                                    ),
+                                    leading: Icon(Icons.message, size: 20),
+                                    title: Padding(
+                                      padding: const EdgeInsets.only(left: 8.0),
+                                      child: Text(message.content),
+                                    )));
+                          });
+                    })),
             TextField(
               controller: _controller,
               onChanged: (text) {
@@ -61,10 +76,10 @@ class _ChatPageState extends State<ChatPage> {
                     ? Text("")
                     : IconButton(
                         icon: Icon(Icons.send),
-                        onPressed: () {
+                        onPressed: () async {
+                          await UserStore.instance.addMessage(widget.chat,
+                              new Message(content: _controller.text));
                           setState(() {
-                            messages
-                                .add(_controller.text); // Add message to list
                             _controller.clear(); // Clear input field
                           });
                         },
