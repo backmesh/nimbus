@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-import 'package:journal/widgets/entry_actions.dart';
+import 'package:nimbus/widgets/entry_actions.dart';
 import 'package:record/record.dart';
 
-import 'package:journal/user_store.dart';
+import 'package:nimbus/user_store.dart';
 // ref https://medium.com/@moeed366/uploading-and-recording-audio-in-flutter-124d95ec249f
 
 class AudioEntryPage extends StatefulWidget {

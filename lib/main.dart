@@ -10,8 +10,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:firebase_ui_oauth_apple/firebase_ui_oauth_apple.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:journal/user_store.dart';
-import 'package:journal/firebase_options.dart';
+import 'package:nimbus/user_store.dart';
+import 'package:nimbus/firebase_options.dart';
 import 'package:posthog_flutter/posthog_flutter.dart';
 
 import 'widgets/entry_list.dart';

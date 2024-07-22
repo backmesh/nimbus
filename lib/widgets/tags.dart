@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:journal/user_store.dart';
+import 'package:nimbus/user_store.dart';
 
 class Tags extends StatefulWidget {
   final Map<String, Tag> tags;

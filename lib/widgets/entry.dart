@@ -4,7 +4,9 @@ import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
-import 'package:journal/widgets/entry_actions.dart';
+import 'package:nimbus/widgets/appbar.dart';
+import 'package:nimbus/widgets/entry_actions.dart';
+import 'package:nimbus/widgets/entry_list.dart';
 
 import '../user_store.dart';
 import 'input_tags.dart';
@@ -232,8 +234,15 @@ class _EntryPageState extends State<EntryPage> {
 
     return Scaffold(
         extendBodyBehindAppBar: true,
-        appBar: AppBar(
-          toolbarHeight: 50,
+        appBar: CustomAppBar(),
+        drawer: Drawer(
+          child: Column(
+            children: [
+              Expanded(
+                child: EntriesPage(widget.tags),
+              ),
+            ],
+          ),
         ),
         body: Container(
           padding: EdgeInsets.only(
