@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dart_openai/dart_openai.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, TargetPlatform, kDebugMode;
@@ -20,7 +21,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  if (kDebugMode) {
+  if (false) {
     try {
       FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
       FirebaseFirestore.instance.settings = Settings(
@@ -30,7 +31,6 @@ void main() async {
       await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
       await FirebaseStorage.instance.useStorageEmulator('localhost', 9199);
     } catch (e) {
-      // ignore: avoid_print
       print(e);
     }
   } else {
@@ -57,18 +57,19 @@ class Main extends StatefulWidget {
 class _MainState extends State<Main> with WidgetsBindingObserver {
   late StreamSubscription<User?> userStream;
   User? user = FirebaseAuth.instance.currentUser;
-  // ios only which hides the app when doing biometric authing making the logic more complicated
-  bool isHidden = true;
-  bool isAuthing = false;
-
   final _posthogFlutterPlugin = Posthog();
 
   void initState() {
     super.initState();
     if (user != null) UserStore(user!.uid);
-    userStream = FirebaseAuth.instance.authStateChanges().listen((fbUser) {
+    userStream =
+        FirebaseAuth.instance.authStateChanges().listen((fbUser) async {
       if (fbUser != null) {
-        Posthog().identify(userId: fbUser.uid);
+        _posthogFlutterPlugin.identify(userId: fbUser.uid);
+        OpenAI.baseUrl =
+            "https://nimbusopenaiproxy.luis-fernando.workers.dev/"; // "https://api.openai.com/v1"; // the default one.
+        final token = await fbUser.getIdToken();
+        OpenAI.apiKey = token!;
         UserStore(fbUser.uid);
       } else {
         UserStore.clear();
@@ -98,7 +99,7 @@ class _MainState extends State<Main> with WidgetsBindingObserver {
           PosthogObserver()
         ],
         debugShowCheckedModeBanner: false,
-        title: 'Journal',
+        title: 'Nimbus',
         localizationsDelegates: [
           GlobalMaterialLocalizations.delegate,
         ],

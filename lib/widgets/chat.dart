@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:dart_openai/dart_openai.dart';
+
 import 'package:nimbus/widgets/common.dart';
 
 import '../user_store.dart';
@@ -14,7 +16,7 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
-  final TextEditingController _controller = TextEditingController();
+  String input = "";
 
   @override
   Widget build(BuildContext context) {
@@ -65,22 +67,68 @@ class _ChatPageState extends State<ChatPage> {
                           });
                     })),
             TextField(
-              controller: _controller,
               onChanged: (text) {
-                setState(() {}); // Trigger rebuild to show/hide suffix icon
+                setState(() {
+                  input = text;
+                });
               },
               decoration: InputDecoration(
                 hintText: 'Type your message...',
                 border: InputBorder.none, // Remove the underline
-                suffixIcon: _controller.text.isEmpty
+                suffixIcon: input.isEmpty
                     ? Text("")
                     : IconButton(
                         icon: Icon(Icons.send),
                         onPressed: () async {
-                          await UserStore.instance.addMessage(widget.chat,
-                              new Message(content: _controller.text));
+                          await UserStore.instance.addMessage(
+                              widget.chat, new Message(content: input));
+
+                          // the system message that will be sent to the request.
+                          final systemMessage =
+                              OpenAIChatCompletionChoiceMessageModel(
+                            content: [
+                              OpenAIChatCompletionChoiceMessageContentItemModel
+                                  .text(
+                                "return any message you are given as JSON.",
+                              ),
+                            ],
+                            role: OpenAIChatMessageRole.assistant,
+                          );
+
+                          // the user message that will be sent to the request.
+                          final userMessage =
+                              OpenAIChatCompletionChoiceMessageModel(
+                            content: [
+                              OpenAIChatCompletionChoiceMessageContentItemModel
+                                  .text(
+                                "Hello, I am a chatbot created by OpenAI. How are you today?",
+                              ),
+                            ],
+                            role: OpenAIChatMessageRole.user,
+                          );
+                          // all messages to be sent.
+                          final requestMessages = [
+                            systemMessage,
+                            userMessage,
+                          ];
+                          // the actual request.
+                          OpenAIChatCompletionModel chatCompletion =
+                              await OpenAI.instance.chat.create(
+                            model: "gpt-3.5-turbo-1106",
+                            responseFormat: {"type": "json_object"},
+                            seed: 6,
+                            messages: requestMessages,
+                            temperature: 0.2,
+                            maxTokens: 500,
+                          );
+
+                          print(chatCompletion.choices.first.message); // ...
+                          print(chatCompletion.systemFingerprint); // ...
+                          print(chatCompletion.usage.promptTokens); // ...
+                          print(chatCompletion.id); // ...
+
                           setState(() {
-                            _controller.clear(); // Clear input field
+                            input = "";
                           });
                         },
                       ),

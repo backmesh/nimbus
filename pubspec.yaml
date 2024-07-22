@@ -37,6 +37,7 @@ dependencies:
   firebase_ui_firestore: ^1.6.4
   posthog_flutter: ^4.5.0
   firebase_storage: ^12.1.0
+  dart_openai: ^5.1.0
 
 dev_dependencies:
   flutter_test:
