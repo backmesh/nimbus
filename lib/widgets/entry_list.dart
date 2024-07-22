@@ -87,64 +87,11 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       drawer: Drawer(
-        child: Column(
-          children: [
-            Expanded(
-              child: EntriesPage(widget.tags),
-            ),
-          ],
+        child: Expanded(
+          child: Column(children: [EntriesPage(widget.tags)]),
         ),
       ),
-      floatingActionButton: ExpandableFab(
-        distance: 80,
-        children: [
-          ActionButton(
-            onPressed: () async {
-              await Posthog().capture(eventName: 'ViewEntry', properties: {
-                'newEntry': true,
-                'hasAudio': false,
-              });
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => EntryPage(widget.tags,
-                        DateTime.now().toIso8601String(), new Entry())),
-              );
-              await Posthog().capture(eventName: 'BackFromEntry', properties: {
-                'newEntry': true,
-                'hasAudio': false,
-              });
-            },
-            icon: const Icon(Icons.keyboard),
-          ),
-          ActionButton(
-            onPressed: () async {
-              await Posthog().capture(eventName: 'ViewEntry', properties: {
-                'newEntry': true,
-                'hasAudio': true,
-              });
-              final entryKey = DateTime.now().toIso8601String();
-              final entry = Entry();
-              final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        AudioEntryPage(widget.tags, entryKey, entry),
-                  ));
-              if (result != 'deleted')
-                await UserStore.instance.backupLocalRecording(entryKey, entry);
-              await Posthog().capture(eventName: 'BackFromEntry', properties: {
-                'newEntry': true,
-                'hasAudio': true,
-              });
-            },
-            icon: const Icon(Icons.mic),
-          ),
-        ],
-      ),
       appBar: CustomAppBar(),
-      body:
-          EntryPage(widget.tags, DateTime.now().toIso8601String(), new Entry()),
     );
   }
 }
