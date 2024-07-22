@@ -1,77 +1,69 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Tag {
-  final String name;
-
-  Tag({required this.name});
-
-  static List<String> getNames(List<Tag> tags) {
-    return tags.map((tag) => tag.name).toList();
-  }
-
-  Tag.fromDb(String key, Map<String, Object?> json)
-      : this(
-          name: json['name']! as String,
-        );
-
-  Map<String, Object?> toDb() {
-    return {
-      'name': name,
-    };
-  }
-}
-
-class Entry {
+class Message {
   final DateTime date;
+  final String? model;
 
-  Entry({DateTime? date, List<String>? tagIds, String? recording})
-      : this.date = date ?? DateTime.now();
+  Message({DateTime? date, String? model})
+      : this.date = date ?? DateTime.now(),
+        this.model = model;
 
-  static List<String> _tagIdsMapper(Object? jsonField) => jsonField != null
-      ? (jsonField as List<dynamic>).cast<String>()
-      : [].cast<String>();
-
-  Entry.fromDb(Map<String, Object?> json)
+  Message.fromDb(Map<String, Object?> json)
       : this(
             date: (json['date']! as Timestamp).toDate(),
-            tagIds: _tagIdsMapper(json['tagIds']),
-            recording: json.containsKey('recording')
-                ? json['recording']! as String
-                : "");
+            model: json.containsKey('model') ? json['model']! as String : null);
 
   Map<String, Object?> toDb() {
     return {
       'date': Timestamp.fromDate(date),
+      'model': model,
+    };
+  }
+
+  bool user() {
+    return model?.isNotEmpty ?? false;
+  }
+}
+
+class Chat {
+  final DateTime date;
+  final String model;
+
+  Chat({DateTime? date, String? model})
+      : this.date = date ?? DateTime.now(),
+        this.model = model ?? "gpt-4o";
+
+  Chat.fromDb(Map<String, Object?> json)
+      : this(
+            date: (json['date']! as Timestamp).toDate(),
+            model: json['model']! as String);
+
+  Map<String, Object?> toDb() {
+    return {
+      'date': Timestamp.fromDate(date),
+      'model': model,
     };
   }
 }
 
 class UserStore {
   final String uid;
-  final CollectionReference<Entry> entriesRef;
-  final CollectionReference<Tag> tagsRef;
+  final CollectionReference<Chat> chatsRef;
 
   static UserStore? _instance;
 
-  UserStore._(this.uid, this.entriesRef, this.tagsRef);
+  UserStore._(this.uid, this.chatsRef);
 
   factory UserStore(String uid) {
-    final tagsRef = FirebaseFirestore.instance
-        .collection('journalists/${uid}/tags')
-        .withConverter<Tag>(
-          fromFirestore: (snapshot, _) =>
-              Tag.fromDb(snapshot.id, snapshot.data()!),
-          toFirestore: (tag, _) => tag.toDb(),
-        );
-    final entriesRef = FirebaseFirestore.instance
-        .collection('journalists/${uid}/entries')
-        .withConverter<Entry>(
+    final chatsRef = FirebaseFirestore.instance
+        .collection('users/${uid}/chats')
+        .withConverter<Chat>(
           fromFirestore: (snapshot, _) {
-            return Entry.fromDb(snapshot.data()!);
+            return Chat.fromDb(snapshot.data()!);
           },
           toFirestore: (entry, _) => entry.toDb(),
         );
-    _instance ??= UserStore._(uid, entriesRef, tagsRef);
+    _instance ??= UserStore._(uid, chatsRef);
     return _instance!;
   }
 
@@ -84,24 +76,43 @@ class UserStore {
     return _instance!;
   }
 
-  Query<Entry> readEntries() {
-    return entriesRef.orderBy('date', descending: true);
+  Query<Chat> readChats() {
+    return chatsRef.orderBy('date', descending: true);
   }
 
-  Future<void> deleteEntry(String entryKey, Entry entry) async {
-    await entriesRef.doc(entryKey).delete();
+  Future<void> deleteChat(String chatKey) async {
+    await chatsRef.doc(chatKey).delete();
   }
 
-  Future<void> saveEntry(String entryKey, Entry entry) async {
-    await entriesRef.doc(entryKey).set(entry);
+  Future<void> saveChat(String chatKey, Chat chat) async {
+    await chatsRef.doc(chatKey).set(chat);
   }
 
-  // Future<bool> hasEntry(String entryKey) async {
-  //   final snapshot = await entriesRef.doc(entryKey).get();
-  //   return snapshot.data() != null;
-  // }
+  Query<Message> readChat(String chatKey) {
+    return chatsRef
+        .doc(chatKey)
+        .collection('messages')
+        .withConverter<Message>(
+          fromFirestore: (snapshot, _) {
+            return Message.fromDb(snapshot.data()!);
+          },
+          toFirestore: (message, _) => message.toDb(),
+        )
+        .orderBy('date', descending: true);
+  }
 
-  Future<DocumentReference<Tag>> newTag(Tag tag) async {
-    return await tagsRef.add(tag);
+  Future<void> addMessage(
+      String chatKey, String messageKey, Message message) async {
+    await chatsRef
+        .doc(chatKey)
+        .collection('messages')
+        .withConverter<Message>(
+          fromFirestore: (snapshot, _) {
+            return Message.fromDb(snapshot.data()!);
+          },
+          toFirestore: (message, _) => message.toDb(),
+        )
+        .add(message);
+    ;
   }
 }

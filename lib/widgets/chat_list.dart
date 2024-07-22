@@ -7,10 +7,10 @@ import '../user_store.dart';
 
 class ChatListPage extends StatefulWidget {
   @override
-  _EntriesPageState createState() => _EntriesPageState();
+  _ChatListPageState createState() => _ChatListPageState();
 }
 
-class _EntriesPageState extends State<ChatListPage> {
+class _ChatListPageState extends State<ChatListPage> {
   @override
   void initState() {
     super.initState();
@@ -19,8 +19,8 @@ class _EntriesPageState extends State<ChatListPage> {
   @override
   Widget build(BuildContext context) {
     final localizations = MaterialLocalizations.of(context);
-    return FirestoreQueryBuilder<Entry>(
-      query: UserStore.instance.readEntries(),
+    return FirestoreQueryBuilder<Chat>(
+      query: UserStore.instance.readChats(),
       builder: (context, snapshot, _) {
         if (snapshot.isFetching) {
           return Center(child: CircularProgressIndicator());
@@ -30,19 +30,19 @@ class _EntriesPageState extends State<ChatListPage> {
         return ListView.builder(
           itemCount: itemCount,
           itemBuilder: (context, index) {
-            final QueryDocumentSnapshot<Entry> doc = snapshot.docs[index];
-            final Entry entry = doc.data();
+            final QueryDocumentSnapshot<Chat> doc = snapshot.docs[index];
+            final Chat chat = doc.data();
             final docSummary = doc.id;
             final textStyle = TextStyle(fontSize: 12, color: Color(0xFF606A85));
             return ListTile(
               title: Text(docSummary, style: textStyle),
-              subtitle: Text(localizations.formatShortDate(entry.date)),
+              subtitle: Text(localizations.formatShortDate(chat.date)),
               onTap: () async {
                 await Navigator.push(
                     context,
                     PageRouteBuilder(
                       pageBuilder: (context, animation, secondaryAnimation) =>
-                          ChatPage(doc.id, entry),
+                          ChatPage(doc.id, chat),
                       transitionsBuilder:
                           (context, animation, secondaryAnimation, child) {
                         return child; // No animation

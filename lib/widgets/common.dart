@@ -36,11 +36,14 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
       actions: [
         IconButton(
             onPressed: () async {
+              final chat = new Chat();
+              final docKey = chat.date.toIso8601String();
+              await UserStore.instance.saveChat(docKey, chat);
               await Navigator.push(
                   context,
                   PageRouteBuilder(
                     pageBuilder: (context, animation, secondaryAnimation) =>
-                        ChatPage(DateTime.now().toIso8601String(), new Entry()),
+                        ChatPage(docKey, chat),
                     transitionsBuilder:
                         (context, animation, secondaryAnimation, child) {
                       return child; // No animation
