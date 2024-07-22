@@ -1,11 +1,4 @@
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:flutter_quill/flutter_quill.dart' hide Text;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_quill/quill_delta.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 
 class Tag {
   final String name;
@@ -30,16 +23,9 @@ class Tag {
 
 class Entry {
   final DateTime date;
-  final Document doc;
-  final String recording;
-  final List<String> tagIds;
 
-  Entry(
-      {Document? doc, DateTime? date, List<String>? tagIds, String? recording})
-      : this.doc = doc ?? Document(),
-        this.tagIds = tagIds ?? [].cast<String>(),
-        this.recording = recording ?? "",
-        this.date = date ?? DateTime.now();
+  Entry({DateTime? date, List<String>? tagIds, String? recording})
+      : this.date = date ?? DateTime.now();
 
   static List<String> _tagIdsMapper(Object? jsonField) => jsonField != null
       ? (jsonField as List<dynamic>).cast<String>()
@@ -47,9 +33,6 @@ class Entry {
 
   Entry.fromDb(Map<String, Object?> json)
       : this(
-            doc: json.containsKey('delta')
-                ? _deltaToDoc(json['delta']! as String)
-                : Document(),
             date: (json['date']! as Timestamp).toDate(),
             tagIds: _tagIdsMapper(json['tagIds']),
             recording: json.containsKey('recording')
@@ -58,35 +41,8 @@ class Entry {
 
   Map<String, Object?> toDb() {
     return {
-      'delta': _docToDelta(doc),
       'date': Timestamp.fromDate(date),
-      'tagIds': tagIds,
-      'recording': recording,
     };
-  }
-
-  bool hasAudio() {
-    return recording.isNotEmpty;
-  }
-
-  Entry fromNewDoc(Document newDoc) {
-    return Entry(date: date, doc: newDoc, recording: recording, tagIds: tagIds);
-  }
-
-  Entry fromNewRecording(String recording) {
-    return Entry(date: date, doc: doc, recording: recording, tagIds: tagIds);
-  }
-
-  Entry fromNewDate(DateTime newDate) {
-    return Entry(date: newDate, doc: doc, recording: recording, tagIds: tagIds);
-  }
-
-  static Document _deltaToDoc(String delta) {
-    return Document.fromDelta(Delta.fromJson(jsonDecode(delta)));
-  }
-
-  static String _docToDelta(Document doc) {
-    return jsonEncode(doc.toDelta().toJson());
   }
 }
 
@@ -134,14 +90,6 @@ class UserStore {
 
   Future<void> deleteEntry(String entryKey, Entry entry) async {
     await entriesRef.doc(entryKey).delete();
-    if (entry.hasAudio()) {
-      final localPath = await _getLocalRecordingPath(entryKey);
-      File file = File(localPath);
-      if (await file.exists()) file.delete();
-      await FirebaseStorage.instance
-          .ref(_getCloudRecordingPath(entryKey))
-          .delete();
-    }
   }
 
   Future<void> saveEntry(String entryKey, Entry entry) async {
@@ -155,36 +103,5 @@ class UserStore {
 
   Future<DocumentReference<Tag>> newTag(Tag tag) async {
     return await tagsRef.add(tag);
-  }
-
-  static Future<String> _getLocalRecordingPath(String entryKey) async {
-    final dir = await getApplicationDocumentsDirectory();
-    return '${dir.path}/${entryKey}.m4a';
-  }
-
-  String _getCloudRecordingPath(String entryKey) {
-    return 'recordings/${UserStore.instance.uid}/${entryKey}.m4a';
-  }
-
-  Future<void> backupLocalRecording(String entryKey, Entry entry) async {
-    final localPath = await _getLocalRecordingPath(entryKey);
-    File file = File(localPath);
-    if (await file.exists()) {
-      final cloudStoragePath = _getCloudRecordingPath(entryKey);
-      await FirebaseStorage.instance.ref(cloudStoragePath).putFile(file);
-      await UserStore.instance
-          .saveEntry(entryKey, entry.fromNewRecording(cloudStoragePath));
-      await file.delete();
-    }
-  }
-
-  Future<String> setupLocalRecording(String entryKey, Entry entry) async {
-    final localPath = await _getLocalRecordingPath(entryKey);
-    if (entry.hasAudio()) {
-      final cloudStoragePath = _getCloudRecordingPath(entryKey);
-      File file = File(localPath);
-      await FirebaseStorage.instance.ref(cloudStoragePath).writeToFile(file);
-    }
-    return localPath;
   }
 }

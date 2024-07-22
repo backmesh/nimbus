@@ -12,6 +12,7 @@ import 'package:firebase_ui_oauth_apple/firebase_ui_oauth_apple.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:nimbus/user_store.dart';
 import 'package:nimbus/firebase_options.dart';
+import 'package:nimbus/widgets/common.dart';
 import 'package:posthog_flutter/posthog_flutter.dart';
 
 import 'widgets/entry_list.dart';
@@ -111,7 +112,7 @@ class _MainState extends State<Main> with WidgetsBindingObserver {
         supportedLocales: [
           const Locale('en', 'US'),
         ],
-        home: user == null ? ContinueWithApple() : HomeScreen());
+        home: user == null ? ContinueWithApple() : HomePage());
   }
 }
 
@@ -125,26 +126,18 @@ class ContinueWithApple extends StatelessWidget {
   }
 }
 
-class HomeScreen extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot<Tag>>(
-        stream: UserStore.instance.tagsRef.snapshots(),
-        builder:
-            (BuildContext context, AsyncSnapshot<QuerySnapshot<Tag>> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting ||
-              !snapshot.hasData) {
-            return Center(
-                child:
-                    CircularProgressIndicator()); // Show a loading indicator while waiting
-          }
-          if (snapshot.hasError) {
-            return Text(snapshot.error
-                .toString()); // Show error or a placeholder when no data
-          }
-          final docs = snapshot.data!.docs;
-          Map<String, Tag> tags = {for (var doc in docs) doc.id: doc.data()};
-          return HomePage(tags);
-        });
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: CommonAppBar(),
+      drawer: CommonDrawer(),
+    );
   }
 }

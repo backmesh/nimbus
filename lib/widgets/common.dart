@@ -3,9 +3,25 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:nimbus/user_store.dart';
 import 'package:nimbus/widgets/entry.dart';
+import 'package:nimbus/widgets/entry_list.dart';
 import 'package:posthog_flutter/posthog_flutter.dart';
 
-class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+class CommonDrawer extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      child: Column(
+        children: [
+          Expanded(
+            child: EntriesPage(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
@@ -25,7 +41,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   PageRouteBuilder(
                     pageBuilder: (context, animation, secondaryAnimation) =>
                         EntryPage(
-                            {}, DateTime.now().toIso8601String(), new Entry()),
+                            DateTime.now().toIso8601String(), new Entry()),
                     transitionsBuilder:
                         (context, animation, secondaryAnimation, child) {
                       return child; // No animation
