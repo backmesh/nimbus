@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:nimbus/user_store.dart';
-import 'package:nimbus/widgets/entry.dart';
-import 'package:nimbus/widgets/entry_list.dart';
+import 'package:nimbus/widgets/chat.dart';
+import 'package:nimbus/widgets/chat_list.dart';
 import 'package:posthog_flutter/posthog_flutter.dart';
 
 class CommonDrawer extends StatelessWidget {
@@ -13,7 +13,7 @@ class CommonDrawer extends StatelessWidget {
       child: Column(
         children: [
           Expanded(
-            child: EntriesPage(),
+            child: ChatListPage(),
           ),
         ],
       ),
@@ -40,8 +40,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
                   context,
                   PageRouteBuilder(
                     pageBuilder: (context, animation, secondaryAnimation) =>
-                        EntryPage(
-                            DateTime.now().toIso8601String(), new Entry()),
+                        ChatPage(DateTime.now().toIso8601String(), new Entry()),
                     transitionsBuilder:
                         (context, animation, secondaryAnimation, child) {
                       return child; // No animation

@@ -15,8 +15,6 @@ import 'package:nimbus/firebase_options.dart';
 import 'package:nimbus/widgets/common.dart';
 import 'package:posthog_flutter/posthog_flutter.dart';
 
-import 'widgets/entry_list.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(

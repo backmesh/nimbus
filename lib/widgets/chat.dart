@@ -2,25 +2,21 @@ import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:nimbus/widgets/common.dart';
-import 'package:nimbus/widgets/entry_list.dart';
 
 import '../user_store.dart';
 
-class EntryPage extends StatefulWidget {
+class ChatPage extends StatefulWidget {
   final String entryKey;
   final Entry entry;
-  const EntryPage(this.entryKey, this.entry);
+  const ChatPage(this.entryKey, this.entry);
 
   @override
   _EntryPageState createState() => _EntryPageState();
 }
 
-class _EntryPageState extends State<EntryPage> {
+class _EntryPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
-    double screenHeight = MediaQuery.of(context).size.height;
-    double screenWidth = MediaQuery.of(context).size.width;
-
     return Scaffold(
         extendBodyBehindAppBar: true,
         appBar: CommonAppBar(),

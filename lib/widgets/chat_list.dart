@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
-import 'package:nimbus/widgets/entry.dart';
+import 'package:nimbus/widgets/chat.dart';
 
 import '../user_store.dart';
 
-class EntriesPage extends StatefulWidget {
+class ChatListPage extends StatefulWidget {
   @override
   _EntriesPageState createState() => _EntriesPageState();
 }
 
-class _EntriesPageState extends State<EntriesPage> {
+class _EntriesPageState extends State<ChatListPage> {
   @override
   void initState() {
     super.initState();
@@ -42,7 +42,7 @@ class _EntriesPageState extends State<EntriesPage> {
                     context,
                     PageRouteBuilder(
                       pageBuilder: (context, animation, secondaryAnimation) =>
-                          EntryPage(doc.id, entry),
+                          ChatPage(doc.id, entry),
                       transitionsBuilder:
                           (context, animation, secondaryAnimation, child) {
                         return child; // No animation
