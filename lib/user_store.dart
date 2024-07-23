@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dart_openai/dart_openai.dart';
 
 class Message {
   final DateTime date;
@@ -24,6 +25,19 @@ class Message {
       'model': model,
       'content': content,
     };
+  }
+
+  OpenAIChatCompletionChoiceMessageModel toOpenAI() {
+    return OpenAIChatCompletionChoiceMessageModel(
+      content: [
+        OpenAIChatCompletionChoiceMessageContentItemModel.text(
+          content,
+        ),
+      ],
+      role: model != null
+          ? OpenAIChatMessageRole.user
+          : OpenAIChatMessageRole.assistant,
+    );
   }
 
   bool user() {

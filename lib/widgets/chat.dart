@@ -1,7 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:dart_openai/dart_openai.dart';
+import 'package:nimbus/openai.dart';
 
 import 'package:nimbus/widgets/common.dart';
 
@@ -17,6 +16,7 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   String input = "";
+  List<Message> allMessages = [];
 
   @override
   Widget build(BuildContext context) {
@@ -41,18 +41,20 @@ class _ChatPageState extends State<ChatPage> {
                         return Center(child: CircularProgressIndicator());
                       }
 
+                      if (snapshot.hasMore) snapshot.fetchMore();
+
                       final itemCount = snapshot.docs.length;
+                      allMessages =
+                          snapshot.docs.map((doc) => doc.data()).toList();
 
                       return ListView.builder(
                           itemCount: itemCount,
                           itemBuilder: (context, index) {
-                            final QueryDocumentSnapshot<Message> doc =
-                                snapshot.docs[index];
-                            final Message message = doc.data();
+                            final Message message = allMessages[index];
                             final isUser = message.model?.isEmpty ?? true;
                             return KeyedSubtree(
                                 // Unique key for each item to keep the list in right order
-                                key: ValueKey(doc.id),
+                                key: ValueKey(message.docKey()),
                                 child: ListTile(
                                     // Indent based on the sender
                                     contentPadding: EdgeInsets.only(
@@ -80,55 +82,19 @@ class _ChatPageState extends State<ChatPage> {
                     : IconButton(
                         icon: Icon(Icons.send),
                         onPressed: () async {
-                          await UserStore.instance.addMessage(
-                              widget.chat, new Message(content: input));
-
-                          // the system message that will be sent to the request.
-                          final systemMessage =
-                              OpenAIChatCompletionChoiceMessageModel(
-                            content: [
-                              OpenAIChatCompletionChoiceMessageContentItemModel
-                                  .text(
-                                "return any message you are given as JSON.",
-                              ),
-                            ],
-                            role: OpenAIChatMessageRole.assistant,
-                          );
-
-                          // the user message that will be sent to the request.
-                          final userMessage =
-                              OpenAIChatCompletionChoiceMessageModel(
-                            content: [
-                              OpenAIChatCompletionChoiceMessageContentItemModel
-                                  .text(
-                                "Hello, I am a chatbot created by OpenAI. How are you today?",
-                              ),
-                            ],
-                            role: OpenAIChatMessageRole.user,
-                          );
-                          // all messages to be sent.
-                          final requestMessages = [
-                            systemMessage,
-                            userMessage,
-                          ];
-                          // the actual request.
-                          OpenAIChatCompletionModel chatCompletion =
-                              await OpenAI.instance.chat.create(
-                            model: "gpt-3.5-turbo-1106",
-                            responseFormat: {"type": "json_object"},
-                            seed: 6,
-                            messages: requestMessages,
-                            temperature: 0.2,
-                            maxTokens: 500,
-                          );
-
-                          print(chatCompletion.choices.first.message); // ...
-                          print(chatCompletion.systemFingerprint); // ...
-                          print(chatCompletion.usage.promptTokens); // ...
-                          print(chatCompletion.id); // ...
-
+                          final userMessage = new Message(content: input);
+                          allMessages.add(userMessage);
                           setState(() {
                             input = "";
+                          });
+                          await UserStore.instance
+                              .addMessage(widget.chat, userMessage);
+                          final gptMessagee = await OpenAIClient.instance
+                              .chatComplete(allMessages);
+                          await UserStore.instance
+                              .addMessage(widget.chat, gptMessagee);
+                          setState(() {
+                            allMessages.clear();
                           });
                         },
                       ),
