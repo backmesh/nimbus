@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:dart_openai/dart_openai.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, TargetPlatform, kDebugMode;
@@ -22,7 +21,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  if (false) {
+  if (kDebugMode) {
     try {
       FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
       FirebaseFirestore.instance.settings = Settings(
