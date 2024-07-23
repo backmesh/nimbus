@@ -21,7 +21,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  if (kDebugMode) {
+  if (false) {
     try {
       FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
       FirebaseFirestore.instance.settings = Settings(
