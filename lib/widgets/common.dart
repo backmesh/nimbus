@@ -37,8 +37,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
         IconButton(
             onPressed: () async {
               final chat = new Chat();
-              await UserStore.instance.saveChat(chat);
-              await Navigator.push(
+              Navigator.push(
                   context,
                   PageRouteBuilder(
                     pageBuilder: (context, animation, secondaryAnimation) =>
@@ -48,6 +47,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
                       return child; // No animation
                     },
                   ));
+              await UserStore.instance.saveChat(chat);
             },
             icon: Icon(Icons.add_comment)),
         PopupMenuButton<int>(
