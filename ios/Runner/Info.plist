@@ -48,7 +48,7 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>com.posthog.posthog.API_KEY</key>
-	<string>phc_l5msrgv5Ya9fzISLP0Tg0skNnxweGVx7ki4qP0TeROx</string>
+	<string>phc_tcFbdhj0jXTGegbf8rznIBXe5IU55AhzthOOqOSJ2FB</string>
 	<key>com.posthog.posthog.POSTHOG_HOST</key>
 	<string>https://app.posthog.com</string>
 	<key>com.posthog.posthog.CAPTURE_APPLICATION_LIFECYCLE_EVENTS</key>
