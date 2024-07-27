@@ -13,7 +13,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:nimbus/openai.dart';
 import 'package:nimbus/user_store.dart';
 import 'package:nimbus/firebase_options.dart';
-import 'package:nimbus/widgets/common.dart';
+import 'package:nimbus/widgets/chat.dart';
 import 'package:posthog_flutter/posthog_flutter.dart';
 
 void main() async {
@@ -109,7 +109,7 @@ class _MainState extends State<Main> with WidgetsBindingObserver {
         supportedLocales: [
           const Locale('en', 'US'),
         ],
-        home: user == null ? ContinueWithApple() : HomePage());
+        home: user == null ? ContinueWithApple() : ChatPage(new Chat()));
   }
 }
 
@@ -119,22 +119,6 @@ class ContinueWithApple extends StatelessWidget {
   Widget build(BuildContext context) {
     return SignInScreen(
       showAuthActionSwitch: false,
-    );
-  }
-}
-
-class HomePage extends StatefulWidget {
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: CommonAppBar(),
-      drawer: CommonDrawer(),
     );
   }
 }

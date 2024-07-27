@@ -24,4 +24,6 @@ https://docs.flutter.dev/deployment/macos#create-a-build-archive-with-xcode
 
 https://firebase.google.com/codelabs/get-started-firebase-emulators-and-flutter#3
 
-`firebase emulators:start`
+```bash
+firebase emulators:start
+```

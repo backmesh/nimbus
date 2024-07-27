@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
-import 'package:nimbus/user_store.dart';
 import 'package:nimbus/widgets/chat.dart';
 import 'package:nimbus/widgets/chat_list.dart';
 import 'package:posthog_flutter/posthog_flutter.dart';
@@ -22,6 +21,9 @@ class CommonDrawer extends StatelessWidget {
 }
 
 class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final bool emptyChat;
+  const CommonAppBar({required this.emptyChat});
+
   @override
   Widget build(BuildContext context) {
     return AppBar(
@@ -35,20 +37,21 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: [
         IconButton(
-            onPressed: () async {
-              final chat = new Chat();
-              Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) =>
-                        ChatPage(chat),
-                    transitionsBuilder:
-                        (context, animation, secondaryAnimation, child) {
-                      return child; // No animation
-                    },
-                  ));
-              await UserStore.instance.saveChat(chat);
-            },
+            onPressed: !emptyChat
+                ? () async {
+                    Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder:
+                              (context, animation, secondaryAnimation) =>
+                                  ChatPage(),
+                          transitionsBuilder:
+                              (context, animation, secondaryAnimation, child) {
+                            return child; // No animation
+                          },
+                        ));
+                  }
+                : null,
             icon: Icon(Icons.add_comment)),
         PopupMenuButton<int>(
           icon: Icon(Icons.more_horiz),
@@ -57,8 +60,33 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
             // Handle the menu item's value
             switch (value) {
               case 1:
-                await FirebaseUIAuth.signOut();
-                // TODO show modal like nutripic
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('Logout?'),
+                      content: const Text(
+                          '''If you Logout, you will need to log in to access your account again.'''),
+                      actions: [
+                        TextButton(
+                          child: const Text('Cancel'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        TextButton(
+                          child: const Text(
+                            'Logout',
+                          ),
+                          onPressed: () async {
+                            await FirebaseUIAuth.signOut();
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
                 await Posthog().capture(eventName: 'Logout');
                 break;
               case 2:
