@@ -1,9 +1,15 @@
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_highlight/flutter_highlight.dart';
 import 'package:nimbus/open_ai.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:markdown/markdown.dart' as md;
+
+import 'package:flutter_highlight/themes/github.dart';
 
 import 'package:nimbus/widgets/common.dart';
+import 'package:nimbus/widgets/highlight.dart';
 import 'package:nimbus/widgets/input.dart';
 
 import '../user_store.dart';
@@ -118,7 +124,14 @@ class _ChatPageState extends State<ChatPage> {
                                 leading: Icon(Icons.message, size: 20),
                                 title: Padding(
                                   padding: const EdgeInsets.only(left: 8.0),
-                                  child: Text(message.content),
+                                  child: MarkdownBody(
+                                    data: message.content,
+                                    selectable: true,
+                                    extensionSet: md.ExtensionSet.gitHubWeb,
+                                    builders: {
+                                      'code': CodeElementBuilder(),
+                                    },
+                                  ),
                                 ));
                           })),
                   InputField(sendMessage, allMessages)
@@ -127,5 +140,37 @@ class _ChatPageState extends State<ChatPage> {
             ),
           );
         });
+  }
+}
+
+class CodeElementBuilder extends MarkdownElementBuilder {
+  @override
+  Widget? visitElementAfter(md.Element element, TextStyle? preferredStyle) {
+    var language = '';
+
+    if (element.attributes['class'] != null) {
+      String lg = element.attributes['class'] as String;
+      language = lg.substring(9);
+    }
+    return SizedBox(
+      child: SelectableHighlightView(
+        // The original code to be highlighted
+        element.textContent,
+
+        // Specify language
+        // It is recommended to give it a value for performance
+        language: language,
+
+        // Specify highlight theme
+        // All available themes are listed in `themes` folder
+        theme: githubTheme,
+
+        // Specify padding
+        padding: const EdgeInsets.all(8),
+
+        // Specify text style
+        textStyle: TextStyle(fontFamily: 'monospace'),
+      ),
+    );
   }
 }
