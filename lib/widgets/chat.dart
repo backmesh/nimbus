@@ -168,7 +168,7 @@ class CodeElementBuilder extends MarkdownElementBuilder {
         padding: const EdgeInsets.all(8),
 
         // Specify text style
-        textStyle: TextStyle(fontFamily: 'monospace'),
+        textStyle: TextStyle(fontFamily: 'monospace', fontSize: 14.0),
       ),
     );
   }
