@@ -1,9 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
+import 'package:nimbus/user_store.dart';
 import 'package:nimbus/widgets/chat.dart';
 import 'package:nimbus/widgets/chat_list.dart';
 import 'package:posthog_flutter/posthog_flutter.dart';
+
+Future<Object?> pushChatPage(BuildContext context, [Chat? chat]) {
+  return Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => ChatPage(chat),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return child; // No animation
+        },
+      ));
+}
 
 class CommonDrawer extends StatelessWidget {
   @override
@@ -37,21 +49,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: [
         IconButton(
-            onPressed: !emptyChat
-                ? () async {
-                    Navigator.push(
-                        context,
-                        PageRouteBuilder(
-                          pageBuilder:
-                              (context, animation, secondaryAnimation) =>
-                                  ChatPage(),
-                          transitionsBuilder:
-                              (context, animation, secondaryAnimation, child) {
-                            return child; // No animation
-                          },
-                        ));
-                  }
-                : null,
+            onPressed: !emptyChat ? () => pushChatPage(context) : null,
             icon: Icon(Icons.add_comment)),
         PopupMenuButton<int>(
           icon: Icon(Icons.more_horiz),

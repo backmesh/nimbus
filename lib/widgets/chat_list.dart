@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
-import 'package:nimbus/widgets/chat.dart';
+import 'package:nimbus/widgets/common.dart';
 
 import '../user_store.dart';
 
@@ -35,21 +35,9 @@ class _ChatListPageState extends State<ChatListPage> {
             final docSummary = doc.id;
             final textStyle = TextStyle(fontSize: 12, color: Color(0xFF606A85));
             return ListTile(
-              title: Text(docSummary, style: textStyle),
-              subtitle: Text(localizations.formatShortDate(chat.date)),
-              onTap: () async {
-                await Navigator.push(
-                    context,
-                    PageRouteBuilder(
-                      pageBuilder: (context, animation, secondaryAnimation) =>
-                          ChatPage(chat),
-                      transitionsBuilder:
-                          (context, animation, secondaryAnimation, child) {
-                        return child; // No animation
-                      },
-                    ));
-              },
-            );
+                title: Text(docSummary, style: textStyle),
+                subtitle: Text(localizations.formatShortDate(chat.date)),
+                onTap: () => pushChatPage(context, chat));
           },
         );
       },

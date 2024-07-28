@@ -110,7 +110,7 @@ class _MainState extends State<Main> with WidgetsBindingObserver {
         supportedLocales: [
           const Locale('en', 'US'),
         ],
-        home: user == null ? ContinueWithApple() : ChatPage(new Chat()));
+        home: user == null ? ContinueWithApple() : ChatPage());
   }
 }
 

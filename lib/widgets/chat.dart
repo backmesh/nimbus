@@ -31,9 +31,10 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    final emptyChat = widget.chat == null && allMessages.isEmpty;
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: CommonAppBar(emptyChat: allMessages.isEmpty),
+      appBar: CommonAppBar(emptyChat: emptyChat),
       drawer: CommonDrawer(),
       body: Container(
         padding: EdgeInsets.only(
@@ -45,7 +46,7 @@ class _ChatPageState extends State<ChatPage> {
         child: Column(
           children: [
             Expanded(
-                child: allMessages.isEmpty
+                child: emptyChat
                     ? Text("")
                     : FirestoreQueryBuilder<Message>(
                         query: UserStore.instance.readChatMessages(chat),
@@ -84,9 +85,14 @@ class _ChatPageState extends State<ChatPage> {
                         })),
             TextField(
               onChanged: (text) {
-                setState(() {
+                // rerender only when send button needs it
+                if (text.isNotEmpty && input.isEmpty ||
+                    text.isEmpty && input.isNotEmpty) {
                   input = text;
-                });
+                  setState(() {});
+                } else {
+                  input = text;
+                }
               },
               decoration: InputDecoration(
                 hintText: 'Type your message...',
@@ -95,9 +101,8 @@ class _ChatPageState extends State<ChatPage> {
                   icon: Icon(Icons.send),
                   onPressed: !input.isEmpty
                       ? () async {
-                          if (allMessages.isEmpty) {
+                          if (emptyChat)
                             await UserStore.instance.saveChat(chat);
-                          }
                           final userMessage = new Message(content: input);
                           allMessages.add(userMessage);
                           setState(() {
@@ -105,13 +110,10 @@ class _ChatPageState extends State<ChatPage> {
                           });
                           await UserStore.instance
                               .addMessage(chat, userMessage);
-                          final gptMessagee = await OpenAIClient.instance
+                          final gptMessage = await OpenAIClient.instance
                               .chatComplete(allMessages);
-                          await UserStore.instance
-                              .addMessage(chat, gptMessagee);
-                          setState(() {
-                            allMessages.clear();
-                          });
+                          allMessages.add(gptMessage);
+                          await UserStore.instance.addMessage(chat, gptMessage);
                         }
                       : null,
                 ),
