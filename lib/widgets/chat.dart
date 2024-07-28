@@ -1,6 +1,6 @@
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:nimbus/openai.dart';
+import 'package:nimbus/open_ai.dart';
 
 import 'package:nimbus/widgets/common.dart';
 import 'package:nimbus/widgets/input.dart';
@@ -92,6 +92,10 @@ class _ChatPageState extends State<ChatPage> {
                           controller: _scrollController,
                           itemCount: itemCount,
                           itemBuilder: (context, index) {
+                            // Schedule a post-frame callback to scroll to bottom
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              scrollToLastMessage();
+                            });
                             final Message message = allMessages[index];
                             final isUser = message.model?.isEmpty ?? true;
                             return ListTile(
