@@ -56,26 +56,28 @@ class Main extends StatefulWidget {
 
 class _MainState extends State<Main> with WidgetsBindingObserver {
   late StreamSubscription<User?> userStream;
-  User? user = FirebaseAuth.instance.currentUser;
+  User? user = null;
   final _posthogFlutterPlugin = Posthog();
+
+  Future<void> init(User? fbUser) async {
+    if (fbUser != null) {
+      _posthogFlutterPlugin.identify(userId: fbUser.uid);
+      final token = await fbUser.getIdToken();
+      OpenAIClient(token!);
+      UserStore(fbUser.uid);
+    } else {
+      UserStore.clear();
+    }
+    setState(() {
+      user = fbUser;
+    });
+  }
 
   void initState() {
     super.initState();
-    if (user != null) UserStore(user!.uid);
-    userStream =
-        FirebaseAuth.instance.authStateChanges().listen((fbUser) async {
-      if (fbUser != null) {
-        _posthogFlutterPlugin.identify(userId: fbUser.uid);
-        final token = await fbUser.getIdToken();
-        OpenAIClient(token!);
-        UserStore(fbUser.uid);
-      } else {
-        UserStore.clear();
-      }
-      setState(() {
-        user = fbUser;
-      });
-    });
+    final fbUser = FirebaseAuth.instance.currentUser;
+    if (fbUser != null) init(fbUser);
+    userStream = FirebaseAuth.instance.authStateChanges().listen(init);
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -114,7 +116,6 @@ class _MainState extends State<Main> with WidgetsBindingObserver {
 }
 
 class ContinueWithApple extends StatelessWidget {
-  // TODO modify to say continue instead of sign in
   @override
   Widget build(BuildContext context) {
     return SignInScreen(
