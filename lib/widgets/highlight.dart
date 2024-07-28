@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:highlight/highlight.dart' show highlight, Node;
 
 /*
-COPY PASTE FROM HIGHLIGHTVIEW BUT JUST CHANGING THE TEXT TO BE SELECTABLE
+COPY PASTE JUST CHANGING THE TEXT TO BE SELECTABLE
+
+HighlightView
+import 'package:flutter_highlight/flutter_highlight.dart';
+
 */
 
 /// Highlight Flutter Widget
