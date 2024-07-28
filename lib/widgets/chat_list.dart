@@ -32,11 +32,10 @@ class _ChatListPageState extends State<ChatListPage> {
           itemBuilder: (context, index) {
             final QueryDocumentSnapshot<Chat> doc = snapshot.docs[index];
             final Chat chat = doc.data();
-            final docSummary = doc.id;
-            final textStyle = TextStyle(fontSize: 12, color: Color(0xFF606A85));
+            final textStyle = TextStyle(color: Color(0xFF606A85), fontSize: 15);
             return ListTile(
-                title: Text(docSummary, style: textStyle),
-                subtitle: Text(localizations.formatShortDate(chat.date)),
+                title: Text(localizations.formatShortDate(chat.date),
+                    style: textStyle),
                 onTap: () => pushChatPage(context, chat));
           },
         );

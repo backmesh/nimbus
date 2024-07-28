@@ -18,6 +18,21 @@ class _ChatPageState extends State<ChatPage> {
   String input = "";
   List<Message> allMessages = [];
   late Chat chat;
+  final TextEditingController _controller = TextEditingController();
+
+  Future<void> sendMessage() async {
+    final emptyChat = widget.chat == null && allMessages.isEmpty;
+    if (emptyChat) await UserStore.instance.saveChat(chat);
+    final userMessage = new Message(content: input);
+    allMessages.add(userMessage);
+    _controller.clear(); // needed for enter submission
+    input = "";
+    setState(() {});
+    await UserStore.instance.addMessage(chat, userMessage);
+    final gptMessage = await OpenAIClient.instance.chatComplete(allMessages);
+    allMessages.add(gptMessage);
+    await UserStore.instance.addMessage(chat, gptMessage);
+  }
 
   @override
   void initState() {
@@ -27,6 +42,12 @@ class _ChatPageState extends State<ChatPage> {
     } else {
       chat = widget.chat!;
     }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -66,24 +87,21 @@ class _ChatPageState extends State<ChatPage> {
                               itemBuilder: (context, index) {
                                 final Message message = allMessages[index];
                                 final isUser = message.model?.isEmpty ?? true;
-                                return KeyedSubtree(
-                                    // Unique key for each item to keep the list in right order
-                                    key: ValueKey(message.docKey()),
-                                    child: ListTile(
-                                        // Indent based on the sender
-                                        contentPadding: EdgeInsets.only(
-                                          left: isUser ? 50 : 0,
-                                          right: isUser ? 0 : 50,
-                                        ),
-                                        leading: Icon(Icons.message, size: 20),
-                                        title: Padding(
-                                          padding:
-                                              const EdgeInsets.only(left: 8.0),
-                                          child: Text(message.content),
-                                        )));
+                                return ListTile(
+                                    // Indent based on the sender
+                                    contentPadding: EdgeInsets.only(
+                                      left: isUser ? 50 : 0,
+                                      right: isUser ? 0 : 50,
+                                    ),
+                                    leading: Icon(Icons.message, size: 20),
+                                    title: Padding(
+                                      padding: const EdgeInsets.only(left: 8.0),
+                                      child: Text(message.content),
+                                    ));
                               });
                         })),
             TextField(
+              controller: _controller,
               onChanged: (text) {
                 // rerender only when send button needs it
                 if (text.isNotEmpty && input.isEmpty ||
@@ -94,28 +112,16 @@ class _ChatPageState extends State<ChatPage> {
                   input = text;
                 }
               },
+              onSubmitted: (text) async {
+                // Fires when the user presses the enter key
+                if (input.isNotEmpty) await sendMessage();
+              },
               decoration: InputDecoration(
                 hintText: 'Type your message...',
                 border: InputBorder.none, // Remove the underline
                 suffixIcon: IconButton(
                   icon: Icon(Icons.send),
-                  onPressed: !input.isEmpty
-                      ? () async {
-                          if (emptyChat)
-                            await UserStore.instance.saveChat(chat);
-                          final userMessage = new Message(content: input);
-                          allMessages.add(userMessage);
-                          setState(() {
-                            input = "";
-                          });
-                          await UserStore.instance
-                              .addMessage(chat, userMessage);
-                          final gptMessage = await OpenAIClient.instance
-                              .chatComplete(allMessages);
-                          allMessages.add(gptMessage);
-                          await UserStore.instance.addMessage(chat, gptMessage);
-                        }
-                      : null,
+                  onPressed: input.isNotEmpty ? () => sendMessage() : null,
                 ),
               ),
             ),
