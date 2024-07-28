@@ -31,6 +31,18 @@ class OpenAIClient {
       temperature: 0.2,
       maxTokens: 500,
     );
+    final stream = OpenAI.instance.chat.createStream(
+      model: model,
+      // responseFormat: {"type": "json_object"},
+      seed: 6,
+      messages: messages.map((msg) => msg.toOpenAI()).toList(),
+      temperature: 0.2,
+      maxTokens: 500,
+    );
+    await for (var completion in stream) {
+      print(completion);
+      print(completion.choices.first.delta.content?.first?.text ?? '');
+    }
     return new Message(
         content: chatCompletion.choices.first.message.content?.first.text ?? '',
         model: model);

@@ -1,5 +1,6 @@
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:nimbus/open_ai.dart';
 
 import 'package:nimbus/widgets/common.dart';
@@ -19,6 +20,7 @@ class _ChatPageState extends State<ChatPage> {
   late Chat chat;
   final TextEditingController _inputController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  bool _userHasScrolled = false;
 
   Future<void> sendMessage(List<Message> allMessages, String text) async {
     final emptyChat = widget.chat == null && allMessages.isEmpty;
@@ -26,14 +28,22 @@ class _ChatPageState extends State<ChatPage> {
     final userMessage = new Message(content: text);
     allMessages.add(userMessage);
     await UserStore.instance.addMessage(chat, userMessage);
+    _userHasScrolled = false;
     scrollToLastMessage();
     final gptMessage = await OpenAIClient.instance.chatComplete(allMessages);
     await UserStore.instance.addMessage(chat, gptMessage);
     scrollToLastMessage();
   }
 
+  void _onScroll() {
+    if (_scrollController.position.userScrollDirection !=
+        ScrollDirection.idle) {
+      _userHasScrolled = true;
+    }
+  }
+
   void scrollToLastMessage() {
-    if (_scrollController.hasClients) {
+    if (_scrollController.hasClients && !_userHasScrolled) {
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
         duration: Duration(milliseconds: 300),
@@ -50,6 +60,7 @@ class _ChatPageState extends State<ChatPage> {
     } else {
       chat = widget.chat!;
     }
+    _scrollController.addListener(_onScroll);
   }
 
   @override
