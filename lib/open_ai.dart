@@ -17,7 +17,7 @@ class OpenAIClient {
 
   factory OpenAIClient(String token) {
     OpenAI.baseUrl =
-        "https://nimbusopenaiproxy.luis-fernando.workers.dev/"; // "https://api.openai.com/v1"; // the default one.
+        "https://proxy.backmesh.com/nimbusopenai/"; // "https://api.openai.com/v1"; // the default one.
     OpenAI.apiKey = token;
     _instance ??= OpenAIClient._();
     return _instance!;
