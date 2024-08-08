@@ -17,7 +17,7 @@ class OpenAIClient {
 
   factory OpenAIClient(String token) {
     OpenAI.baseUrl =
-        "https://proxy.backmesh.com/nimbusopenai/"; // "https://api.openai.com/v1"; // the default one.
+        "https://edge.backmesh.com/v1/proxy/PyHU4LvcdsQ4gm2xeniAFhMyuDl2/8Jz8LeAitA5uEUQVdXff";
     OpenAI.apiKey = token;
     _instance ??= OpenAIClient._();
     return _instance!;
@@ -31,13 +31,7 @@ class OpenAIClient {
     //     messages: messages.map((msg) => msg.toOpenAI()).toList());
     // chatStream.listen(
     //   (streamChatCompletion) {
-    //     print("Received streamChatCompletion: $streamChatCompletion");
-    //     final content = streamChatCompletion.choices.first.delta.content;
-    //     if (content != null) {
-    //       print("content $content");
-    //     } else {
-    //       print("No content received in this streamChatCompletion.");
-    //     }
+    //     print(streamChatCompletion);
     //   },
     //   onDone: () {
     //     print("Done");
