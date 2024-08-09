@@ -1,12 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../user_store.dart';
 
 class InputField extends StatefulWidget {
   final List<Message> messages;
   final Function(List<Message>, String) onSendMessage;
-  final List<String> files; // Add a list of files
-  const InputField(this.onSendMessage, this.messages, this.files);
+  const InputField(this.onSendMessage, this.messages);
 
   @override
   _InputFieldState createState() => _InputFieldState();
@@ -16,11 +18,40 @@ class _InputFieldState extends State<InputField> {
   String input = '';
   final richTextController = RichTextEditingController();
   final focusNode = FocusNode();
+  List<String> files = [];
   List<String> selectedFiles = [];
+
+  Future<void> setFilesInHomeDirectory() async {
+    try {
+      final docs = await getApplicationDocumentsDirectory();
+      final downloads = await getDownloadsDirectory();
+
+      files = [];
+      await _addFilesFromDirectory(docs.path);
+      if (downloads != null) {
+        await _addFilesFromDirectory(downloads.path);
+      }
+
+      setState(() {});
+    } catch (e) {
+      print("Directory listing failed: $e");
+    }
+  }
+
+  Future<void> _addFilesFromDirectory(String path) async {
+    final directory = Directory(path);
+    final entities = await directory.list().toList();
+    for (var entity in entities) {
+      if (await FileSystemEntity.isFile(entity.path)) {
+        files.add(entity.path);
+      }
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    setFilesInHomeDirectory();
   }
 
   @override
@@ -49,7 +80,7 @@ class _InputFieldState extends State<InputField> {
             print('optionsBuilder called with: ${textEditingValue.text}');
             if (textEditingValue.text.contains('@')) {
               String query = textEditingValue.text.split('@').last;
-              List<String> filteredFiles = widget.files
+              List<String> filteredFiles = files
                   .where((file) =>
                       file.contains(query) && !selectedFiles.contains(file))
                   .toList();
