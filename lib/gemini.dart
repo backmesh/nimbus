@@ -23,11 +23,8 @@ class GeminiClient {
   factory GeminiClient(String token) {
     _instance ??= GeminiClient._();
     Uri uri = Uri.parse('$BASE_URL/$API_VERSION');
-    _instance!.client = createModelWithBaseUri(
-        model: MODEL,
-        apiKey: '',
-        baseUri: uri,
-        requestHeaders: () async => {'Authorization': 'Bearer $token'});
+    _instance!.client =
+        createModelWithBaseUri(model: MODEL, apiKey: token, baseUri: uri);
     return _instance!;
   }
 
