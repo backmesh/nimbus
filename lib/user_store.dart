@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dart_openai/dart_openai.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 
 class Message {
   final DateTime date;
@@ -27,6 +28,10 @@ class Message {
     };
   }
 
+  Content toGemini() {
+    return Content(model == null ? 'user' : 'model', [TextPart(content)]);
+  }
+
   OpenAIChatCompletionChoiceMessageModel toOpenAI() {
     return OpenAIChatCompletionChoiceMessageModel(
       content: [
@@ -34,7 +39,7 @@ class Message {
           content,
         ),
       ],
-      role: model != null
+      role: model == null
           ? OpenAIChatMessageRole.user
           : OpenAIChatMessageRole.assistant,
     );

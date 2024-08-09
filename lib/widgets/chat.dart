@@ -1,7 +1,7 @@
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:nimbus/open_ai.dart';
+import 'package:nimbus/gemini.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:markdown/markdown.dart' as md;
 
@@ -31,12 +31,12 @@ class _ChatPageState extends State<ChatPage> {
     final emptyChat = widget.chat == null && allMessages.isEmpty;
     if (emptyChat) await UserStore.instance.saveChat(chat);
     final userMessage = new Message(content: text);
-    allMessages.add(userMessage);
     await UserStore.instance.addMessage(chat, userMessage);
     _userHasScrolled = false;
     scrollToLastMessage();
-    final gptMessage = await OpenAIClient.instance.chatComplete(allMessages);
-    await UserStore.instance.addMessage(chat, gptMessage);
+    final assistantMssg =
+        await GeminiClient.instance.chatComplete(allMessages, userMessage);
+    await UserStore.instance.addMessage(chat, assistantMssg);
     scrollToLastMessage();
   }
 

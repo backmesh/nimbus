@@ -10,6 +10,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:firebase_ui_oauth_apple/firebase_ui_oauth_apple.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:nimbus/gemini.dart';
 import 'package:nimbus/open_ai.dart';
 import 'package:nimbus/user_store.dart';
 import 'package:nimbus/firebase_options.dart';
@@ -64,6 +65,7 @@ class _MainState extends State<Main> with WidgetsBindingObserver {
       _posthogFlutterPlugin.identify(userId: fbUser.uid);
       final token = await fbUser.getIdToken();
       OpenAIClient(token!);
+      GeminiClient(token!);
       UserStore(fbUser.uid);
     } else {
       UserStore.clear();
