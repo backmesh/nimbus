@@ -64,6 +64,7 @@ class _InputFieldState extends State<InputField> {
             input = newText;
             selectedFiles.add(selection);
             richTextController.updateText(newText, selectedFiles);
+            focusNode.unfocus(); // Hide autocomplete options
             // setState(() {});
           },
           fieldViewBuilder: (BuildContext context,
@@ -159,18 +160,18 @@ class RichTextEditingController extends TextEditingController {
     int start = 0;
 
     for (final file in selectedFiles) {
-      final index = text.indexOf(file, start);
+      final index = text.indexOf('@$file', start); // Include '@' in the search
       if (index != -1) {
         if (index > start) {
           textSpans.add(TextSpan(text: text.substring(start, index)));
         }
         textSpans.add(TextSpan(
-          text: file,
+          text: '@$file', // Include '@' in the highlighted text
           style: TextStyle(
             backgroundColor: Colors.yellow, // Highlight @ and selected files
           ),
         ));
-        start = index + file.length;
+        start = index + file.length + 1; // Adjust start position to include @
       }
     }
 
