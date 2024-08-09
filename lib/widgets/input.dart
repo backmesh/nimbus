@@ -1,13 +1,11 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:nimbus/files.dart';
 
 import '../user_store.dart';
 
 class InputField extends StatefulWidget {
   final List<Message> messages;
-  final Function(List<Message>, String) onSendMessage;
+  final Function(List<Message>, Message) onSendMessage;
   const InputField(this.onSendMessage, this.messages);
 
   @override
@@ -22,30 +20,8 @@ class _InputFieldState extends State<InputField> {
   List<String> selectedFiles = [];
 
   Future<void> setFilesInHomeDirectory() async {
-    try {
-      final docs = await getApplicationDocumentsDirectory();
-      final downloads = await getDownloadsDirectory();
-
-      files = [];
-      await _addFilesFromDirectory(docs.path);
-      if (downloads != null) {
-        await _addFilesFromDirectory(downloads.path);
-      }
-
-      setState(() {});
-    } catch (e) {
-      print("Directory listing failed: $e");
-    }
-  }
-
-  Future<void> _addFilesFromDirectory(String path) async {
-    final directory = Directory(path);
-    final entities = await directory.list().toList();
-    for (var entity in entities) {
-      if (await FileSystemEntity.isFile(entity.path)) {
-        files.add(entity.path);
-      }
-    }
+    files = await Files.getSupportedFilePaths();
+    setState(() {});
   }
 
   @override
@@ -63,7 +39,11 @@ class _InputFieldState extends State<InputField> {
 
   void sendMessage() async {
     if (richTextController.text.isNotEmpty) {
-      widget.onSendMessage(widget.messages, richTextController.text);
+      widget.onSendMessage(
+          widget.messages,
+          new Message(
+              content: richTextController.text,
+              filePaths: richTextController.selectedFiles));
       richTextController.clear();
     }
   }
@@ -174,13 +154,13 @@ class RichTextEditingController extends TextEditingController {
 
   void updateText(String text, List<String> selectedFiles) {
     this.selectedFiles = selectedFiles;
-    value = value.copyWith(
-      text: text,
-      selection: TextSelection.fromPosition(
-        TextPosition(offset: text.length),
-      ),
-      composing: TextRange.empty,
-    );
+    this.text = text;
+  }
+
+  @override
+  void clear() {
+    super.clear();
+    selectedFiles.clear();
   }
 
   @override

@@ -6,9 +6,8 @@ import 'package:nimbus/user_store.dart';
 final MODEL = 'gemini-1.5-flash-latest';
 final API_VERSION = 'v1beta';
 final BASE_URL =
-    'edge.backmesh.com/v1/proxy/PyHU4LvcdsQ4gm2xeniAFhMyuDl2/aUxjzrA9w7K9auXp6Be8';
+    'https://edge.backmesh.com/v1/proxy/PyHU4LvcdsQ4gm2xeniAFhMyuDl2/aUxjzrA9w7K9auXp6Be8';
 
-//
 class GeminiClient {
   late GenerativeModel client;
 
@@ -23,17 +22,30 @@ class GeminiClient {
 
   factory GeminiClient(String token) {
     _instance ??= GeminiClient._();
+    Uri uri = Uri.parse('$BASE_URL/$API_VERSION');
     _instance!.client = createModelWithBaseUri(
-        model: MODEL, apiKey: token, baseUri: Uri.https(BASE_URL, API_VERSION));
+        model: MODEL,
+        apiKey: '',
+        baseUri: uri,
+        requestHeaders: () async => {'Authorization': 'Bearer $token'});
     return _instance!;
   }
 
   Future<Message> chatComplete(List<Message> messages, Message last) async {
-    List<Content> contents = messages.map((msg) => msg.toGemini()).toList();
+    List<Content> contents = [];
+    for (var msg in messages) {
+      contents.add(await msg.toGemini());
+    }
     final chat = client.startChat(history: contents);
-    final response = await chat.sendMessage(
-      last.toGemini(),
-    );
-    return new Message(content: response.text ?? '', model: MODEL);
+    try {
+      final response = await chat.sendMessage(
+        await last.toGemini(),
+      );
+      print('Response: ${response.text}'); // Log the response text
+      return new Message(content: response.text ?? '', model: MODEL);
+    } catch (e) {
+      print('Error: $e'); // Log any errors
+      rethrow; // Re-throw the error after logging it
+    }
   }
 }

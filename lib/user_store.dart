@@ -1,14 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dart_openai/dart_openai.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:nimbus/files.dart';
 
 class Message {
   final DateTime date;
   final String? model;
   final String content;
+  final List<String>? filePaths;
 
-  Message({DateTime? date, String? model, required String content})
+  Message(
+      {DateTime? date,
+      String? model,
+      List<String>? filePaths,
+      required String content})
       : this.date = date ?? DateTime.now(),
+        this.filePaths = filePaths ?? [],
         this.model = model,
         this.content = content;
 
@@ -18,6 +25,11 @@ class Message {
                 ? (json['date']! as Timestamp).toDate()
                 : DateTime.now(),
             content: json['content'] != null ? json['content'] as String : "",
+            filePaths: json['filePaths'] != null
+                ? (json['filePaths'] as List<dynamic>)
+                    .map((e) => e as String)
+                    .toList()
+                : [],
             model: json['model'] != null ? json['model'] as String : null);
 
   Map<String, Object?> toDb() {
@@ -25,11 +37,22 @@ class Message {
       'date': Timestamp.fromDate(date),
       'model': model,
       'content': content,
+      'filePaths': filePaths,
     };
   }
 
-  Content toGemini() {
-    return Content(model == null ? 'user' : 'model', [TextPart(content)]);
+  Future<Content> toGemini() async {
+    final role = model == null ? 'user' : 'model';
+    if (filePaths != null && filePaths!.length > 0) {
+      List<Part> fileParts = [];
+      String cleanContent = content;
+      for (var fp in filePaths!) {
+        fileParts.add(await Files.getPart(fp));
+        cleanContent.replaceAll(fp, '');
+      }
+      return Content(role, [TextPart(cleanContent), ...fileParts]);
+    }
+    return Content(role, [TextPart(content)]);
   }
 
   OpenAIChatCompletionChoiceMessageModel toOpenAI() {

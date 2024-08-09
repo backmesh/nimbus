@@ -27,10 +27,10 @@ class _ChatPageState extends State<ChatPage> {
   final ScrollController _scrollController = ScrollController();
   bool _userHasScrolled = false;
 
-  Future<void> sendMessage(List<Message> allMessages, String text) async {
+  Future<void> sendMessage(
+      List<Message> allMessages, Message userMessage) async {
     final emptyChat = widget.chat == null && allMessages.isEmpty;
     if (emptyChat) await UserStore.instance.saveChat(chat);
-    final userMessage = new Message(content: text);
     await UserStore.instance.addMessage(chat, userMessage);
     _userHasScrolled = false;
     scrollToLastMessage();
