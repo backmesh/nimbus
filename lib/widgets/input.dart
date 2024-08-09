@@ -34,6 +34,7 @@ class _InputFieldState extends State<InputField> {
   Widget build(BuildContext context) {
     print('Building InputField widget');
     print(widget.files);
+    late TextEditingController textEditingController;
     return Column(
       children: [
         Autocomplete<String>(
@@ -51,17 +52,18 @@ class _InputFieldState extends State<InputField> {
           onSelected: (String selection) {
             print('onSelected called with: $selection');
             int atIndex = input.lastIndexOf('@');
-            String newText = input.substring(0, atIndex + 1) +
-                selection +
-                input.substring(atIndex + 1);
+            String newText = input.substring(0, atIndex + 1) + selection;
             print('newText: $newText');
             input = newText;
+            textEditingController.text = newText;
+            // Update the TextEditingController
             // setState(() {});
           },
           fieldViewBuilder: (BuildContext context,
-              TextEditingController textEditingController,
+              TextEditingController fieldTextEditingController,
               FocusNode focusNode,
               VoidCallback onFieldSubmitted) {
+            textEditingController = fieldTextEditingController;
             return TextField(
               controller: textEditingController,
               focusNode: focusNode,
