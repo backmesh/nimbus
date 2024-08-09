@@ -13,31 +13,38 @@ class InputField extends StatefulWidget {
 }
 
 class _InputFieldState extends State<InputField> {
-  String input = "";
-  final FocusNode _focusNode = FocusNode();
+  String input = '';
+  final richTextController = RichTextEditingController();
+  final focusNode = FocusNode();
+  List<String> selectedFiles = [];
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   void dispose() {
-    _focusNode.dispose();
+    richTextController.dispose();
+    focusNode.dispose();
     super.dispose();
   }
 
   void sendMessage() async {
-    if (input.isNotEmpty) {
-      widget.onSendMessage(widget.messages, input);
-      input = "";
-      setState(() {});
+    if (richTextController.text.isNotEmpty) {
+      widget.onSendMessage(widget.messages, richTextController.text);
+      richTextController.clear();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     print('Building InputField widget');
-    print(widget.files);
-    late TextEditingController textEditingController;
     return Column(
       children: [
-        Autocomplete<String>(
+        RawAutocomplete<String>(
+          textEditingController: richTextController,
+          focusNode: focusNode,
           optionsBuilder: (TextEditingValue textEditingValue) {
             print('optionsBuilder called with: ${textEditingValue.text}');
             if (textEditingValue.text.contains('@')) {
@@ -55,17 +62,16 @@ class _InputFieldState extends State<InputField> {
             String newText = input.substring(0, atIndex + 1) + selection;
             print('newText: $newText');
             input = newText;
-            textEditingController.text = newText;
-            // Update the TextEditingController
+            selectedFiles.add(selection);
+            richTextController.updateText(newText, selectedFiles);
             // setState(() {});
           },
           fieldViewBuilder: (BuildContext context,
               TextEditingController fieldTextEditingController,
               FocusNode focusNode,
               VoidCallback onFieldSubmitted) {
-            textEditingController = fieldTextEditingController;
             return TextField(
-              controller: textEditingController,
+              controller: fieldTextEditingController,
               focusNode: focusNode,
               onChanged: (text) {
                 print('TextField onChanged called with: $text');
@@ -127,5 +133,51 @@ class _InputFieldState extends State<InputField> {
         ),
       ],
     );
+  }
+}
+
+class RichTextEditingController extends TextEditingController {
+  List<String> selectedFiles = [];
+
+  void updateText(String text, List<String> selectedFiles) {
+    this.selectedFiles = selectedFiles;
+    value = value.copyWith(
+      text: text,
+      selection: TextSelection.fromPosition(
+        TextPosition(offset: text.length),
+      ),
+      composing: TextRange.empty,
+    );
+  }
+
+  @override
+  TextSpan buildTextSpan(
+      {required BuildContext context,
+      TextStyle? style,
+      required bool withComposing}) {
+    final textSpans = <TextSpan>[];
+    int start = 0;
+
+    for (final file in selectedFiles) {
+      final index = text.indexOf(file, start);
+      if (index != -1) {
+        if (index > start) {
+          textSpans.add(TextSpan(text: text.substring(start, index)));
+        }
+        textSpans.add(TextSpan(
+          text: file,
+          style: TextStyle(
+            backgroundColor: Colors.yellow, // Highlight @ and selected files
+          ),
+        ));
+        start = index + file.length;
+      }
+    }
+
+    if (start < text.length) {
+      textSpans.add(TextSpan(text: text.substring(start)));
+    }
+
+    return TextSpan(style: style, children: textSpans);
   }
 }
