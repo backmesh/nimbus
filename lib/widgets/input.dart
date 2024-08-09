@@ -95,29 +95,36 @@ class _InputFieldState extends State<InputField> {
               ),
             );
           },
-          optionsMaxHeight: 1,
           optionsViewOpenDirection: OptionsViewOpenDirection.up,
           optionsViewBuilder: (BuildContext context,
               AutocompleteOnSelected<String> onSelected,
               Iterable<String> options) {
             print('optionsViewBuilder called with options: $options');
-            return Material(
-              elevation: 4.0, // Add elevation to make it more visible
-              child: ListView.builder(
-                itemCount: options.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final String option = options.elementAt(index);
-                  print('Building option: $option'); // Debug print
-                  return GestureDetector(
-                    onTap: () {
-                      print('Option tapped: $option'); // Debug print
-                      onSelected(option);
+            return Align(
+              alignment: Alignment.bottomLeft,
+              child: Material(
+                elevation: 4.0, // Add elevation to make it more visible
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  constraints: BoxConstraints(maxHeight: 200), // Limit height
+                  child: ListView.builder(
+                    padding: EdgeInsets.all(8.0),
+                    itemCount: options.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final String option = options.elementAt(index);
+                      print('Building option: $option'); // Debug print
+                      return GestureDetector(
+                        onTap: () {
+                          print('Option tapped: $option'); // Debug print
+                          onSelected(option);
+                        },
+                        child: ListTile(
+                          title: Text(option),
+                        ),
+                      );
                     },
-                    child: ListTile(
-                      title: Text(option),
-                    ),
-                  );
-                },
+                  ),
+                ),
               ),
             );
           },
