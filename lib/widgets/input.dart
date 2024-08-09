@@ -49,8 +49,10 @@ class _InputFieldState extends State<InputField> {
             print('optionsBuilder called with: ${textEditingValue.text}');
             if (textEditingValue.text.contains('@')) {
               String query = textEditingValue.text.split('@').last;
-              List<String> filteredFiles =
-                  widget.files.where((file) => file.contains(query)).toList();
+              List<String> filteredFiles = widget.files
+                  .where((file) =>
+                      file.contains(query) && !selectedFiles.contains(file))
+                  .toList();
               print('Filtered files: $filteredFiles');
               return filteredFiles;
             }
@@ -64,7 +66,6 @@ class _InputFieldState extends State<InputField> {
             input = newText;
             selectedFiles.add(selection);
             richTextController.updateText(newText, selectedFiles);
-            focusNode.unfocus(); // Hide autocomplete options
             // setState(() {});
           },
           fieldViewBuilder: (BuildContext context,
