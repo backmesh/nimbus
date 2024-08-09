@@ -14,12 +14,10 @@ class InputField extends StatefulWidget {
 
 class _InputFieldState extends State<InputField> {
   String input = "";
-  final TextEditingController _inputController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
   @override
   void dispose() {
-    _inputController.dispose();
     _focusNode.dispose();
     super.dispose();
   }
@@ -28,7 +26,6 @@ class _InputFieldState extends State<InputField> {
     if (input.isNotEmpty) {
       widget.onSendMessage(widget.messages, input);
       input = "";
-      _inputController.clear();
       setState(() {});
     }
   }
@@ -53,16 +50,13 @@ class _InputFieldState extends State<InputField> {
           },
           onSelected: (String selection) {
             print('onSelected called with: $selection');
-            String currentText = _inputController.text;
-            int atIndex = currentText.lastIndexOf('@');
-            String newText = currentText.substring(0, atIndex + 1) + selection;
-            _inputController.text = newText;
-            _inputController.selection = TextSelection.fromPosition(
-              TextPosition(offset: newText.length),
-            );
-            setState(() {
-              input = newText;
-            });
+            int atIndex = input.lastIndexOf('@');
+            String newText = input.substring(0, atIndex + 1) +
+                selection +
+                input.substring(atIndex + 1);
+            print('newText: $newText');
+            input = newText;
+            // setState(() {});
           },
           fieldViewBuilder: (BuildContext context,
               TextEditingController textEditingController,
@@ -83,7 +77,6 @@ class _InputFieldState extends State<InputField> {
               },
               onSubmitted: (text) {
                 sendMessage();
-                onFieldSubmitted(); // Call the onFieldSubmitted callback
               },
               decoration: InputDecoration(
                 hintText: 'Type your message...',
