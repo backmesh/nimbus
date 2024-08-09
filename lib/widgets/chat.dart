@@ -133,7 +133,13 @@ class _ChatPageState extends State<ChatPage> {
                                   ),
                                 ));
                           })),
-                  InputField(sendMessage, allMessages)
+                  InputField(sendMessage, allMessages, [
+                    'file1.txt',
+                    'file2.js',
+                    'document.pdf',
+                    'image.png',
+                    'notes.docx'
+                  ])
                 ],
               ),
             ),
