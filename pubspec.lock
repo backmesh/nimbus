@@ -333,6 +333,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  google_generative_ai:
+    dependency: "direct main"
+    description:
+      name: google_generative_ai
+      sha256: e2f4c0ac13f0898f670ce5ac0dc4501ebe09b96f9d59163724380d9aa82065be
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.4"
   highlight:
     dependency: "direct main"
     description:

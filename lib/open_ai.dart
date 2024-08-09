@@ -23,7 +23,7 @@ class OpenAIClient {
     return _instance!;
   }
 
-  Future<Message> chatComplete(List<Message> messages) async {
+  Future<Message> chatComplete(List<Message> messages, Message last) async {
     // final chatStream = OpenAI.instance.chat.createStream(
     //     model: model,
     //     seed: 423,
@@ -46,7 +46,10 @@ class OpenAIClient {
       model: model,
       // responseFormat: {"type": "json_object"},
       seed: 6,
-      messages: messages.map((msg) => msg.toOpenAI()).toList(),
+      messages: [
+        ...messages.map((msg) => msg.toOpenAI()).toList(),
+        last.toOpenAI()
+      ],
       temperature: 0.2,
       maxTokens: 500,
     );
