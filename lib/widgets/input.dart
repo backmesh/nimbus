@@ -101,9 +101,10 @@ class _InputFieldState extends State<InputField> {
                 elevation: 4.0, // Add elevation to make it more visible
                 child: Container(
                   width: MediaQuery.of(context).size.width * 0.8,
+                  height: options.length * 50.0,
                   constraints: BoxConstraints(maxHeight: 200), // Limit height
                   child: ListView.builder(
-                    padding: EdgeInsets.all(8.0),
+                    padding: EdgeInsets.zero,
                     itemCount: options.length,
                     itemBuilder: (BuildContext context, int index) {
                       final String option = options.elementAt(index);
