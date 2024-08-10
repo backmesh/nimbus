@@ -1,13 +1,11 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:nimbus/files.dart';
 
 import '../user_store.dart';
 
 class InputField extends StatefulWidget {
   final List<Message> messages;
-  final Function(List<Message>, String) onSendMessage;
+  final Future<void> Function(List<Message>, Message) onSendMessage;
   const InputField(this.onSendMessage, this.messages);
 
   @override
@@ -22,30 +20,8 @@ class _InputFieldState extends State<InputField> {
   List<String> selectedFiles = [];
 
   Future<void> setFilesInHomeDirectory() async {
-    try {
-      final docs = await getApplicationDocumentsDirectory();
-      final downloads = await getDownloadsDirectory();
-
-      files = [];
-      await _addFilesFromDirectory(docs.path);
-      if (downloads != null) {
-        await _addFilesFromDirectory(downloads.path);
-      }
-
-      setState(() {});
-    } catch (e) {
-      print("Directory listing failed: $e");
-    }
-  }
-
-  Future<void> _addFilesFromDirectory(String path) async {
-    final directory = Directory(path);
-    final entities = await directory.list().toList();
-    for (var entity in entities) {
-      if (await FileSystemEntity.isFile(entity.path)) {
-        files.add(entity.path);
-      }
-    }
+    files = await Files.getSupportedFilePaths();
+    setState(() {});
   }
 
   @override
@@ -63,21 +39,25 @@ class _InputFieldState extends State<InputField> {
 
   void sendMessage() async {
     if (richTextController.text.isNotEmpty) {
-      widget.onSendMessage(widget.messages, richTextController.text);
+      await widget.onSendMessage(
+          widget.messages,
+          new Message(
+              content: richTextController.text,
+              filePaths: richTextController.selectedFiles));
       richTextController.clear();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    print('Building InputField widget');
+    // print('Building InputField widget');
     return Column(
       children: [
         RawAutocomplete<String>(
           textEditingController: richTextController,
           focusNode: focusNode,
           optionsBuilder: (TextEditingValue textEditingValue) {
-            print('optionsBuilder called with: ${textEditingValue.text}');
+            // print('optionsBuilder called with: ${textEditingValue.text}');
             if (textEditingValue.text.contains('@')) {
               String query = textEditingValue.text.split('@').last;
               List<String> filteredFiles = files
@@ -90,10 +70,10 @@ class _InputFieldState extends State<InputField> {
             return const Iterable<String>.empty();
           },
           onSelected: (String selection) {
-            print('onSelected called with: $selection');
+            // print('onSelected called with: $selection');
             int atIndex = input.lastIndexOf('@');
             String newText = input.substring(0, atIndex + 1) + selection;
-            print('newText: $newText');
+            // print('newText: $newText');
             input = newText;
             selectedFiles.add(selection);
             richTextController.updateText(newText, selectedFiles);
@@ -107,7 +87,7 @@ class _InputFieldState extends State<InputField> {
               controller: fieldTextEditingController,
               focusNode: focusNode,
               onChanged: (text) {
-                print('TextField onChanged called with: $text');
+                // print('TextField onChanged called with: $text');
                 if (text.isNotEmpty && input.isEmpty ||
                     text.isEmpty && input.isNotEmpty) {
                   input = text;
@@ -133,7 +113,7 @@ class _InputFieldState extends State<InputField> {
           optionsViewBuilder: (BuildContext context,
               AutocompleteOnSelected<String> onSelected,
               Iterable<String> options) {
-            print('optionsViewBuilder called with options: $options');
+            // print('optionsViewBuilder called with options: $options');
             return Align(
               alignment: Alignment.bottomLeft,
               child: Material(
@@ -147,10 +127,10 @@ class _InputFieldState extends State<InputField> {
                     itemCount: options.length,
                     itemBuilder: (BuildContext context, int index) {
                       final String option = options.elementAt(index);
-                      print('Building option: $option'); // Debug print
+                      // print('Building option: $option');
                       return GestureDetector(
                         onTap: () {
-                          print('Option tapped: $option'); // Debug print
+                          // print('Option tapped: $option');
                           onSelected(option);
                         },
                         child: ListTile(
@@ -174,13 +154,13 @@ class RichTextEditingController extends TextEditingController {
 
   void updateText(String text, List<String> selectedFiles) {
     this.selectedFiles = selectedFiles;
-    value = value.copyWith(
-      text: text,
-      selection: TextSelection.fromPosition(
-        TextPosition(offset: text.length),
-      ),
-      composing: TextRange.empty,
-    );
+    this.text = text;
+  }
+
+  @override
+  void clear() {
+    super.clear();
+    selectedFiles.clear();
   }
 
   @override

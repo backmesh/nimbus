@@ -44,6 +44,7 @@ dependencies:
   flutter_highlight: ^0.7.0
   path_provider: ^2.1.4
   google_generative_ai: ^0.4.4
+  mime: ^1.0.5
 
 dev_dependencies:
   flutter_test:
