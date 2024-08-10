@@ -38,7 +38,16 @@
 	<string>https://app.posthog.com</string>
 	<key>com.posthog.posthog.CAPTURE_APPLICATION_LIFECYCLE_EVENTS</key>
 	<true/>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Nimbus needs access to the microphone to record your audio entry.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.23195978304-tbro7dpn10m23g072jpup7u98orhbpub</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
