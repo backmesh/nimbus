@@ -4,6 +4,14 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:mime/mime.dart';
 
+// no official list, figured out through trial and error
+// according to docs all image/* mime types work but svg and .heic do not
+// for example
+const SUPPORTED_MIMES = [
+  'image/png',
+  'image/jpeg',
+];
+
 class Files {
   static Future<List<String>> getSupportedFilePaths() async {
     final docs = await getApplicationDocumentsDirectory();
@@ -29,17 +37,20 @@ class Files {
     return paths;
   }
 
-  static Future<Part> getPart(String path) async {
+  // if the file is not supported it returns nothing
+  // and the file is ignored to avoid gemini from erroring
+  static Future<Part?> getPart(String path) async {
     final mime = lookupMimeType(path);
     print('get message part for $path with mime $mime');
-    if (mime != null) {
+    if (mime == null) return null;
+    if (SUPPORTED_MIMES.contains(mime)) {
       return DataPart(mime, await File(path).readAsBytes());
     }
     // if (mime != null && mime.startsWith('text')) {
     //   String content = await File(path).readAsString();
     //   return TextPart('$path content: $content');
     // }
-    throw Exception('Unsupported file type called');
+    return null;
   }
 
   // Future<void> _extractTextFromPdf(String filePath) async {

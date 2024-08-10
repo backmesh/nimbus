@@ -49,13 +49,13 @@ class Message {
       String cleanContent = content;
       for (var fp in filePaths!) {
         final part = await Files.getPart(fp);
-        fileParts.add(part);
+        if (part != null) fileParts.add(part);
         // print(fp);
-        // cleanContent = cleanContent.replaceAll('@$fp', '');
+        cleanContent = cleanContent.replaceAll('@$fp', '');
         // print(cleanContent);
         // print(part.toJson());
       }
-      return Content(role, [TextPart(cleanContent), ...fileParts]);
+      return Content(role, [...fileParts, TextPart(cleanContent)]);
     }
     return Content(role, [TextPart(content)]);
   }

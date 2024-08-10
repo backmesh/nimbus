@@ -5,7 +5,7 @@ import '../user_store.dart';
 
 class InputField extends StatefulWidget {
   final List<Message> messages;
-  final Function(List<Message>, Message) onSendMessage;
+  final Future<void> Function(List<Message>, Message) onSendMessage;
   const InputField(this.onSendMessage, this.messages);
 
   @override

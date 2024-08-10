@@ -3,6 +3,8 @@ import 'package:google_generative_ai/src/model.dart'
     show createModelWithBaseUri;
 import 'package:nimbus/user_store.dart';
 
+// https://pub.dev/documentation/google_generative_ai/latest/google_generative_ai/google_generative_ai-library.html
+
 final MODEL = 'gemini-1.5-flash';
 final API_VERSION = 'v1beta';
 final BASE_URL =
@@ -23,12 +25,8 @@ class GeminiClient {
   factory GeminiClient(String token) {
     _instance ??= GeminiClient._();
     Uri uri = Uri.parse('$BASE_URL/$API_VERSION');
-    _instance!.client = createModelWithBaseUri(
-        model: MODEL,
-        apiKey: token,
-        baseUri: uri,
-        systemInstruction: Content.text(
-            'Files referenced with @this/file/path are provided as data parts'));
+    _instance!.client =
+        createModelWithBaseUri(model: MODEL, apiKey: token, baseUri: uri);
     return _instance!;
   }
 
