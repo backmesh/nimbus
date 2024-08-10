@@ -42,63 +42,74 @@ class Main extends StatefulWidget {
 }
 
 class _MainState extends State<Main> with WidgetsBindingObserver {
-  late StreamSubscription<User?> userStream;
-  User? user = null;
-  final _posthogFlutterPlugin = Posthog();
-
-  Future<void> init(User? fbUser) async {
-    if (fbUser != null) {
-      _posthogFlutterPlugin.identify(userId: fbUser.uid);
-      final token = await fbUser.getIdToken();
-      OpenAIClient(token!);
-      GeminiClient(token!);
-      UserStore(fbUser.uid);
-    } else {
-      UserStore.clear();
-    }
-    setState(() {
-      user = fbUser;
-    });
-  }
-
-  void initState() {
-    super.initState();
-    init(FirebaseAuth.instance.currentUser);
-    userStream = FirebaseAuth.instance.authStateChanges().listen(init);
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void dispose() {
-    userStream.cancel();
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     const primary = Color.fromRGBO(23, 89, 115, 1);
     //const secondary = Color.fromRGBO(140, 184, 159, 1);
     return MaterialApp(
-        navigatorObservers: [
-          // The PosthogObserver records screen views automatically
-          PosthogObserver()
-        ],
-        debugShowCheckedModeBanner: false,
-        title: 'Nimbus',
-        localizationsDelegates: [
-          GlobalMaterialLocalizations.delegate,
-        ],
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: primary),
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-          useMaterial3: true,
-        ),
-        supportedLocales: [
-          const Locale('en', 'US'),
-        ],
-        home: user == null ? ContinueWithApple() : ChatPage());
+      navigatorObservers: [
+        // The PosthogObserver records screen views automatically
+        PosthogObserver()
+      ],
+      debugShowCheckedModeBanner: false,
+      title: 'Nimbus',
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+      ],
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: primary),
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+        useMaterial3: true,
+      ),
+      supportedLocales: [
+        const Locale('en', 'US'),
+      ],
+      home: _AuthGate(),
+    );
+  }
+}
+
+class _AuthGate extends StatelessWidget {
+  final _posthogFlutterPlugin = Posthog();
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return ContinueWithApple();
+        }
+        final user = snapshot.data;
+        if (user != null) {
+          UserStore(user.uid);
+          _posthogFlutterPlugin.identify(userId: user.uid);
+          user.getIdToken().then((jwt) {
+            OpenAIClient(jwt!);
+            GeminiClient(jwt!);
+          });
+        }
+
+        if (user != null && !user.emailVerified) {
+          final emailProvider = user.providerData
+              .any((provider) => provider.providerId == 'password');
+          if (emailProvider) {
+            user.sendEmailVerification().then((_) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                      'Verification email sent to ${user.email}. Please verify your email.'),
+                ),
+              );
+              FirebaseAuth.instance.signOut();
+            });
+          }
+        }
+
+        return ChatPage();
+      },
+    );
   }
 }
 
