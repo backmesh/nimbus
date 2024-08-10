@@ -27,10 +27,7 @@ class Files {
       // }
       final mime = lookupMimeType(entity.path);
       if (mime == null) continue;
-      if (mime.startsWith('text')) {
-        paths.add(entity.path);
-      }
-      if (mime.startsWith('image')) {
+      if (isMimeSupported(mime)) {
         paths.add(entity.path);
       }
     }
@@ -46,11 +43,20 @@ class Files {
     if (SUPPORTED_MIMES.contains(mime)) {
       return DataPart(mime, await File(path).readAsBytes());
     }
+    if (mime.startsWith('text')) {
+      return TextPart(await File(path).readAsString());
+    }
     // if (mime != null && mime.startsWith('text')) {
     //   String content = await File(path).readAsString();
     //   return TextPart('$path content: $content');
     // }
     return null;
+  }
+
+  static bool isMimeSupported(String mime) {
+    if (SUPPORTED_MIMES.contains(mime)) return true;
+    if (mime.startsWith('text')) return true;
+    return false;
   }
 
   // Future<void> _extractTextFromPdf(String filePath) async {
