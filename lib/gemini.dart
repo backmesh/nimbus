@@ -3,6 +3,7 @@ import 'package:google_generative_ai/src/model.dart'
     show createModelWithBaseUri;
 import 'package:nimbus/user_store.dart';
 
+// https://github.com/google-gemini/generative-ai-dart/tree/main/pkgs/google_generative_ai
 // https://pub.dev/documentation/google_generative_ai/latest/google_generative_ai/google_generative_ai-library.html
 
 final MODEL = 'gemini-1.5-flash';
