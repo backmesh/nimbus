@@ -31,12 +31,14 @@ class Files {
 
   static Future<Part> getPart(String path) async {
     final mime = lookupMimeType(path);
-    if (mime != null && mime.startsWith('image')) {
+    print('get message part for $path with mime $mime');
+    if (mime != null) {
       return DataPart(mime, await File(path).readAsBytes());
     }
-    if (mime != null && mime.startsWith('text')) {
-      return TextPart(await File(path).readAsString());
-    }
+    // if (mime != null && mime.startsWith('text')) {
+    //   String content = await File(path).readAsString();
+    //   return TextPart('$path content: $content');
+    // }
     throw Exception('Unsupported file type called');
   }
 

@@ -39,7 +39,7 @@ class _InputFieldState extends State<InputField> {
 
   void sendMessage() async {
     if (richTextController.text.isNotEmpty) {
-      widget.onSendMessage(
+      await widget.onSendMessage(
           widget.messages,
           new Message(
               content: richTextController.text,
@@ -50,14 +50,14 @@ class _InputFieldState extends State<InputField> {
 
   @override
   Widget build(BuildContext context) {
-    print('Building InputField widget');
+    // print('Building InputField widget');
     return Column(
       children: [
         RawAutocomplete<String>(
           textEditingController: richTextController,
           focusNode: focusNode,
           optionsBuilder: (TextEditingValue textEditingValue) {
-            print('optionsBuilder called with: ${textEditingValue.text}');
+            // print('optionsBuilder called with: ${textEditingValue.text}');
             if (textEditingValue.text.contains('@')) {
               String query = textEditingValue.text.split('@').last;
               List<String> filteredFiles = files
@@ -70,10 +70,10 @@ class _InputFieldState extends State<InputField> {
             return const Iterable<String>.empty();
           },
           onSelected: (String selection) {
-            print('onSelected called with: $selection');
+            // print('onSelected called with: $selection');
             int atIndex = input.lastIndexOf('@');
             String newText = input.substring(0, atIndex + 1) + selection;
-            print('newText: $newText');
+            // print('newText: $newText');
             input = newText;
             selectedFiles.add(selection);
             richTextController.updateText(newText, selectedFiles);
@@ -87,7 +87,7 @@ class _InputFieldState extends State<InputField> {
               controller: fieldTextEditingController,
               focusNode: focusNode,
               onChanged: (text) {
-                print('TextField onChanged called with: $text');
+                // print('TextField onChanged called with: $text');
                 if (text.isNotEmpty && input.isEmpty ||
                     text.isEmpty && input.isNotEmpty) {
                   input = text;
@@ -113,7 +113,7 @@ class _InputFieldState extends State<InputField> {
           optionsViewBuilder: (BuildContext context,
               AutocompleteOnSelected<String> onSelected,
               Iterable<String> options) {
-            print('optionsViewBuilder called with options: $options');
+            // print('optionsViewBuilder called with options: $options');
             return Align(
               alignment: Alignment.bottomLeft,
               child: Material(
@@ -127,10 +127,10 @@ class _InputFieldState extends State<InputField> {
                     itemCount: options.length,
                     itemBuilder: (BuildContext context, int index) {
                       final String option = options.elementAt(index);
-                      print('Building option: $option'); // Debug print
+                      // print('Building option: $option');
                       return GestureDetector(
                         onTap: () {
-                          print('Option tapped: $option'); // Debug print
+                          // print('Option tapped: $option');
                           onSelected(option);
                         },
                         child: ListTile(

@@ -43,12 +43,17 @@ class Message {
 
   Future<Content> toGemini() async {
     final role = model == null ? 'user' : 'model';
+    print('filepaths $filePaths');
     if (filePaths != null && filePaths!.length > 0) {
       List<Part> fileParts = [];
       String cleanContent = content;
       for (var fp in filePaths!) {
-        fileParts.add(await Files.getPart(fp));
-        cleanContent.replaceAll(fp, '');
+        final part = await Files.getPart(fp);
+        fileParts.add(part);
+        // print(fp);
+        // cleanContent = cleanContent.replaceAll('@$fp', '');
+        // print(cleanContent);
+        // print(part.toJson());
       }
       return Content(role, [TextPart(cleanContent), ...fileParts]);
     }
