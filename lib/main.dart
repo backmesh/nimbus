@@ -12,7 +12,6 @@ import 'package:firebase_ui_oauth_apple/firebase_ui_oauth_apple.dart';
 import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:nimbus/gemini.dart';
-import 'package:nimbus/open_ai.dart';
 import 'package:nimbus/user_store.dart';
 import 'package:nimbus/firebase_options.dart';
 import 'package:nimbus/widgets/chat.dart';
@@ -100,7 +99,6 @@ class _AuthGate extends StatelessWidget {
           UserStore(user.uid);
           _posthogFlutterPlugin.identify(userId: user.uid);
           user.getIdToken().then((jwt) {
-            OpenAIClient(jwt!);
             GeminiClient(jwt!);
           });
         }
