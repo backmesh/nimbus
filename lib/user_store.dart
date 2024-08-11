@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dart_openai/dart_openai.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:nimbus/files.dart';
 import 'package:nimbus/functions.dart';
@@ -109,19 +108,6 @@ class Message {
       return Content(role, [...fileParts, TextPart(cleanContent)]);
     }
     return Content(role, [TextPart(content)]);
-  }
-
-  OpenAIChatCompletionChoiceMessageModel toOpenAI() {
-    return OpenAIChatCompletionChoiceMessageModel(
-      content: [
-        OpenAIChatCompletionChoiceMessageContentItemModel.text(
-          content,
-        ),
-      ],
-      role: model == null
-          ? OpenAIChatMessageRole.user
-          : OpenAIChatMessageRole.assistant,
-    );
   }
 
   bool user() {
