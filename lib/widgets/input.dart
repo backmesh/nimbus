@@ -28,6 +28,9 @@ class _InputFieldState extends State<InputField> {
   void initState() {
     super.initState();
     setFilesInHomeDirectory();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).requestFocus(focusNode);
+    });
   }
 
   @override
@@ -103,9 +106,13 @@ class _InputFieldState extends State<InputField> {
               decoration: InputDecoration(
                 hintText: 'Type your message...',
                 border: InputBorder.none,
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.send),
-                  onPressed: input.isNotEmpty ? () => sendMessage() : null,
+                suffixIcon: AnimatedOpacity(
+                  opacity: input.isNotEmpty ? 1.0 : 0.0,
+                  duration: Duration(milliseconds: 100),
+                  child: IconButton(
+                    icon: Icon(Icons.send),
+                    onPressed: input.isNotEmpty ? () => sendMessage() : null,
+                  ),
                 ),
               ),
             );
