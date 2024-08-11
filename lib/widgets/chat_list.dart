@@ -26,10 +26,20 @@ class _ChatListPageState extends State<ChatListPage> {
           return Center(child: CircularProgressIndicator());
         }
 
-        final itemCount = snapshot.docs.length;
+        if (snapshot.hasError) {
+          // TODO display with better UX as snack
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        final itemCount = snapshot.docs.length + (snapshot.hasMore ? 1 : 0);
         return ListView.builder(
           itemCount: itemCount,
           itemBuilder: (context, index) {
+            if (index == snapshot.docs.length) {
+              snapshot.fetchMore();
+              return Center(child: CircularProgressIndicator());
+            }
+
             final QueryDocumentSnapshot<Chat> doc = snapshot.docs[index];
             final Chat chat = doc.data();
             final textStyle = TextStyle(color: Color(0xFF606A85), fontSize: 15);
