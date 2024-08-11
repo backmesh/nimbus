@@ -1,4 +1,7 @@
-import 'package:process_run/process_run.dart';
+import 'dart:io';
+
+import 'package:nimbus/files.dart';
+import 'package:nimbus/functions.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:google_generative_ai/src/model.dart'
     show createModelWithBaseUri;
@@ -16,7 +19,7 @@ final BASE_URL =
 
 class GeminiClient {
   late GenerativeModel client;
-  late Future<FunctionResponse> Function(FunctionCall) dispatchFunctionCall;
+  // late Future<FunctionResponse> Function(FunctionCall) dispatchFunctionCall;
 
   static GeminiClient? _instance;
 
@@ -30,74 +33,87 @@ class GeminiClient {
   factory GeminiClient(String token) {
     _instance ??= GeminiClient._();
 
-    Future<Map<String, Object?>> runShellCommand(
-        Map<String, Object?> args) async {
-      final command = args['command'] as String;
-      final arguments =
-          (args['arguments'] as List<dynamic>? ?? []).cast<String>();
-      final results = await run(command + arguments.join(' '));
-      for (var result in results) {
-        if (result.exitCode == 0) {
-          print('Command output: ${result.stdout}');
-          return {'output': result.stdout.trim()};
-        } else {
-          print('Error running command: ${result.stderr}');
-          return {'error': result.stderr.trim()};
-        }
-      }
-      // Add this return statement to handle cases where no result is returned
-      return {'error': 'No result returned from shell command'};
-    }
-
-    final runShellCommandFunction = FunctionDeclaration(
-        'runShellCommand',
-        'Run a shell command and set computer settings.',
+    final runCodeFunction = FunctionDeclaration(
+        'runCode',
+        'Run code on the User\'s machine',
         Schema.object(properties: {
-          'command': Schema.string(
-              description: 'The shell command to run.', nullable: false),
-          'arguments': Schema.array(
-              items: Schema.string(),
-              description: 'Arguments for the shell command.',
-              nullable: false)
+          'code': Schema.string(
+              description: 'The shell command to run.', nullable: false)
         }));
-    final functions = {runShellCommandFunction.name: runShellCommand};
-    _instance!.dispatchFunctionCall = (FunctionCall call) async {
-      final function = functions[call.name]!;
-      final result = await function(call.args);
-      return FunctionResponse(call.name, result);
-    };
 
+    // GET OS FN
+    // Future<Map<String, Object?>> getOSInfo(Map<String, Object?> args) async {
+    //   final os = Platform.operatingSystem;
+    //   final osVersion = Platform.operatingSystemVersion;
+    //   return {'os': os, 'version': osVersion};
+    // }
+
+    // final getOSInfoFunction = FunctionDeclaration(
+    //     'getOSInfo',
+    //     'Get the operating system information.',
+    //     Schema.object(properties: {
+    //       'os': Schema.string(description: 'The operating system name.'),
+    //       'version': Schema.string(description: 'The operating system version.')
+    //     }));
+
+    final sysMessage = """
+      You are a world-class programmer and system administrator that can complete any goal by executing code.
+      When you execute code, it will be executed **on the user's machine**. The user has given you **full and complete permission** to execute any code necessary to complete the task. Execute the code.
+      You can access the internet. Run **any code** to achieve the goal, and if at first you don't succeed, try again and again.
+      You can install new packages.
+      You can process and understand files with the following mimes: ${SUPPORTED_GEMINI_MIMES.join(',')}.
+      The user can reference and upload files in their machine which is typically what they reference when they talk about filenames.
+      Write messages to the user in Markdown.
+      You are capable of **any** task.
+
+      User's OS: ${Platform.operatingSystem}
+      User's OS version: ${Platform.operatingSystemVersion}
+    """;
     Uri uri = Uri.parse('$BASE_URL/$API_VERSION');
     _instance!.client = createModelWithBaseUri(
         model: MODEL,
         apiKey: token,
         baseUri: uri,
+        systemInstruction: Content.system(sysMessage),
+        safetySettings: [
+          SafetySetting(HarmCategory.dangerousContent, HarmBlockThreshold.high)
+        ],
         tools: [
-          Tool(functionDeclarations: [runShellCommandFunction])
+          Tool(functionDeclarations: [
+            runCodeFunction,
+            // getOSInfoFunction
+          ])
         ]);
     return _instance!;
   }
 
-  Stream<String> chatCompleteStream(
+  Stream<Message> chatCompleteStream(
       List<Message> messages, Message last) async* {
     List<Content> contents = [];
     for (var msg in messages) {
       contents.add(await msg.toGemini());
     }
     final chat = client.startChat(history: contents);
+    final message = new Message(content: '', model: MODEL);
     try {
       final lastMessage = await last.toGemini();
       await for (var response in chat.sendMessageStream(lastMessage)) {
-        String message = response.text ?? '';
+        message.content += response.text ?? '';
         List<FunctionCall> functionCalls = response.functionCalls.toList();
         if (functionCalls.isNotEmpty) {
-          var fnResps = <FunctionResponse>[
-            for (final functionCall in functionCalls)
-              await dispatchFunctionCall(functionCall)
-          ];
-          fnResps.forEach((fnResp) => message += fnResp.toJson().toString());
+          // var fnResps = <FunctionResponse>[
+          for (final functionCall in functionCalls)
+            // TODO ask for consent before running
+            // TODO be able to cancel
+            // TODO terminal user to respond with error
+            message.fnCalls.add(FnCall(
+                fnArgs: functionCall.args,
+                fnName: functionCall.name,
+                fnOutput: {}));
+          // ];
+          //fnResps.forEach((fnResp) => message += fnResp.toJson().toString());
         }
-        print('Response: ${message}');
+        print('Response: ${message.content}');
         yield message;
       }
     } catch (e) {

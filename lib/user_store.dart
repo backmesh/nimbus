@@ -2,21 +2,56 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dart_openai/dart_openai.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:nimbus/files.dart';
+import 'package:nimbus/functions.dart';
+
+class FnCall {
+  final Map<String, Object?> fnArgs;
+  final String fnName;
+  Map<String, Object?> fnOutput;
+
+  FnCall({required this.fnArgs, required this.fnName, required this.fnOutput});
+
+  FnCall.fromDb(Map<String, Object?> json)
+      : fnArgs = json['fnArgs'] as Map<String, Object?>,
+        fnName = json['fnName'] as String,
+        fnOutput = json['fnOutput'] is Map<String, Object?>
+            ? json['fnOutput'] as Map<String, Object?>
+            : {};
+
+  Map<String, Object?> toDb() {
+    return {
+      'fnArgs': fnArgs,
+      'fnName': fnName,
+      'fnOutput': fnOutput,
+    };
+  }
+
+  run() async {
+    try {
+      fnOutput = await functions[fnName]!(fnArgs);
+    } catch (e) {
+      fnOutput = {'error': e};
+    }
+  }
+}
 
 class Message {
   final DateTime date;
   final String? model;
   String content;
   final List<String>? filePaths;
+  final List<FnCall> fnCalls;
 
   Message(
       {DateTime? date,
       String? model,
+      List<FnCall>? fnCalls,
       List<String>? filePaths,
       required String content})
       : this.date = date ?? DateTime.now(),
         this.filePaths = filePaths ?? [],
         this.model = model,
+        this.fnCalls = fnCalls ?? [],
         this.content = content;
 
   Message.fromDb(Map<String, Object?> json)
@@ -25,6 +60,11 @@ class Message {
                 ? (json['date']! as Timestamp).toDate()
                 : DateTime.now(),
             content: json['content'] != null ? json['content'] as String : "",
+            fnCalls: json['fnCalls'] != null
+                ? (json['fnCalls'] as List<dynamic>)
+                    .map((e) => FnCall.fromDb(e as Map<String, Object?>))
+                    .toList()
+                : [],
             filePaths: json['filePaths'] != null
                 ? (json['filePaths'] as List<dynamic>)
                     .map((e) => e as String)
@@ -38,7 +78,18 @@ class Message {
       'model': model,
       'content': content,
       'filePaths': filePaths,
+      'fnCalls': fnCalls.map((e) => e.toDb()).toList(),
     };
+  }
+
+  bool isUser() {
+    return model?.isEmpty ?? true;
+  }
+
+  Message getFnCallResMessage() {
+    final res = fnCalls.map((fn) => fn.fnOutput['output']).join('\n');
+    // TODO create terminal user
+    return Message(content: res.isEmpty ? 'No output returned' : res);
   }
 
   Future<Content> toGemini() async {
@@ -84,21 +135,15 @@ class Message {
 
 class Chat {
   final DateTime date;
-  final String model;
 
-  Chat({DateTime? date, String? model})
-      : this.date = date ?? DateTime.now(),
-        this.model = model ?? "gpt-4o";
+  Chat({DateTime? date}) : this.date = date ?? DateTime.now();
 
   Chat.fromDb(Map<String, Object?> json)
-      : this(
-            date: (json['date']! as Timestamp).toDate(),
-            model: json['model']! as String);
+      : this(date: (json['date']! as Timestamp).toDate());
 
   Map<String, Object?> toDb() {
     return {
       'date': Timestamp.fromDate(date),
-      'model': model,
     };
   }
 
