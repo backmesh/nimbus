@@ -43,7 +43,8 @@ class _InputFieldState extends State<InputField> {
           widget.messages,
           new Message(
               content: richTextController.text,
-              filePaths: richTextController.selectedFiles));
+              // Pass a copy
+              filePaths: List<String>.from(richTextController.selectedFiles)));
       richTextController.clear();
     }
   }
