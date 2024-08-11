@@ -31,13 +31,17 @@ class _ChatPageState extends State<ChatPage> {
       List<Message> allMessages, Message userMessage) async {
     final emptyChat = widget.chat == null && allMessages.isEmpty;
     if (emptyChat) await UserStore.instance.saveChat(chat);
-    await UserStore.instance.addMessage(chat, userMessage);
+    await UserStore.instance.saveMessage(chat, userMessage);
     _userHasScrolled = false;
     scrollToLastMessage();
-    final assistantMssg =
-        await GeminiClient.instance.chatComplete(allMessages, userMessage);
-    await UserStore.instance.addMessage(chat, assistantMssg);
-    scrollToLastMessage();
+    final assistantMssg = new Message(content: '', model: MODEL);
+    await GeminiClient.instance
+        .chatCompleteStream(allMessages, userMessage)
+        .listen((text) async {
+      assistantMssg.content += text;
+      await UserStore.instance.saveMessage(chat, assistantMssg);
+      scrollToLastMessage();
+    });
   }
 
   void _onScroll() {

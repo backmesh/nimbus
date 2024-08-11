@@ -6,7 +6,7 @@ import 'package:nimbus/files.dart';
 class Message {
   final DateTime date;
   final String? model;
-  final String content;
+  String content;
   final List<String>? filePaths;
 
   Message(
@@ -162,7 +162,7 @@ class UserStore {
         .orderBy('date', descending: false);
   }
 
-  Future<void> addMessage(Chat chat, Message message) async {
+  Future<void> saveMessage(Chat chat, Message message) async {
     await chatsRef
         .doc(chat.docKey())
         .collection('messages')
