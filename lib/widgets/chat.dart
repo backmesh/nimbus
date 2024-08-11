@@ -34,13 +34,10 @@ class _ChatPageState extends State<ChatPage> {
     await UserStore.instance.saveMessage(chat, userMessage);
     _userHasScrolled = false;
     scrollToLastMessage();
-    // TODO get model from somewhere else
-    final assistantMssg = new Message(content: '', model: MODEL);
     await GeminiClient.instance
         .chatCompleteStream(allMessages, userMessage)
-        .listen((text) async {
-      assistantMssg.content += text;
-      await UserStore.instance.saveMessage(chat, assistantMssg);
+        .listen((mssg) async {
+      await UserStore.instance.saveMessage(chat, mssg);
       scrollToLastMessage();
     });
   }
@@ -116,23 +113,48 @@ class _ChatPageState extends State<ChatPage> {
                               scrollToLastMessage();
                             });
                             final Message message = allMessages[index];
-                            final isUser = message.model?.isEmpty ?? true;
                             return ListTile(
                                 // Indent based on the sender
                                 contentPadding: EdgeInsets.only(
-                                  left: isUser ? 50 : 0,
-                                  right: isUser ? 0 : 50,
+                                  left: message.isUser() ? 50 : 0,
+                                  right: message.isUser() ? 0 : 50,
                                 ),
                                 leading: Icon(Icons.message, size: 20),
                                 title: Padding(
                                   padding: const EdgeInsets.only(left: 8.0),
-                                  child: MarkdownBody(
-                                    data: message.content,
-                                    selectable: true,
-                                    extensionSet: md.ExtensionSet.gitHubWeb,
-                                    builders: {
-                                      'code': CodeElementBuilder(),
-                                    },
+                                  child: Column(
+                                    children: [
+                                      MarkdownBody(
+                                        data: message.fnCalls.length > 0
+                                            ? '''```bash
+                                            ${message.fnCalls.map((f) => f.fnArgs['code']).join('\n')}
+                                            '''
+                                            : message.content,
+                                        selectable: true,
+                                        extensionSet: md.ExtensionSet.gitHubWeb,
+                                        builders: {
+                                          'code': CodeElementBuilder(),
+                                        },
+                                      ),
+                                      if (message.fnCalls.length > 0)
+                                        OutlinedButton(
+                                            // TODO hide button after it runs
+                                            // TODO show some loading indicator
+                                            onPressed: () async {
+                                              for (var fnC in message.fnCalls) {
+                                                await fnC.run();
+                                              }
+                                              await UserStore.instance
+                                                  .saveMessage(chat, message);
+                                              await UserStore.instance
+                                                  .saveMessage(
+                                                      chat,
+                                                      message
+                                                          .getFnCallResMessage());
+                                              scrollToLastMessage();
+                                            },
+                                            child: Text('Run'))
+                                    ],
                                   ),
                                 ));
                           })),
