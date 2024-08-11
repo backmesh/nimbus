@@ -34,6 +34,7 @@ class _ChatPageState extends State<ChatPage> {
     await UserStore.instance.saveMessage(chat, userMessage);
     _userHasScrolled = false;
     scrollToLastMessage();
+    // TODO get model from somewhere else
     final assistantMssg = new Message(content: '', model: MODEL);
     await GeminiClient.instance
         .chatCompleteStream(allMessages, userMessage)
@@ -92,11 +93,9 @@ class _ChatPageState extends State<ChatPage> {
 
           final itemCount = snapshot.docs.length;
           final allMessages = snapshot.docs.map((doc) => doc.data()).toList();
-          final isChatEmpty = widget.chat == null && allMessages.isEmpty;
-
           return Scaffold(
             extendBodyBehindAppBar: true,
-            appBar: CommonAppBar(chat: isChatEmpty ? null : widget.chat),
+            appBar: CommonAppBar(chat: allMessages.isEmpty ? null : chat),
             drawer: CommonDrawer(),
             body: Container(
               padding: EdgeInsets.only(
