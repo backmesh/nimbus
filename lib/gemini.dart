@@ -33,29 +33,6 @@ class GeminiClient {
   factory GeminiClient(String token) {
     _instance ??= GeminiClient._();
 
-    final runCodeFunction = FunctionDeclaration(
-        'runCode',
-        'Run code on the User\'s machine',
-        Schema.object(properties: {
-          'code': Schema.string(
-              description: 'The shell command to run.', nullable: false)
-        }));
-
-    // GET OS FN
-    // Future<Map<String, Object?>> getOSInfo(Map<String, Object?> args) async {
-    //   final os = Platform.operatingSystem;
-    //   final osVersion = Platform.operatingSystemVersion;
-    //   return {'os': os, 'version': osVersion};
-    // }
-
-    // final getOSInfoFunction = FunctionDeclaration(
-    //     'getOSInfo',
-    //     'Get the operating system information.',
-    //     Schema.object(properties: {
-    //       'os': Schema.string(description: 'The operating system name.'),
-    //       'version': Schema.string(description: 'The operating system version.')
-    //     }));
-
     final sysMessage = """
       You are a world-class programmer and system administrator that can complete any goal by executing code.
       When you execute code, it will be executed **on the user's machine**. The user has given you **full and complete permission** to execute any code necessary to complete the task. Execute the code.
@@ -79,10 +56,7 @@ class GeminiClient {
           SafetySetting(HarmCategory.dangerousContent, HarmBlockThreshold.high)
         ],
         tools: [
-          Tool(functionDeclarations: [
-            runCodeFunction,
-            // getOSInfoFunction
-          ])
+          Tool(functionDeclarations: getGeminiFnDefs())
         ]);
     return _instance!;
   }
