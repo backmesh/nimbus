@@ -32,8 +32,8 @@ class CommonDrawer extends StatelessWidget {
 }
 
 class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final bool emptyChat;
-  const CommonAppBar({required this.emptyChat});
+  final Chat? chat;
+  const CommonAppBar({required this.chat});
 
   @override
   Widget build(BuildContext context) {
@@ -48,8 +48,41 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: [
         IconButton(
-            onPressed: !emptyChat ? () => pushChatPage(context) : null,
+            onPressed: chat != null ? () => pushChatPage(context) : null,
             icon: Icon(Icons.add_comment)),
+        IconButton(
+            onPressed: chat != null
+                ? () async {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('Delete Chat'),
+                          content: const Text('''This cannot be undone.'''),
+                          actions: [
+                            TextButton(
+                              child: const Text('Cancel'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                            TextButton(
+                              child: const Text(
+                                'Delete',
+                              ),
+                              onPressed: () async {
+                                await UserStore.instance.deleteChat(chat!);
+                                Navigator.of(context).pop();
+                                pushChatPage(context);
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                : null,
+            icon: Icon(Icons.delete)),
         PopupMenuButton<int>(
           icon: Icon(Icons.more_horiz),
           offset: Offset(0, 40),
@@ -61,7 +94,7 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: const Text('Logout?'),
+                      title: const Text('Logout'),
                       content: const Text(
                           '''If you Logout, you will need to log in to access your account again.'''),
                       actions: [

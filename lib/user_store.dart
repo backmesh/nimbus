@@ -141,8 +141,26 @@ class UserStore {
     return chatsRef.orderBy('date', descending: true);
   }
 
-  Future<void> deleteChat(String chatKey) async {
-    await chatsRef.doc(chatKey).delete();
+  Future<void> deleteChat(Chat chat) async {
+    final chatDoc = chatsRef.doc(chat.docKey());
+    final messagesCollection = chatDoc.collection('messages');
+
+    // Get all messages in the nested collection
+    final messagesSnapshot = await messagesCollection.get();
+
+    // Create a batch
+    final batch = FirebaseFirestore.instance.batch();
+
+    // Add delete operations for each message document to the batch
+    for (var doc in messagesSnapshot.docs) {
+      batch.delete(doc.reference);
+    }
+
+    // Add delete operation for the chat document to the batch
+    batch.delete(chatDoc);
+
+    // Commit the batch
+    await batch.commit();
   }
 
   Future<void> saveChat(Chat chat) async {

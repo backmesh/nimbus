@@ -92,11 +92,11 @@ class _ChatPageState extends State<ChatPage> {
 
           final itemCount = snapshot.docs.length;
           final allMessages = snapshot.docs.map((doc) => doc.data()).toList();
-          final emptyChat = widget.chat == null && allMessages.isEmpty;
+          final isChatEmpty = widget.chat == null && allMessages.isEmpty;
 
           return Scaffold(
             extendBodyBehindAppBar: true,
-            appBar: CommonAppBar(emptyChat: emptyChat),
+            appBar: CommonAppBar(chat: isChatEmpty ? null : widget.chat),
             drawer: CommonDrawer(),
             body: Container(
               padding: EdgeInsets.only(
