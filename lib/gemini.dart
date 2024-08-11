@@ -10,6 +10,8 @@ final MODEL = 'gemini-1.5-flash';
 final API_VERSION = 'v1beta';
 final BASE_URL =
     'https://edge.backmesh.com/v1/proxy/PyHU4LvcdsQ4gm2xeniAFhMyuDl2/aUxjzrA9w7K9auXp6Be8';
+// final BASE_URL =
+//     'http://localhost:8787/v1/proxy/gbBbHCDBxqb8zwMk6dCio63jhOP2/lVXeOSrFwT9eQxtRRjp4';
 
 class GeminiClient {
   late GenerativeModel client;
@@ -26,23 +28,26 @@ class GeminiClient {
   factory GeminiClient(String token) {
     _instance ??= GeminiClient._();
     Uri uri = Uri.parse('$BASE_URL/$API_VERSION');
-    _instance!.client =
-        createModelWithBaseUri(model: MODEL, apiKey: token, baseUri: uri);
+    _instance!.client = createModelWithBaseUri(
+      model: MODEL,
+      apiKey: token,
+      baseUri: uri,
+    );
     return _instance!;
   }
 
-  Future<Message> chatComplete(List<Message> messages, Message last) async {
+  Stream<String> chatCompleteStream(
+      List<Message> messages, Message last) async* {
     List<Content> contents = [];
     for (var msg in messages) {
       contents.add(await msg.toGemini());
     }
     final chat = client.startChat(history: contents);
     try {
-      final response = await chat.sendMessage(
-        await last.toGemini(),
-      );
-      print('Response: ${response.text}');
-      return new Message(content: response.text ?? '', model: MODEL);
+      final lastMessage = await last.toGemini();
+      await for (var response in chat.sendMessageStream(lastMessage)) {
+        yield response.text!;
+      }
     } catch (e) {
       print('Error: $e'); // Log any errors
       rethrow; // Re-throw the error after logging it

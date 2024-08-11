@@ -11,7 +11,7 @@ import 'package:mime/mime.dart';
 // only image/* mime types work but pdf does and svg and heic do not
 // https://github.com/google-gemini/generative-ai-dart/blob/9ea128fa6ca8b4e387973e0bf28eb2fe9feeea6a/samples/dart/bin/advanced_text_and_image.dart#L42
 // https://github.com/google-gemini/generative-ai-dart/blob/9ea128fa6ca8b4e387973e0bf28eb2fe9feeea6a/samples/flutter_app/lib/main.dart#L226
-const SUPPORTED_MIMES = [
+const SUPPORTED_GEMINI_MIMES = [
   'image/png',
   'image/jpg',
   'image/jpeg',
@@ -43,7 +43,7 @@ class Files {
     final mime = lookupMimeType(path);
     print('get message part for $path with mime $mime');
     if (mime == null) return null;
-    if (SUPPORTED_MIMES.contains(mime)) {
+    if (SUPPORTED_GEMINI_MIMES.contains(mime)) {
       return DataPart(mime, await File(path).readAsBytes());
     }
     if (mime.startsWith('text')) {
@@ -56,7 +56,7 @@ class Files {
   }
 
   static bool isMimeSupported(String mime) {
-    if (SUPPORTED_MIMES.contains(mime)) return true;
+    if (SUPPORTED_GEMINI_MIMES.contains(mime)) return true;
     if (mime.startsWith('text')) return true;
     if (mime == 'application/json') return true;
     return false;

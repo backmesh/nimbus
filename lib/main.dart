@@ -54,7 +54,6 @@ class _MainState extends State<Main> with WidgetsBindingObserver {
         PosthogObserver()
       ],
       debugShowCheckedModeBanner: false,
-      title: 'Nimbus',
       localizationsDelegates: [
         GlobalMaterialLocalizations.delegate,
       ],
