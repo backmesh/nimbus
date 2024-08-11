@@ -19,7 +19,6 @@ final BASE_URL =
 
 class GeminiClient {
   late GenerativeModel client;
-  // late Future<FunctionResponse> Function(FunctionCall) dispatchFunctionCall;
 
   static GeminiClient? _instance;
 
