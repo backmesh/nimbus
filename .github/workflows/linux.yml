@@ -1,0 +1,40 @@
+name: Build and Release Flutter Linux App
+
+on:
+  workflow_dispatch: # Trigger manually
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v1
+        with:
+          flutter-version: stable
+          flutter-version-file: pubspec.yaml
+
+      - name: Flutter version used
+        run: flutter --version
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build Release App
+        run: flutter build linux --release
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ runner.os }}-release-${{ github.run_number }}
+          body: Release built on ${{ runner.os }}
+
+      - name: Upload Release Artifact
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: build/linux/release/bundle
+          asset_name: ${{ runner.os }}-release-${{ github.run_number }}.zip
+          asset_content_type: application/zip
