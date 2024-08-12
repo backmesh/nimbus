@@ -141,26 +141,26 @@ class UserMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-        alignment: Alignment.centerRight, // Ensure alignment to the right
-        child: FractionallySizedBox(
-          widthFactor: 0.7,
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: Container(
-              margin: EdgeInsets.all(15.0), // Add some vertical margin
-              padding:
-                  EdgeInsets.all(15.0), // Add padding for better appearance
-              decoration: BoxDecoration(
-                color: Theme.of(context)
-                    .colorScheme
-                    .primaryContainer, // Background color for user message
-                borderRadius: BorderRadius.circular(10.0), // Rounded corners
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 30),
+      child: Align(
+          alignment: Alignment.centerRight,
+          child: FractionallySizedBox(
+            widthFactor: 0.7,
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Container(
+                margin: EdgeInsets.all(15.0),
+                padding: EdgeInsets.all(15.0),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                child: SelectableText(message.content),
               ),
-              child: SelectableText(message.content),
             ),
-          ),
-        ));
+          )),
+    );
   }
 }
 
@@ -177,7 +177,7 @@ class AIMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
