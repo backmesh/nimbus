@@ -59,29 +59,28 @@ class GeminiClient {
   }
 
   Stream<Message> chatCompleteStream(
-      List<Message> messages, Message last) async* {
+      List<Message> history, Message userMessage, Message aiMessage) async* {
     List<Content> contents = [Content.text(sysMessage)];
-    for (var msg in messages) {
+    for (var msg in history) {
       contents.add(await msg.toGemini());
     }
     final chat = client.startChat(history: contents);
-    final message = new Message(content: '', model: UserStore.instance.model);
     try {
-      final lastMessage = await last.toGemini();
+      final lastMessage = await userMessage.toGemini();
       await for (var response in chat.sendMessageStream(lastMessage)) {
-        message.content += response.text ?? '';
+        aiMessage.content += response.text ?? '';
         List<FunctionCall> functionCalls = response.functionCalls.toList();
         if (functionCalls.isNotEmpty) {
           for (final functionCall in functionCalls)
             // TODO be able to cancel
             // TODO terminal user to respond with error
-            message.fnCalls.add(FnCall(
+            aiMessage.fnCalls.add(FnCall(
                 fnArgs: functionCall.args,
                 fnName: functionCall.name,
                 fnOutput: {}));
         }
-        print('Response: ${message.content}');
-        yield message;
+        // print('Response: ${aiMessage.content}');
+        yield aiMessage;
       }
     } catch (e) {
       print('Error: $e'); // Log any errors

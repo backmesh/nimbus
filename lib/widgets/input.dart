@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -6,7 +8,8 @@ import '../user_store.dart';
 
 class InputField extends StatefulWidget {
   final List<Message> messages;
-  final Future<void> Function(List<Message>, Message) onSendMessage;
+  final Future<StreamSubscription<Message>> Function(List<Message>, Message)
+      onSendMessage;
   const InputField(this.onSendMessage, this.messages);
 
   @override
@@ -16,6 +19,8 @@ class InputField extends StatefulWidget {
 class _InputFieldState extends State<InputField> {
   String input = '';
   final richTextController = RichTextEditingController();
+  bool isStreaming = false;
+  StreamSubscription<Message>? subscription;
   late final focusNode = FocusNode(
     onKey: _handleKeyPress,
   );
@@ -57,13 +62,18 @@ class _InputFieldState extends State<InputField> {
 
   void sendMessage() async {
     if (richTextController.text.trim().replaceAll('\n', '').isNotEmpty) {
-      await widget.onSendMessage(
+      subscription = await widget.onSendMessage(
           widget.messages,
           new Message(
               content: richTextController.text,
               // Pass a copy
               filePaths: List<String>.from(richTextController.selectedFiles)));
       richTextController.clear();
+      isStreaming = true;
+      setState(() {});
+      await subscription?.asFuture();
+      isStreaming = false;
+      setState(() {});
     }
   }
 
@@ -145,13 +155,27 @@ class _InputFieldState extends State<InputField> {
                 suffixIcon: AnimatedOpacity(
                   opacity: input.isNotEmpty ? 1.0 : 0.0,
                   duration: Duration(milliseconds: 100),
-                  child: IconButton(
-                    icon: Icon(Icons.send),
-                    padding: EdgeInsets.only(left: 5),
-                    onPressed: input.trim().replaceAll('\n', '').isNotEmpty
-                        ? () => sendMessage()
-                        : null,
-                  ),
+                  child: isStreaming
+                      ? IconButton(
+                          iconSize: 20,
+                          icon: Icon(Icons.stop_circle),
+                          padding: EdgeInsets.all(5),
+                          onPressed: () {
+                            subscription?.cancel();
+                            isStreaming = false;
+                            setState(() {});
+                          })
+                      : IconButton(
+                          iconSize: 20,
+                          icon: Icon(
+                            Icons.send,
+                          ),
+                          padding: EdgeInsets.all(5),
+                          onPressed:
+                              input.trim().replaceAll('\n', '').isNotEmpty
+                                  ? () => sendMessage()
+                                  : null,
+                        ),
                 ),
               ),
             );

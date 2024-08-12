@@ -48,7 +48,7 @@ class Files {
   // and the file is ignored to avoid gemini from erroring
   static Future<Part?> getPart(String path) async {
     final mime = lookupMimeType(path);
-    print('get message part for $path with mime $mime');
+    // print('get message part for $path with mime $mime');
     if (mime == null) return null;
     if (SUPPORTED_GEMINI_MIMES.contains(mime)) {
       return DataPart(mime, await File(path).readAsBytes());

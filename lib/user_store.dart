@@ -101,7 +101,7 @@ class Message {
 
   Future<Content> toGemini() async {
     final role = model == null ? 'user' : 'model';
-    print('filepaths $filePaths');
+    // print('filepaths $filePaths');
     if (filePaths != null && filePaths!.length > 0) {
       List<Part> fileParts = [];
       String cleanContent = content;
