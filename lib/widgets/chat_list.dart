@@ -6,6 +6,10 @@ import 'package:nimbus/widgets/common.dart';
 import '../user_store.dart';
 
 class ChatListPage extends StatefulWidget {
+  final Chat? chat;
+
+  ChatListPage({required this.chat});
+
   @override
   _ChatListPageState createState() => _ChatListPageState();
 }
@@ -43,9 +47,13 @@ class _ChatListPageState extends State<ChatListPage> {
             final QueryDocumentSnapshot<Chat> doc = snapshot.docs[index];
             final Chat chat = doc.data();
             final textStyle = TextStyle(color: Color(0xFF606A85), fontSize: 15);
+            final isHighlighted =
+                widget.chat != null && chat.docKey() == widget.chat!.docKey();
             return ListTile(
-                title: Text(localizations.formatShortDate(chat.date),
-                    style: textStyle),
+                title: Text(localizations.formatShortDate(chat.date)),
+                tileColor: isHighlighted
+                    ? Theme.of(context).colorScheme.secondaryContainer
+                    : null, // Highlighted background color
                 onTap: () => pushChatPage(context, chat));
           },
         );

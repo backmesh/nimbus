@@ -5,7 +5,7 @@ import 'package:nimbus/gemini.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:markdown/markdown.dart' as md;
 
-import 'package:flutter_highlight/themes/github.dart';
+import 'package:flutter_highlight/themes/a11y-light.dart';
 
 import 'package:nimbus/widgets/common.dart';
 import 'package:nimbus/widgets/highlight.dart';
@@ -93,14 +93,9 @@ class _ChatPageState extends State<ChatPage> {
           return Scaffold(
             extendBodyBehindAppBar: true,
             appBar: CommonAppBar(chat: allMessages.isEmpty ? null : chat),
-            drawer: CommonDrawer(),
+            drawer: CommonDrawer(chat: allMessages.isEmpty ? null : chat),
             body: Container(
-              padding: EdgeInsets.only(
-                top: 75,
-                bottom: 25,
-                left: 25,
-                right: 25,
-              ),
+              padding: EdgeInsets.all(25),
               child: Column(
                 children: [
                   Expanded(
@@ -113,56 +108,103 @@ class _ChatPageState extends State<ChatPage> {
                               scrollToLastMessage();
                             });
                             final Message message = allMessages[index];
-                            return ListTile(
-                                // Indent based on the sender
-                                contentPadding: EdgeInsets.only(
-                                  left: message.isUser() ? 50 : 0,
-                                  right: message.isUser() ? 0 : 50,
-                                ),
-                                leading: Icon(Icons.message, size: 20),
-                                title: Padding(
-                                  padding: const EdgeInsets.only(left: 8.0),
-                                  child: Column(
-                                    children: [
-                                      MarkdownBody(
-                                        data: message.fnCalls.length > 0
-                                            ? '''```bash
-                                            ${message.fnCalls.map((f) => f.fnArgs['code']).join('\n')}
-                                            '''
-                                            : message.content,
-                                        selectable: true,
-                                        extensionSet: md.ExtensionSet.gitHubWeb,
-                                        builders: {
-                                          'code': CodeElementBuilder(),
-                                        },
-                                      ),
-                                      SizedBox(height: 10),
-                                      if (message.fnCalls.length > 0 &&
-                                          !message.fnCallsDone())
-                                        FilledButton.tonal(
-                                            // TODO show some loading indicator
-                                            onPressed: () async {
-                                              for (var fnC in message.fnCalls) {
-                                                await fnC.run();
-                                              }
-                                              await UserStore.instance
-                                                  .saveMessage(chat, message);
-                                              // await sendMessage(
-                                              //     allMessages,
-                                              //     message
-                                              //         .getFnCallResMessage());
-                                            },
-                                            child: Text('Run'))
-                                    ],
-                                  ),
-                                ));
+                            return message.isUser()
+                                ? UserMessage(message: message)
+                                : AIMessage(message: message, chat: chat);
                           })),
+                  const SizedBox(height: 15),
                   InputField(sendMessage, allMessages)
                 ],
               ),
             ),
           );
         });
+  }
+}
+
+class UserMessage extends StatelessWidget {
+  final Message message;
+
+  const UserMessage({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+        alignment: Alignment.centerRight, // Ensure alignment to the right
+        child: FractionallySizedBox(
+          widthFactor: 0.7,
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Container(
+              margin: EdgeInsets.all(15.0), // Add some vertical margin
+              padding:
+                  EdgeInsets.all(15.0), // Add padding for better appearance
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .primaryContainer, // Background color for user message
+                borderRadius: BorderRadius.circular(10.0), // Rounded corners
+              ),
+              child: MarkdownBody(
+                data: message.content,
+                selectable: true,
+                extensionSet: md.ExtensionSet.gitHubWeb,
+                builders: {
+                  'code': CodeElementBuilder(),
+                },
+              ),
+            ),
+          ),
+        ));
+  }
+}
+
+class AIMessage extends StatelessWidget {
+  final Message message;
+  final Chat chat;
+
+  const AIMessage(
+      {required this.message, required this.chat}); // Update constructor
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: ListTile(
+        leading: Icon(Icons.message, size: 20),
+        title: Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              MarkdownBody(
+                data: message.fnCalls.length > 0
+                    ? '''```bash
+                    ${message.fnCalls.map((f) => f.fnArgs['code']).join('\n')}
+                    '''
+                    : message.content,
+                selectable: true,
+                extensionSet: md.ExtensionSet.gitHubWeb,
+                builders: {
+                  'code': CodeElementBuilder(),
+                },
+              ),
+              SizedBox(height: 10),
+              if (message.fnCalls.length > 0 && !message.fnCallsDone())
+                FilledButton(
+                    // TODO show some loading indicator
+                    onPressed: () async {
+                      for (var fnC in message.fnCalls) {
+                        await fnC.run();
+                      }
+                      await UserStore.instance.saveMessage(chat, message);
+                    },
+                    child: Text('Run'))
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -186,7 +228,7 @@ class CodeElementBuilder extends MarkdownElementBuilder {
 
         // Specify highlight theme
         // All available themes are listed in `themes` folder
-        theme: githubTheme,
+        theme: a11yLightTheme,
 
         // Specify padding
         padding: const EdgeInsets.all(8),

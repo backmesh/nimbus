@@ -87,6 +87,7 @@ class _InputFieldState extends State<InputField> {
               TextEditingController fieldTextEditingController,
               FocusNode focusNode,
               VoidCallback onFieldSubmitted) {
+            final borderColor = Colors.grey.withOpacity(0.5);
             return TextField(
               controller: fieldTextEditingController,
               focusNode: focusNode,
@@ -103,9 +104,24 @@ class _InputFieldState extends State<InputField> {
               onSubmitted: (text) {
                 sendMessage();
               },
+              style: TextStyle(fontSize: 14.0),
               decoration: InputDecoration(
                 hintText: 'Type your message...',
-                border: InputBorder.none,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  borderSide: BorderSide(color: borderColor),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  borderSide: BorderSide(color: borderColor),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  borderSide: BorderSide(color: borderColor),
+                ),
+                filled: true,
+                fillColor: Colors.white,
+                hoverColor: Colors.white,
                 suffixIcon: AnimatedOpacity(
                   opacity: input.isNotEmpty ? 1.0 : 0.0,
                   duration: Duration(milliseconds: 100),
@@ -142,7 +158,10 @@ class _InputFieldState extends State<InputField> {
                           onSelected(option);
                         },
                         child: ListTile(
-                          title: Text(option),
+                          title: Text(
+                            option,
+                            style: TextStyle(fontSize: 14),
+                          ),
                         ),
                       );
                     },
@@ -188,8 +207,8 @@ class RichTextEditingController extends TextEditingController {
         textSpans.add(TextSpan(
           text: '@$file', // Include '@' in the highlighted text
           style: TextStyle(
-            backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-          ),
+              backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+              fontSize: 14),
         ));
         start = index + file.length + 1; // Adjust start position to include @
       }

@@ -17,13 +17,16 @@ Future<Object?> pushChatPage(BuildContext context, [Chat? chat]) {
 }
 
 class CommonDrawer extends StatelessWidget {
+  final Chat? chat;
+  const CommonDrawer({required this.chat});
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
       child: Column(
         children: [
           Expanded(
-            child: ChatListPage(),
+            child: ChatListPage(chat: chat),
           ),
         ],
       ),
@@ -48,6 +51,11 @@ class _CommonAppBarState extends State<CommonAppBar> {
     return AppBar(
       toolbarHeight: 50,
       automaticallyImplyLeading: false, // Remove the back button
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.white,
+      elevation: 1.0,
+      scrolledUnderElevation: 2.0,
+      shadowColor: Colors.grey,
       leading: IconButton(
         icon: Icon(Icons.menu),
         onPressed: () {
