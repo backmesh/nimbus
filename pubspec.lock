@@ -249,14 +249,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.3"
-  firebase_ui_oauth_apple:
-    dependency: "direct main"
-    description:
-      name: firebase_ui_oauth_apple
-      sha256: "6e89230a3d8143465e70274a0ffc5988cf55ba2869105e769f53b61cb264b6ef"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.2.21"
   firebase_ui_oauth_google:
     dependency: "direct main"
     description:

@@ -33,7 +33,6 @@ dependencies:
   firebase_core: ^3.1.1
   firebase_auth: ^5.1.1
   firebase_ui_auth: ^1.15.0
-  firebase_ui_oauth_apple: ^1.2.21
   cloud_firestore: ^5.0.2
   firebase_ui_firestore: ^1.6.4
   posthog_flutter: ^4.5.0

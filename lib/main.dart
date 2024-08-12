@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
-import 'package:firebase_ui_oauth_apple/firebase_ui_oauth_apple.dart';
 import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:nimbus/gemini.dart';
@@ -24,7 +23,6 @@ void main() async {
     cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
   );
   FirebaseUIAuth.configureProviders([
-    if (defaultTargetPlatform == TargetPlatform.macOS) AppleProvider(),
     GoogleProvider(
         clientId: DefaultFirebaseOptions.currentPlatform.iosClientId!)
   ]);
@@ -163,12 +161,6 @@ class _Login extends StatelessWidget {
               ),
               const SizedBox(
                 height: 40,
-              ),
-              AppleSignInButton(
-                  auth: FirebaseAuth.instance,
-                  loadingIndicator: Center(child: CircularProgressIndicator())),
-              const SizedBox(
-                height: 20,
               ),
               GoogleSignInButton(
                   loadingIndicator: Center(child: CircularProgressIndicator()),

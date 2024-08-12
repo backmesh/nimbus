@@ -52,7 +52,7 @@ class _ChatListPageState extends State<ChatListPage> {
                 title: Text(localizations.formatShortDate(chat.date)),
                 tileColor: isHighlighted
                     ? Theme.of(context).colorScheme.secondaryContainer
-                    : null, // Highlighted background color
+                    : null,
                 onTap: () => pushChatPage(context, chat));
           },
         );
