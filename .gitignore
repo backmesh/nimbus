@@ -6,6 +6,9 @@ macos/Runner/GoogleService-Info.plist
 macos/firebase_app_id_file.json
 android/app/google-services.json
 
+## Firebase cache
+.firebase
+
 # https://gist.githubusercontent.com/dileepabandara/43f37affb84650a7e59ff04204c44aa8/raw/d339318878f15df404c7b984db0ba9f2d325b963/.gitignore
 ### ------------------------- Flutter.gitignore ------------------------ ###
 
