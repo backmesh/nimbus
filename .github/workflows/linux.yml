@@ -13,7 +13,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v1
         with:
-          flutter-version: stable
+          channel: stable
           flutter-version-file: pubspec.yaml
 
       - name: Flutter version used
