@@ -188,7 +188,7 @@ class RichTextEditingController extends TextEditingController {
         textSpans.add(TextSpan(
           text: '@$file', // Include '@' in the highlighted text
           style: TextStyle(
-            backgroundColor: Colors.yellow, // Highlight @ and selected files
+            backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
           ),
         ));
         start = index + file.length + 1; // Adjust start position to include @

@@ -26,8 +26,15 @@ class Files {
     final downloadDir = downloads != null ? Directory(downloads.path) : null;
     final docEnts = await docDir.list().toList();
     final downloadEnts = await downloadDir?.list().toList() ?? List.empty();
+    var allEnts = docEnts.followedBy(downloadEnts);
+    if (Platform.environment.containsKey('HOME')) {
+      final homeDir = Directory(Platform.environment['HOME']!);
+      allEnts = allEnts.followedBy(await homeDir.list().toList());
+    }
     List<String> paths = [];
-    for (final entity in docEnts.followedBy(downloadEnts)) {
+    for (final entity in allEnts) {
+      final entityName = entity.path.split('/').last;
+      if (entityName.startsWith('.')) continue;
       final mime = lookupMimeType(entity.path);
       if (mime == null) continue;
       if (isMimeSupported(mime)) {
