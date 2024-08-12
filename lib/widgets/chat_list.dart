@@ -46,7 +46,6 @@ class _ChatListPageState extends State<ChatListPage> {
 
             final QueryDocumentSnapshot<Chat> doc = snapshot.docs[index];
             final Chat chat = doc.data();
-            final textStyle = TextStyle(color: Color(0xFF606A85), fontSize: 15);
             final isHighlighted =
                 widget.chat != null && chat.docKey() == widget.chat!.docKey();
             return ListTile(

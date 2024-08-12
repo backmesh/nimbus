@@ -137,16 +137,16 @@ class _Login extends StatelessWidget {
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Image.network(
-            //   'logo.png',
-            //   height: 60,
-            //   width: 60,
-            // ),
+            Image.asset(
+              'assets/images/logo.png',
+              height: 100,
+              width: 100,
+            ),
             const SizedBox(
               height: 30,
             ),
             const Text(
-              'Nimbus',
+              'nimbus',
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             )
           ],
@@ -183,17 +183,23 @@ class _Login extends StatelessWidget {
       },
       headerBuilder: (context, constraints, _) {
         return Center(
-          child: Column(
-            children: [
-              const SizedBox(
-                height: 80,
-              ),
-              // Image.network(
-              //   'logo.png',
-              //   height: 50,
-              //   width: 50,
-              // ),
-            ],
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(
+                  height: 80,
+                ),
+                Image.asset(
+                  'assets/images/logo.png',
+                  height: 60,
+                  width: 60,
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+              ],
+            ),
           ),
         );
       },
