@@ -22,7 +22,7 @@ jobs:
       - name: Install Linux deps
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y ninja-build libgtk-3-dev
+          sudo apt-get install -y ninja-build libgtk-3-dev libwebkit2gtk-4.0-dev
   
       - name: Install Dependencies
         run: flutter pub get
