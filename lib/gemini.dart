@@ -67,24 +67,20 @@ class GeminiClient {
       contents.add(await msg.toGemini());
     }
     final chat = client.startChat(history: contents);
-    final message = new Message(content: '', model: MODEL);
+    final message = new Message(content: '', model: UserStore.instance.model);
     try {
       final lastMessage = await last.toGemini();
       await for (var response in chat.sendMessageStream(lastMessage)) {
         message.content += response.text ?? '';
         List<FunctionCall> functionCalls = response.functionCalls.toList();
         if (functionCalls.isNotEmpty) {
-          // var fnResps = <FunctionResponse>[
           for (final functionCall in functionCalls)
-            // TODO ask for consent before running
             // TODO be able to cancel
             // TODO terminal user to respond with error
             message.fnCalls.add(FnCall(
                 fnArgs: functionCall.args,
                 fnName: functionCall.name,
                 fnOutput: {}));
-          // ];
-          //fnResps.forEach((fnResp) => message += fnResp.toJson().toString());
         }
         print('Response: ${message.content}');
         yield message;

@@ -31,10 +31,18 @@ class CommonDrawer extends StatelessWidget {
   }
 }
 
-class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
+class CommonAppBar extends StatefulWidget implements PreferredSizeWidget {
   final Chat? chat;
   const CommonAppBar({required this.chat});
 
+  @override
+  _CommonAppBarState createState() => _CommonAppBarState();
+
+  @override
+  Size get preferredSize => Size.fromHeight(50);
+}
+
+class _CommonAppBarState extends State<CommonAppBar> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
@@ -46,12 +54,42 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
           Scaffold.of(context).openDrawer();
         },
       ),
+      titleSpacing: 10,
+      title: FocusScope(
+        canRequestFocus: false,
+        child: DropdownButton<String>(
+          value: UserStore.instance.model,
+          items: UserStore.getModelOptions()
+              .map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(
+                '   $value   ',
+                style: TextStyle(fontSize: 14),
+              ),
+            );
+          }).toList(),
+          onChanged: (String? newValue) {
+            if (newValue != null) {
+              setState(() {
+                UserStore.instance.setModel(newValue);
+              });
+            }
+          },
+          icon: Icon(Icons.arrow_drop_down),
+          underline: SizedBox(),
+          focusColor: Theme.of(context).appBarTheme.backgroundColor,
+          dropdownColor: Theme.of(context)
+              .appBarTheme
+              .backgroundColor, // Match AppBar color
+        ),
+      ),
       actions: [
         IconButton(
-            onPressed: chat != null ? () => pushChatPage(context) : null,
+            onPressed: widget.chat != null ? () => pushChatPage(context) : null,
             icon: Icon(Icons.add_comment)),
         IconButton(
-            onPressed: chat != null
+            onPressed: widget.chat != null
                 ? () async {
                     showDialog(
                       context: context,
@@ -71,7 +109,8 @@ class CommonAppBar extends StatelessWidget implements PreferredSizeWidget {
                                 'Delete',
                               ),
                               onPressed: () async {
-                                await UserStore.instance.deleteChat(chat!);
+                                await UserStore.instance
+                                    .deleteChat(widget.chat!);
                                 Navigator.of(context).pop();
                                 pushChatPage(context);
                               },

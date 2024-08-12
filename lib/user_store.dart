@@ -141,10 +141,11 @@ class Chat {
 class UserStore {
   final String uid;
   final CollectionReference<Chat> chatsRef;
+  String model;
 
   static UserStore? _instance;
 
-  UserStore._(this.uid, this.chatsRef);
+  UserStore._(this.uid, this.chatsRef, this.model);
 
   factory UserStore(String uid) {
     final chatsRef = FirebaseFirestore.instance
@@ -155,7 +156,7 @@ class UserStore {
           },
           toFirestore: (entry, _) => entry.toDb(),
         );
-    _instance ??= UserStore._(uid, chatsRef);
+    _instance ??= UserStore._(uid, chatsRef, 'gemini-1.5-flash');
     return _instance!;
   }
 
@@ -166,6 +167,14 @@ class UserStore {
   static UserStore get instance {
     assert(_instance != null, 'UserStore must be initialized before accessing');
     return _instance!;
+  }
+
+  void setModel(String newModel) {
+    model = newModel;
+  }
+
+  static getModelOptions() {
+    return ['gemini-1.5-flash', 'gemini-1.5-pro'];
   }
 
   Query<Chat> readChats() {
