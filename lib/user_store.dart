@@ -164,7 +164,7 @@ class UserStore {
           },
           toFirestore: (entry, _) => entry.toDb(),
         );
-    _instance = UserStore._(uid, chatsRef, 'gemini-1.5-flash');
+    _instance ??= UserStore._(uid, chatsRef, 'gemini-1.5-flash');
     return _instance!;
   }
 
