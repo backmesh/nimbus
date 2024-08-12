@@ -179,7 +179,4 @@ class _CommonAppBarState extends State<CommonAppBar> {
       ],
     );
   }
-
-  @override
-  Size get preferredSize => Size.fromHeight(50);
 }

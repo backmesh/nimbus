@@ -136,9 +136,10 @@ class _ChatPageState extends State<ChatPage> {
                                           'code': CodeElementBuilder(),
                                         },
                                       ),
-                                      if (message.fnCalls.length > 0)
-                                        OutlinedButton(
-                                            // TODO hide button after it runs
+                                      SizedBox(height: 10),
+                                      if (message.fnCalls.length > 0 &&
+                                          !message.fnCallsDone())
+                                        FilledButton.tonal(
                                             // TODO show some loading indicator
                                             onPressed: () async {
                                               for (var fnC in message.fnCalls) {
@@ -146,12 +147,10 @@ class _ChatPageState extends State<ChatPage> {
                                               }
                                               await UserStore.instance
                                                   .saveMessage(chat, message);
-                                              await UserStore.instance
-                                                  .saveMessage(
-                                                      chat,
-                                                      message
-                                                          .getFnCallResMessage());
-                                              scrollToLastMessage();
+                                              // await sendMessage(
+                                              //     allMessages,
+                                              //     message
+                                              //         .getFnCallResMessage());
                                             },
                                             child: Text('Run'))
                                     ],

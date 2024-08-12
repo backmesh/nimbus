@@ -85,11 +85,19 @@ class Message {
     return model?.isEmpty ?? true;
   }
 
-  Message getFnCallResMessage() {
-    final res = fnCalls.map((fn) => fn.fnOutput['output']).join('\n');
-    // TODO create terminal user
-    return Message(content: res.isEmpty ? 'No output returned' : res);
+  bool fnCallsDone() {
+    final res = fnCalls.map((fn) =>
+        fn.fnOutput.containsKey('output') || fn.fnOutput.containsKey('error'));
+    return res.every((done) => done);
   }
+
+  // Message getFnCallResMessage() {
+  //   final res = fnCalls.map((fn) => fn.fnOutput['output'] ?? '').join('\n');
+  //   return Message(
+  //       content: res.replaceAll('\n', '').isEmpty
+  //           ? 'The script ran successfully.'
+  //           : res);
+  // }
 
   Future<Content> toGemini() async {
     final role = model == null ? 'user' : 'model';
