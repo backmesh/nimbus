@@ -1,14 +1,11 @@
 import 'dart:async';
-
-import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:nimbus/gemini.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:markdown/markdown.dart' as md;
-
+import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter_highlight/themes/a11y-light.dart';
-
+import 'package:markdown/markdown.dart' as md;
+import 'package:nimbus/gemini.dart';
 import 'package:nimbus/widgets/common.dart';
 import 'package:nimbus/widgets/highlight.dart';
 import 'package:nimbus/widgets/input.dart';
@@ -16,8 +13,8 @@ import 'package:nimbus/widgets/input.dart';
 import '../user_store.dart';
 
 class ChatPage extends StatefulWidget {
-  final Chat? chat; // Make chat optional
-  const ChatPage([this.chat]); // Allow chat
+  final Chat? chat; // No chat = new chat
+  const ChatPage([this.chat]);
 
   @override
   _ChatPageState createState() => _ChatPageState();
@@ -187,8 +184,8 @@ class AIMessage extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               border: Border.all(
-                color: Colors.grey, // Set border color
-                width: 0.2, // Set border width
+                color: Colors.grey,
+                width: 0.2,
               ),
               shape: BoxShape.circle,
             ),
@@ -223,7 +220,7 @@ ${message.fnCalls.map((f) => f.fnArgs['code']).join('\n')}
                 SizedBox(height: 10),
                 if (message.fnCalls.length > 0 && !message.fnCallsDone())
                   FilledButton(
-                      // TODO show some loading indicator
+                      // TODO show loading indicator
                       onPressed: () async {
                         for (var fnC in message.fnCalls) {
                           await fnC.run();
@@ -251,21 +248,10 @@ class CodeElementBuilder extends MarkdownElementBuilder {
     }
     return SizedBox(
       child: SelectableHighlightView(
-        // The original code to be highlighted
         element.textContent,
-
-        // Specify language
-        // It is recommended to give it a value for performance
         language: language,
-
-        // Specify highlight theme
-        // All available themes are listed in `themes` folder
         theme: a11yLightTheme,
-
-        // Specify padding
         padding: const EdgeInsets.all(8),
-
-        // Specify text style
         textStyle: TextStyle(fontFamily: 'monospace', fontSize: 14.0),
       ),
     );

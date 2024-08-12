@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:nimbus/files.dart';
+import 'package:nimbus/logger.dart';
 import '../user_store.dart';
 
 class InputField extends StatefulWidget {
@@ -79,14 +80,14 @@ class _InputFieldState extends State<InputField> {
 
   @override
   Widget build(BuildContext context) {
-    // print('Building InputField widget');
     return Column(
       children: [
         RawAutocomplete<String>(
           textEditingController: richTextController,
           focusNode: focusNode,
           optionsBuilder: (TextEditingValue textEditingValue) async {
-            // print('optionsBuilder called with: ${textEditingValue.text}');
+            Logger.debug(
+                'optionsBuilder called with: ${textEditingValue.text}');
             if (textEditingValue.text.contains('@')) {
               // lazily load files to ask for permissions when it makes sense
               if (files.length == 0) await setFilesInHomeDirectory();
@@ -95,7 +96,7 @@ class _InputFieldState extends State<InputField> {
                   .where((file) =>
                       file.contains(query) && !selectedFiles.contains(file))
                   .toList();
-              // print('Filtered files: $filteredFiles');
+              Logger.debug('Filtered files: $filteredFiles');
               return filteredFiles;
             }
             return const Iterable<String>.empty();
@@ -184,24 +185,24 @@ class _InputFieldState extends State<InputField> {
           optionsViewBuilder: (BuildContext context,
               AutocompleteOnSelected<String> onSelected,
               Iterable<String> options) {
-            // print('optionsViewBuilder called with options: $options');
+            Logger.debug('optionsViewBuilder called with options: $options');
             return Align(
               alignment: Alignment.bottomLeft,
               child: Material(
-                elevation: 4.0, // Add elevation to make it more visible
+                elevation: 4.0,
                 child: Container(
                   width: MediaQuery.of(context).size.width * 0.8,
                   height: options.length * 50.0,
-                  constraints: BoxConstraints(maxHeight: 200), // Limit height
+                  constraints: BoxConstraints(maxHeight: 200),
                   child: ListView.builder(
                     padding: EdgeInsets.zero,
                     itemCount: options.length,
                     itemBuilder: (BuildContext context, int index) {
                       final String option = options.elementAt(index);
-                      // print('Building option: $option');
+                      Logger.debug('Building option: $option');
                       return GestureDetector(
                         onTap: () {
-                          // print('Option tapped: $option');
+                          Logger.debug('Option tapped: $option');
                           onSelected(option);
                         },
                         child: ListTile(

@@ -4,8 +4,8 @@ import 'package:highlight/highlight.dart' show highlight, Node;
 /*
 COPY PASTE JUST CHANGING THE TEXT TO BE SELECTABLE
 
-HighlightView
-import 'package:flutter_highlight/flutter_highlight.dart';
+HighlightView from
+'package:flutter_highlight/flutter_highlight.dart';
 
 */
 

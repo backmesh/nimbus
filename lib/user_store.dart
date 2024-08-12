@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:nimbus/files.dart';
 import 'package:nimbus/functions.dart';
+import 'package:nimbus/logger.dart';
 
 class FnCall {
   final Map<String, Object?> fnArgs;
@@ -91,27 +92,18 @@ class Message {
     return res.every((done) => done);
   }
 
-  // Message getFnCallResMessage() {
-  //   final res = fnCalls.map((fn) => fn.fnOutput['output'] ?? '').join('\n');
-  //   return Message(
-  //       content: res.replaceAll('\n', '').isEmpty
-  //           ? 'The script ran successfully.'
-  //           : res);
-  // }
-
   Future<Content> toGemini() async {
     final role = model == null ? 'user' : 'model';
-    // print('filepaths $filePaths');
+    Logger.debug('filepaths $filePaths');
     if (filePaths != null && filePaths!.length > 0) {
       List<Part> fileParts = [];
       String cleanContent = content;
       for (var fp in filePaths!) {
         final part = await Files.getPart(fp);
         if (part != null) fileParts.add(part);
-        // print(fp);
+        Logger.debug(fp);
         cleanContent = cleanContent.replaceAll('@$fp', '');
-        // print(cleanContent);
-        // print(part.toJson());
+        Logger.debug(cleanContent);
       }
       return Content(role, [...fileParts, TextPart(cleanContent)]);
     }

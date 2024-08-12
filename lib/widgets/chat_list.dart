@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:nimbus/widgets/common.dart';
 
 import '../user_store.dart';
@@ -31,7 +31,6 @@ class _ChatListPageState extends State<ChatListPage> {
         }
 
         if (snapshot.hasError) {
-          // TODO display with better UX as snack
           return Center(child: Text('Error: ${snapshot.error}'));
         }
 

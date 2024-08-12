@@ -27,23 +27,16 @@ void main() async {
 }
 
 class Main extends StatefulWidget {
-  // This widget is the root of your application.
-
   @override
   _MainState createState() => _MainState();
 }
 
 class _MainState extends State<Main> with WidgetsBindingObserver {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     const primary = Color.fromRGBO(23, 89, 115, 1);
-    //const secondary = Color.fromRGBO(140, 184, 159, 1);
     return MaterialApp(
-      navigatorObservers: [
-        // The PosthogObserver records screen views automatically
-        PosthogObserver()
-      ],
+      navigatorObservers: [PosthogObserver()],
       debugShowCheckedModeBanner: false,
       localizationsDelegates: [
         GlobalMaterialLocalizations.delegate,

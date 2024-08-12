@@ -173,7 +173,7 @@ class _CommonAppBarState extends State<CommonAppBar> {
                 value: 1,
                 child: InkWell(
                     onTap: () {
-                      Navigator.pop(context, 1); // Closes the popup menu
+                      Navigator.pop(context, 1);
                     },
                     child: Row(
                       children: [

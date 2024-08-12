@@ -1,10 +1,10 @@
 import 'dart:io';
-
-import 'package:nimbus/files.dart';
-import 'package:nimbus/functions.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:google_generative_ai/src/model.dart'
     show createModelWithBaseUri;
+import 'package:nimbus/files.dart';
+import 'package:nimbus/functions.dart';
+import 'package:nimbus/logger.dart';
 import 'package:nimbus/user_store.dart';
 
 // https://github.com/google-gemini/generative-ai-dart/tree/main/pkgs/google_generative_ai
@@ -79,11 +79,11 @@ class GeminiClient {
                 fnName: functionCall.name,
                 fnOutput: {}));
         }
-        // print('Response: ${aiMessage.content}');
+        Logger.debug('Response: ${aiMessage.content}');
         yield aiMessage;
       }
     } catch (e) {
-      print('Error: $e'); // Log any errors
+      Logger.debug('Error: $e'); // Log any errors
       rethrow; // Re-throw the error after logging it
     }
   }

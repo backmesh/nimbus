@@ -1,9 +1,9 @@
 import 'dart:io';
-
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:path_provider/path_provider.dart';
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
 import 'package:mime/mime.dart';
+import 'package:nimbus/logger.dart';
 
 // created this whitelist through trial and error
 // have to be careful with google gen ai package updates
@@ -45,10 +45,10 @@ class Files {
   }
 
   // if the file is not supported it returns nothing
-  // and the file is ignored to avoid gemini from erroring
+  // and the file is ignored to spare us the gemini error
   static Future<Part?> getPart(String path) async {
     final mime = lookupMimeType(path);
-    // print('get message part for $path with mime $mime');
+    Logger.debug('get message part for $path with mime $mime');
     if (mime == null) return null;
     if (SUPPORTED_GEMINI_MIMES.contains(mime)) {
       return DataPart(mime, await File(path).readAsBytes());
