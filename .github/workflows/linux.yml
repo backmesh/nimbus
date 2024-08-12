@@ -34,4 +34,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: linux-build-artifact
-          path: build/linux/release/bundle
+          path: build/linux/x64/release/bundle/app
