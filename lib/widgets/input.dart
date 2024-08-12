@@ -31,6 +31,7 @@ class _InputFieldState extends State<InputField> {
     return KeyEventResult.ignored;
   }
 
+  Files filesObj = new Files();
   List<String> files = [];
   List<String> selectedFiles = [];
 
@@ -42,7 +43,6 @@ class _InputFieldState extends State<InputField> {
   @override
   void initState() {
     super.initState();
-    setFilesInHomeDirectory();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).requestFocus(focusNode);
     });
@@ -75,15 +75,17 @@ class _InputFieldState extends State<InputField> {
         RawAutocomplete<String>(
           textEditingController: richTextController,
           focusNode: focusNode,
-          optionsBuilder: (TextEditingValue textEditingValue) {
+          optionsBuilder: (TextEditingValue textEditingValue) async {
             // print('optionsBuilder called with: ${textEditingValue.text}');
             if (textEditingValue.text.contains('@')) {
+              // lazily load files to ask for permissions when it makes sense
+              if (files.length == 0) await setFilesInHomeDirectory();
               String query = textEditingValue.text.split('@').last;
               List<String> filteredFiles = files
                   .where((file) =>
                       file.contains(query) && !selectedFiles.contains(file))
                   .toList();
-              print('Filtered files: $filteredFiles');
+              // print('Filtered files: $filteredFiles');
               return filteredFiles;
             }
             return const Iterable<String>.empty();

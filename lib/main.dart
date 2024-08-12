@@ -1,6 +1,3 @@
-import 'dart:async';
-
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, TargetPlatform;
 import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
