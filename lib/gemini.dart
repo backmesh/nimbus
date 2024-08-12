@@ -14,8 +14,7 @@ final MODEL = 'gemini-1.5-flash';
 final API_VERSION = 'v1beta';
 final BASE_URL =
     'https://edge.backmesh.com/v1/proxy/PyHU4LvcdsQ4gm2xeniAFhMyuDl2/aUxjzrA9w7K9auXp6Be8';
-// final BASE_URL =
-//     'http://localhost:8787/v1/proxy/gbBbHCDBxqb8zwMk6dCio63jhOP2/lVXeOSrFwT9eQxtRRjp4';
+
 final sysMessage = """
 You are a world-class programmer and system administrator that can complete any goal by executing code.
 When you execute code, it will be executed **on the user's machine**. The user has given you **full and complete permission** to execute any code necessary to complete the task. Execute the code.
@@ -60,6 +59,8 @@ class GeminiClient {
 
   Stream<Message> chatCompleteStream(
       List<Message> history, Message userMessage, Message aiMessage) async* {
+    // add the sysmessage again here because otherwise it gets ignored often
+    // not great because we are using up a lot of the context window
     List<Content> contents = [Content.text(sysMessage)];
     for (var msg in history) {
       contents.add(await msg.toGemini());
@@ -73,7 +74,7 @@ class GeminiClient {
         if (functionCalls.isNotEmpty) {
           for (final functionCall in functionCalls)
             // TODO be able to cancel
-            // TODO terminal user to respond with error
+            // TODO automatically respond with error
             aiMessage.fnCalls.add(FnCall(
                 fnArgs: functionCall.args,
                 fnName: functionCall.name,
