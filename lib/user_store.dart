@@ -168,6 +168,10 @@ class UserStore {
     return _instance!;
   }
 
+  static void clear() {
+    _instance = null;
+  }
+
   static UserStore get instance {
     assert(_instance != null, 'UserStore must be initialized before accessing');
     return _instance!;
