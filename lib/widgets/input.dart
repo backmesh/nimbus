@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:nimbus/files.dart';
+import 'package:flutter/services.dart';
 
+import 'package:nimbus/files.dart';
 import '../user_store.dart';
 
 class InputField extends StatefulWidget {
@@ -15,7 +16,21 @@ class InputField extends StatefulWidget {
 class _InputFieldState extends State<InputField> {
   String input = '';
   final richTextController = RichTextEditingController();
-  final focusNode = FocusNode();
+  late final focusNode = FocusNode(
+    onKey: _handleKeyPress,
+  );
+
+  KeyEventResult _handleKeyPress(FocusNode focusNode, RawKeyEvent event) {
+    // handles submit on enter
+    if (event.isKeyPressed(LogicalKeyboardKey.enter) && !event.isShiftPressed) {
+      sendMessage();
+      // handled means that the event will not propagate
+      return KeyEventResult.handled;
+    }
+    // ignore every other keyboard event including SHIFT+ENTER
+    return KeyEventResult.ignored;
+  }
+
   List<String> files = [];
   List<String> selectedFiles = [];
 
@@ -41,7 +56,7 @@ class _InputFieldState extends State<InputField> {
   }
 
   void sendMessage() async {
-    if (richTextController.text.isNotEmpty) {
+    if (richTextController.text.trim().replaceAll('\n', '').isNotEmpty) {
       await widget.onSendMessage(
           widget.messages,
           new Message(
@@ -105,6 +120,9 @@ class _InputFieldState extends State<InputField> {
                 sendMessage();
               },
               style: TextStyle(fontSize: 14.0),
+              maxLines: null,
+              minLines: 1,
+              textInputAction: TextInputAction.newline,
               decoration: InputDecoration(
                 hintText: 'Type your message...',
                 border: OutlineInputBorder(
@@ -127,7 +145,10 @@ class _InputFieldState extends State<InputField> {
                   duration: Duration(milliseconds: 100),
                   child: IconButton(
                     icon: Icon(Icons.send),
-                    onPressed: input.isNotEmpty ? () => sendMessage() : null,
+                    padding: EdgeInsets.only(left: 5),
+                    onPressed: input.trim().replaceAll('\n', '').isNotEmpty
+                        ? () => sendMessage()
+                        : null,
                   ),
                 ),
               ),
