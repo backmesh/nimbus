@@ -16,6 +16,18 @@ final BASE_URL =
     'https://edge.backmesh.com/v1/proxy/PyHU4LvcdsQ4gm2xeniAFhMyuDl2/aUxjzrA9w7K9auXp6Be8';
 // final BASE_URL =
 //     'http://localhost:8787/v1/proxy/gbBbHCDBxqb8zwMk6dCio63jhOP2/lVXeOSrFwT9eQxtRRjp4';
+final sysMessage = """
+You are a world-class programmer and system administrator that can complete any goal by executing code.
+When you execute code, it will be executed **on the user's machine**. The user has given you **full and complete permission** to execute any code necessary to complete the task. Execute the code.
+You can access the internet. Run **any code** to achieve the goal, and if at first you don't succeed, try again and again.
+You can install new packages.
+You can process and understand files with the following mimes: ${SUPPORTED_GEMINI_MIMES.join(', ')}.
+The user can reference and upload files in their machine which is typically what they reference when they talk about filenames.
+Write messages to the user in Markdown.
+You are capable of **any** task.
+
+User's OS: ${Platform.operatingSystem}
+""";
 
 class GeminiClient {
   late GenerativeModel client;
@@ -31,20 +43,6 @@ class GeminiClient {
 
   factory GeminiClient(String token) {
     _instance ??= GeminiClient._();
-
-    final sysMessage = """
-      You are a world-class programmer and system administrator that can complete any goal by executing code.
-      When you execute code, it will be executed **on the user's machine**. The user has given you **full and complete permission** to execute any code necessary to complete the task. Execute the code.
-      You can access the internet. Run **any code** to achieve the goal, and if at first you don't succeed, try again and again.
-      You can install new packages.
-      You can process and understand files with the following mimes: ${SUPPORTED_GEMINI_MIMES.join(',')}.
-      The user can reference and upload files in their machine which is typically what they reference when they talk about filenames.
-      Write messages to the user in Markdown.
-      You are capable of **any** task.
-
-      User's OS: ${Platform.operatingSystem}
-      User's OS version: ${Platform.operatingSystemVersion}
-    """;
     Uri uri = Uri.parse('$BASE_URL/$API_VERSION');
     _instance!.client = createModelWithBaseUri(
         model: MODEL,
@@ -62,7 +60,7 @@ class GeminiClient {
 
   Stream<Message> chatCompleteStream(
       List<Message> messages, Message last) async* {
-    List<Content> contents = [];
+    List<Content> contents = [Content.text(sysMessage)];
     for (var msg in messages) {
       contents.add(await msg.toGemini());
     }
