@@ -145,14 +145,7 @@ class UserMessage extends StatelessWidget {
                     .primaryContainer, // Background color for user message
                 borderRadius: BorderRadius.circular(10.0), // Rounded corners
               ),
-              child: MarkdownBody(
-                data: message.content,
-                selectable: true,
-                extensionSet: md.ExtensionSet.gitHubWeb,
-                builders: {
-                  'code': CodeElementBuilder(),
-                },
-              ),
+              child: SelectableText(message.content),
             ),
           ),
         ));
