@@ -180,7 +180,7 @@ class AIMessage extends StatelessWidget {
               MarkdownBody(
                 data: message.fnCalls.length > 0
                     ? '''```bash
-                    ${message.fnCalls.map((f) => f.fnArgs['code']).join('\n')}
+${message.fnCalls.map((f) => f.fnArgs['code']).join('\n')}
                     '''
                     : message.content,
                 selectable: true,
