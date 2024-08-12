@@ -29,3 +29,9 @@ jobs:
 
       - name: Build Release App
         run: flutter build linux --release
+
+      - name: Upload Build Artifact (Linux)
+        uses: actions/upload-artifact@v2
+        with:
+          name: linux-build-artifact
+          path: build/linux/release/bundle
