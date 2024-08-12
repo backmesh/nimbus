@@ -87,15 +87,16 @@ class _AuthGate extends StatelessWidget {
           return _Login();
         }
         final user = snapshot.data;
-        if (user != null) {
-          UserStore(user.uid);
-          _posthogFlutterPlugin.identify(userId: user.uid);
-          user.getIdToken().then((jwt) {
-            GeminiClient(jwt!);
-          });
+        if (user == null) {
+          return _Login();
         }
+        UserStore(user.uid);
+        _posthogFlutterPlugin.identify(userId: user.uid);
+        user.getIdToken().then((jwt) {
+          GeminiClient(jwt!);
+        });
 
-        if (user != null && !user.emailVerified) {
+        if (!user.emailVerified) {
           final emailProvider = user.providerData
               .any((provider) => provider.providerId == 'password');
           if (emailProvider) {
