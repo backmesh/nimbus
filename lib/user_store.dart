@@ -8,7 +8,8 @@ class ChatResult {
   String content;
   List<FnCall> fnCalls;
 
-  ChatResult({this.content = '', this.fnCalls = const []});
+  ChatResult({this.content = '', List<FnCall>? fnCalls})
+      : this.fnCalls = fnCalls ?? [];
 }
 
 class FnCall {
