@@ -26,7 +26,8 @@ class _ChatPageState extends State<ChatPage> {
   final ScrollController _scrollController = ScrollController();
   bool _userHasScrolled = false;
 
-  Future<StreamSubscription<ChatResult>> sendMessage({
+  // returns when the message completes
+  Future<void> sendMessage({
     required List<Message> allMessages,
     required String content,
     required List<String> filePaths,
@@ -43,13 +44,15 @@ class _ChatPageState extends State<ChatPage> {
     final subscription = GeminiClient.instance
         .chatCompleteStream(allMessages, userMessage)
         .listen((chatResult) async {
-      aiMessage.waiting = false;
       aiMessage.content = chatResult.content;
       aiMessage.fnCalls = chatResult.fnCalls;
       await UserStore.instance.saveMessage(chat, aiMessage);
       scrollToLastMessage();
     });
-    return subscription;
+    // equivalent to onDone
+    await subscription.asFuture();
+    aiMessage.waiting = false;
+    await UserStore.instance.saveMessage(chat, aiMessage);
   }
 
   void _onScroll() {
@@ -207,28 +210,28 @@ class AIMessage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                message.waiting
-                    ? Padding(
-                        padding: const EdgeInsets.only(top: 10.0),
-                        child: SizedBox(
-                          width: 7.0,
-                          height: 7.0,
-                          child: LinearProgressIndicator(),
-                        ),
-                      )
-                    : MarkdownBody(
-                        data: message.fnCalls.length > 0
-                            ? '''```bash
+                MarkdownBody(
+                  data: message.fnCalls.length > 0
+                      ? '''```bash
 ${message.fnCalls.map((f) => f.fnArgs['code']).join('\n')}
                       '''
-                            : message.content,
-                        // TODO selectability is choppy, how can we fix that?
-                        selectable: true,
-                        extensionSet: md.ExtensionSet.gitHubWeb,
-                        builders: {
-                          'code': CodeElementBuilder(),
-                        },
-                      ),
+                      : message.content,
+                  // TODO selectability is choppy, how can we fix that?
+                  selectable: true,
+                  extensionSet: md.ExtensionSet.gitHubWeb,
+                  builders: {
+                    'code': CodeElementBuilder(),
+                  },
+                ),
+                if (message.waiting)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10.0),
+                    child: SizedBox(
+                      width: 7.0,
+                      height: 7.0,
+                      child: LinearProgressIndicator(),
+                    ),
+                  ),
                 SizedBox(height: 10),
                 if (message.fnCalls.length > 0 && !message.fnCallsDone())
                   FilledButton(

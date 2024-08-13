@@ -8,7 +8,7 @@ import 'package:nimbus/logger.dart';
 import '../user_store.dart';
 
 class InputField extends StatefulWidget {
-  final Future<StreamSubscription<ChatResult>> Function(
+  final Future<void> Function(
       {required String content, required List<String> filePaths}) onSendMessage;
   const InputField(this.onSendMessage);
 
@@ -62,14 +62,16 @@ class _InputFieldState extends State<InputField> {
 
   void sendMessage() async {
     if (richTextController.text.trim().replaceAll('\n', '').isNotEmpty) {
-      subscription = await widget.onSendMessage(
-          content: richTextController.text,
-          // Pass a copy
-          filePaths: List<String>.from(richTextController.selectedFiles));
+      String messageContent = richTextController.text;
+      List<String> filePaths =
+          List<String>.from(richTextController.selectedFiles);
       richTextController.clear();
       isStreaming = true;
       setState(() {});
-      await subscription?.asFuture();
+      await widget.onSendMessage(
+          content: messageContent,
+          // Pass a copy as arrays are pass by value in dart
+          filePaths: filePaths);
       isStreaming = false;
       setState(() {});
     }

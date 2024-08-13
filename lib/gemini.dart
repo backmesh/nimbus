@@ -66,6 +66,7 @@ class GeminiClient {
     }
     final res = new ChatResult();
     final chat = client.startChat(history: contents);
+    Logger.debug('START chat result for message ${userMessage.docKey()}');
     try {
       await for (var response
           in chat.sendMessageStream(await userMessage.toGemini())) {
@@ -78,9 +79,11 @@ class GeminiClient {
                 fnName: functionCall.name,
                 fnOutput: {}));
         }
-        Logger.debug('Response: ${res.content}');
+        Logger.debug('ON chat result for message ${userMessage.docKey()}');
+        // Logger.debug('Response: ${res.content}');
         yield res;
       }
+      Logger.debug('END chat result for message ${userMessage.docKey()}');
     } catch (e) {
       Logger.debug('Error: $e'); // Log any errors
       rethrow; // Re-throw the error after logging it
