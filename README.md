@@ -1,13 +1,13 @@
 # nimbus
 
-Superpower your desktop with an LLM that can complete tasks for you
+Nimbus gives Google's Gemini LLM access to your desktop so it can easily read files and run code for you.
 
 # architecture
 
-- Flutter app for desktops that lets us target MacOS and Linux with a single codebase
-- Firebase Firestore to preserve chats and messages with security rules to ensure only authenticated users can read or write their data.
-- Firebase Authentication to let users log in using email or Google.
-- There is no backend. We use a pass-through server proxy to directly call the Google AI Gemini API.
+- Flutter desktop app that targets MacOS and Linux with a single codebase.
+- Firebase Firestore is used to preserve chats and messages with security rules to ensure that only authenticated users can read or write their data.
+- Firebase Authentication is used to let users log in using email or Google.
+- There is no backend. The Flutter client uses a pass-through server proxy to directly call the Google AI Gemini API.
 - Firebase Hosting for the landing page
 
 # next

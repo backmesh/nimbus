@@ -57,31 +57,32 @@ class GeminiClient {
     return _instance!;
   }
 
-  Stream<Message> chatCompleteStream(
-      List<Message> history, Message userMessage, Message aiMessage) async* {
+  Stream<ChatResult> chatCompleteStream(
+      List<Message> history, Message userMessage) async* {
     // add the sysmessage again here because otherwise it gets ignored often
     // not great because we are using up a lot of the context window
     List<Content> contents = [Content.text(sysMessage)];
     for (var msg in history) {
       contents.add(await msg.toGemini());
     }
+    final res = new ChatResult();
     final chat = client.startChat(history: contents);
     try {
-      final lastMessage = await userMessage.toGemini();
-      await for (var response in chat.sendMessageStream(lastMessage)) {
-        aiMessage.content += response.text ?? '';
+      await for (var response
+          in chat.sendMessageStream(await userMessage.toGemini())) {
+        res.content += response.text ?? '';
         List<FunctionCall> functionCalls = response.functionCalls.toList();
         if (functionCalls.isNotEmpty) {
           for (final functionCall in functionCalls)
             // TODO be able to cancel
             // TODO automatically respond with error
-            aiMessage.fnCalls.add(FnCall(
+            res.fnCalls.add(FnCall(
                 fnArgs: functionCall.args,
                 fnName: functionCall.name,
                 fnOutput: {}));
         }
-        Logger.debug('Response: ${aiMessage.content}');
-        yield aiMessage;
+        Logger.debug('Response: ${res.content}');
+        yield res;
       }
     } catch (e) {
       Logger.debug('Error: $e'); // Log any errors

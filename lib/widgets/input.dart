@@ -8,10 +8,9 @@ import 'package:nimbus/logger.dart';
 import '../user_store.dart';
 
 class InputField extends StatefulWidget {
-  final List<Message> messages;
-  final Future<StreamSubscription<Message>> Function(List<Message>, Message)
-      onSendMessage;
-  const InputField(this.onSendMessage, this.messages);
+  final Future<StreamSubscription<ChatResult>> Function(
+      {required String content, required List<String> filePaths}) onSendMessage;
+  const InputField(this.onSendMessage);
 
   @override
   _InputFieldState createState() => _InputFieldState();
@@ -21,7 +20,7 @@ class _InputFieldState extends State<InputField> {
   String input = '';
   final richTextController = RichTextEditingController();
   bool isStreaming = false;
-  StreamSubscription<Message>? subscription;
+  StreamSubscription<ChatResult>? subscription;
   late final focusNode = FocusNode(
     onKey: _handleKeyPress,
   );
@@ -64,11 +63,9 @@ class _InputFieldState extends State<InputField> {
   void sendMessage() async {
     if (richTextController.text.trim().replaceAll('\n', '').isNotEmpty) {
       subscription = await widget.onSendMessage(
-          widget.messages,
-          new Message(
-              content: richTextController.text,
-              // Pass a copy
-              filePaths: List<String>.from(richTextController.selectedFiles)));
+          content: richTextController.text,
+          // Pass a copy
+          filePaths: List<String>.from(richTextController.selectedFiles));
       richTextController.clear();
       isStreaming = true;
       setState(() {});
