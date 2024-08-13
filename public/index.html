@@ -3,78 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <title>Nimbus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Avenir+Next:wght@400;700&display=swap" rel="stylesheet">
-
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
+            font-family: 'Avenir Next', sans-serif;
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            background-color: #2d3250;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 4rem auto;
+            padding: 4rem;
+            background-color: #fff;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            color: #555;
             text-align: center;
         }
-        .container {
-            background-color: white;
-            padding: 50px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+        h1, h2, h3, h4 {
+            color: #2d3250;
         }
-        .logo {
-            margin-bottom: 20px;
-        }
-        .logo img {
-            max-width: 200px;
-            height: auto;
-        }
-        h1, h2, h3 {
-            font-family: 'Avenir Next', Arial, sans-serif; /* Apply font to headings */
-        }
+
         h1 {
-            font-size: 48px; /* Increased font size */
-            margin-bottom: 20px;
-            font-weight: bold; /* Added bold font weight */
+            font-size: 4rem;
+            margin-bottom: 1rem;
         }
+
+        h2 {
+            margin-top: 0;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
         h3 {
-            font-size: 24px; /* Adjusted font size */
-            margin-bottom: 20px;
-            font-weight: normal; /* Normal font weight */
+            margin-bottom: 2rem;
         }
+
         p {
-            font-size: 20px; /* Adjusted font size */
-            margin-bottom: 40px;
+            line-height: 1.8;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
         }
-        .download-button {
-            display: inline-block;
-            padding: 15px 30px;
-            font-size: 18px;
-            color: white;
-            background-color: #007bff;
-            border: none;
-            border-radius: 5px;
-            text-decoration: none;
-            cursor: pointer;
-        }
+
         .coming-soon {
-            font-size: 24px;
-            color: #555;
-            margin-top: 30px;
+            margin-bottom: 3rem;
+            text-align: left;
+        }
+
+        .coming-soon li {
+            margin-bottom: 1rem;
+            list-style-type: none;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .coming-soon li:before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #2d3250;
+        }
+
+        .logo {
+            max-width: 180px; 
+            height: auto;
+            margin: 0 auto 2rem auto; 
+            display: block;
+        }
+
+        .download-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 14px 30px;
+            background-color: #2d3250; 
+            color: #fff; 
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 2rem; 
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: background-color 0.3s ease; 
+            gap: 15px; 
+        }
+
+        .download-button:hover {
+            background-color: #444c68;
+        }
+
+        .download-button img { 
+            width: 20px;
+            height: auto;
+            filter: invert(1); 
+        }
+
+        .feature {
+            text-align: center;
+            margin-bottom: 5rem; 
+        }
+
+        .feature-gif {
+            width: 100%; 
+            max-width: 700px; 
+            height: auto;
+            margin: 0 auto 2rem auto; 
+            border-radius: 8px;
+            cursor: pointer; 
+        }
+
+        .feature-gif:hover {
+            opacity: 0.8; 
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="logo">
-            <img src="logo.png" alt="Nimbus Logo">
+        <img src="logo.png" alt="Nimbus Logo" class="logo">
+        <h2>Nimbus</h2>
+        <p>Desktop AI assistant app that gives Gemini models the power to safely run code and access local files.</p>
+        <a href="Nimbus-1.0.1.dmg" class="download-button">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_logo_black.svg/1024px-Apple_logo_black.svg.png" alt="Mac Logo"> Download for macOS
+        </a>
+
+        <div style="margin-top: 7rem;"></div> <div class="feature">
+            <h3>Intelligent File Management</h3>
+            <p>Interact with your files directly within the Nimbus chat. Type "@" followed by the file name to access, modify, or share them effortlessly.</p>
+            <a href="https://youtu.be/LGyLS0twUIY?t=14" target="_blank">
+                <img src="file-management.gif" alt="File Management GIF" class="feature-gif">
+            </a>
         </div>
-        <h1>nimbus</h1>
-        <h3>Superpower your desktop with an LLM that can complete tasks for you</h3>
+
+        <div class="feature">
+            <h3>Authorized Code Execution</h3>
+            <p>Utilize Gemini's powerful function calling to automate tasks. Nimbus requires your explicit consent before running any code, ensuring your system's safety.</p>
+            <a href="https://youtu.be/LGyLS0twUIY?t=48" target="_blank">
+                <img src="code-exec.gif" alt="Authorized Code Execution GIF" class="feature-gif">
+            </a>
+        </div>
+
+        <h3>Coming Soon</h3>
+        <ul class="coming-soon">
+            <li>Internet search</li>
+            <li>Create and modify files</li>
+            <li>Linux and Windows distributions</li>
+        </ul>
     </div>
 </body>
 </html>
