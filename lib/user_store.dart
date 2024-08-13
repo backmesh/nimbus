@@ -4,6 +4,13 @@ import 'package:nimbus/files.dart';
 import 'package:nimbus/functions.dart';
 import 'package:nimbus/logger.dart';
 
+class ChatResult {
+  String content;
+  List<FnCall> fnCalls;
+
+  ChatResult({this.content = '', this.fnCalls = const []});
+}
+
 class FnCall {
   final Map<String, Object?> fnArgs;
   final String fnName;
@@ -38,16 +45,18 @@ class FnCall {
 class Message {
   final DateTime date;
   final String? model;
-  String content;
   final List<String>? filePaths;
-  final List<FnCall> fnCalls;
+  String content;
+  List<FnCall> fnCalls;
+  bool waiting;
 
   Message(
       {DateTime? date,
       String? model,
       List<FnCall>? fnCalls,
       List<String>? filePaths,
-      required String content})
+      required String content,
+      this.waiting = false})
       : this.date = date ?? DateTime.now(),
         this.filePaths = filePaths ?? [],
         this.model = model,
@@ -70,7 +79,8 @@ class Message {
                     .map((e) => e as String)
                     .toList()
                 : [],
-            model: json['model'] != null ? json['model'] as String : null);
+            model: json['model'] != null ? json['model'] as String : null,
+            waiting: json['waiting'] != null ? json['waiting'] as bool : false);
 
   Map<String, Object?> toDb() {
     return {
@@ -79,6 +89,7 @@ class Message {
       'content': content,
       'filePaths': filePaths,
       'fnCalls': fnCalls.map((e) => e.toDb()).toList(),
+      'waiting': waiting,
     };
   }
 

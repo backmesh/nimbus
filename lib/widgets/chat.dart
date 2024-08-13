@@ -25,23 +25,28 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController _inputController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _userHasScrolled = false;
-  String? waitingOnMessage = null;
 
-  Future<StreamSubscription<Message>> sendMessage(
-      List<Message> allMessages, Message userMessage) async {
+  Future<StreamSubscription<ChatResult>> sendMessage({
+    required List<Message> allMessages,
+    required String content,
+    required List<String> filePaths,
+  }) async {
     final emptyChat = widget.chat == null && allMessages.isEmpty;
     if (emptyChat) await UserStore.instance.saveChat(chat);
+    final userMessage = new Message(content: content, filePaths: filePaths);
     await UserStore.instance.saveMessage(chat, userMessage);
     _userHasScrolled = false;
     scrollToLastMessage();
-    final aiMessage = new Message(content: '', model: UserStore.instance.model);
-    waitingOnMessage = aiMessage.docKey();
+    final aiMessage = new Message(
+        content: '', model: UserStore.instance.model, waiting: true);
     await UserStore.instance.saveMessage(chat, aiMessage);
     final subscription = GeminiClient.instance
-        .chatCompleteStream(allMessages, userMessage, aiMessage)
-        .listen((mssgUpdate) async {
-      waitingOnMessage = null;
-      await UserStore.instance.saveMessage(chat, mssgUpdate);
+        .chatCompleteStream(allMessages, userMessage)
+        .listen((chatResult) async {
+      aiMessage.waiting = false;
+      aiMessage.content = chatResult.content;
+      aiMessage.fnCalls = chatResult.fnCalls;
+      await UserStore.instance.saveMessage(chat, aiMessage);
       scrollToLastMessage();
     });
     return subscription;
@@ -115,14 +120,21 @@ class _ChatPageState extends State<ChatPage> {
                             final Message message = allMessages[index];
                             return message.isUser()
                                 ? UserMessage(message: message)
-                                : AIMessage(
-                                    message: message,
-                                    chat: chat,
-                                    waitingForMessageStream:
-                                        waitingOnMessage == message.docKey());
+                                : AIMessage(message: message, chat: chat);
                           })),
                   const SizedBox(height: 15),
-                  InputField(sendMessage, allMessages)
+                  // bind allMessages as the first arg for sendMessage
+                  InputField(
+                    (
+                        {required String content,
+                        required List<String> filePaths}) {
+                      return sendMessage(
+                        allMessages: allMessages,
+                        content: content,
+                        filePaths: filePaths,
+                      );
+                    },
+                  )
                 ],
               ),
             ),
@@ -164,12 +176,8 @@ class UserMessage extends StatelessWidget {
 class AIMessage extends StatelessWidget {
   final Message message;
   final Chat chat;
-  final bool waitingForMessageStream;
 
-  const AIMessage(
-      {required this.message,
-      required this.chat,
-      required this.waitingForMessageStream});
+  const AIMessage({required this.message, required this.chat});
 
   @override
   Widget build(BuildContext context) {
@@ -199,7 +207,7 @@ class AIMessage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                waitingForMessageStream
+                message.waiting
                     ? SizedBox(
                         width: 20.0,
                         height: 20.0,
