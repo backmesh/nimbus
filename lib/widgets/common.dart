@@ -80,7 +80,6 @@ class _CommonAppBarState extends State<CommonAppBar> {
           onChanged: (String? newValue) async {
             if (newValue != null) {
               await UserStore.instance.setModel(newValue);
-
               setState(() {});
             }
           },
