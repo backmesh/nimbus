@@ -219,6 +219,7 @@ class AIMessage extends StatelessWidget {
 ${message.fnCalls.map((f) => f.fnArgs['code']).join('\n')}
                       '''
                             : message.content,
+                        // TODO selectability is choppy, how can we fix that?
                         selectable: true,
                         extensionSet: md.ExtensionSet.gitHubWeb,
                         builders: {
