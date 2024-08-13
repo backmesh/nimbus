@@ -208,10 +208,13 @@ class AIMessage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 message.waiting
-                    ? SizedBox(
-                        width: 20.0,
-                        height: 20.0,
-                        child: CircularProgressIndicator(strokeWidth: 2.0),
+                    ? Padding(
+                        padding: const EdgeInsets.only(top: 10.0),
+                        child: SizedBox(
+                          width: 7.0,
+                          height: 7.0,
+                          child: LinearProgressIndicator(),
+                        ),
                       )
                     : MarkdownBody(
                         data: message.fnCalls.length > 0
