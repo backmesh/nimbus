@@ -14,3 +14,14 @@ Nimbus gives Google's Gemini LLM access to your desktop so it can easily read fi
 
 - [ ] Firebase App Check to increase security
 - [ ] Use Firebase Storage when files exceed the size limit for direct upload to Google AI Gemini API
+
+# macos release
+
+1. Notarize App. Open Xcode and select `Product > Archive` => `Distribute App` => `Direct Distribution`
+
+2. [Create DMG](https://github.com/sindresorhus/create-dmg) from Notarized App
+
+```bash
+mkdir dmg
+create-dmg path/to/Nimbus.app dmg
+```
