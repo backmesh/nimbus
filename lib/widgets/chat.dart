@@ -49,10 +49,18 @@ class _ChatPageState extends State<ChatPage> {
       await UserStore.instance.saveMessage(chat, aiMessage);
       scrollToLastMessage();
     });
-    // equivalent to onDone
-    await subscription.asFuture();
-    aiMessage.waiting = false;
-    await UserStore.instance.saveMessage(chat, aiMessage);
+    // equivalent to onDone and onError
+    try {
+      await subscription.asFuture();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(backgroundColor: Colors.red, content: Text('Error $e')),
+      );
+      aiMessage.error = e.toString();
+    } finally {
+      aiMessage.waiting = false;
+      await UserStore.instance.saveMessage(chat, aiMessage);
+    }
   }
 
   void _onScroll() {

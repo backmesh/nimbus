@@ -52,6 +52,7 @@ class Message {
   String content;
   List<FnCall> fnCalls;
   bool waiting;
+  String? error;
 
   Message(
       {DateTime? date,
@@ -59,7 +60,8 @@ class Message {
       List<FnCall>? fnCalls,
       List<String>? filePaths,
       required String content,
-      this.waiting = false})
+      this.waiting = false,
+      this.error})
       : this.date = date ?? DateTime.now(),
         this.filePaths = filePaths ?? [],
         this.model = model,
@@ -83,7 +85,8 @@ class Message {
                     .toList()
                 : [],
             model: json['model'] != null ? json['model'] as String : null,
-            waiting: json['waiting'] != null ? json['waiting'] as bool : false);
+            waiting: json['waiting'] != null ? json['waiting'] as bool : false,
+            error: json['error'] != null ? json['error'] as String : null);
 
   Map<String, Object?> toDb() {
     return {
@@ -93,6 +96,7 @@ class Message {
       'filePaths': filePaths,
       'fnCalls': fnCalls.map((e) => e.toDb()).toList(),
       'waiting': waiting,
+      'error': error,
     };
   }
 
