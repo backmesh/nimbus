@@ -83,8 +83,6 @@ class _InputFieldState extends State<InputField> {
           textEditingController: richTextController,
           focusNode: focusNode,
           optionsBuilder: (TextEditingValue textEditingValue) async {
-            Logger.debug(
-                'optionsBuilder called with: ${textEditingValue.text}');
             if (textEditingValue.text.contains('@')) {
               // lazily load files to ask for permissions when it makes sense
               if (files.length == 0) await setFilesInHomeDirectory();

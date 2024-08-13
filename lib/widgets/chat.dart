@@ -123,7 +123,7 @@ class _ChatPageState extends State<ChatPage> {
                                 : AIMessage(message: message, chat: chat);
                           })),
                   const SizedBox(height: 15),
-                  // bind allMessages as the first arg for sendMessage
+                  // bind allMessages
                   InputField(
                     (
                         {required String content,
@@ -232,7 +232,9 @@ ${message.fnCalls.map((f) => f.fnArgs['code']).join('\n')}
                 SizedBox(height: 10),
                 if (message.fnCalls.length > 0 && !message.fnCallsDone())
                   FilledButton(
-                      // TODO show loading indicator
+                      // TODO show loading indicator while running
+                      // TODO be able to cancel
+                      // TODO automatically respond with error
                       onPressed: () async {
                         for (var fnC in message.fnCalls) {
                           await fnC.run();

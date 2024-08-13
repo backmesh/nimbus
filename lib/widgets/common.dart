@@ -77,11 +77,11 @@ class _CommonAppBarState extends State<CommonAppBar> {
               ),
             );
           }).toList(),
-          onChanged: (String? newValue) {
+          onChanged: (String? newValue) async {
             if (newValue != null) {
-              setState(() {
-                UserStore.instance.setModel(newValue);
-              });
+              await UserStore.instance.setModel(newValue);
+
+              setState(() {});
             }
           },
           icon: Icon(Icons.arrow_drop_down),

@@ -10,7 +10,6 @@ import 'package:nimbus/user_store.dart';
 // https://github.com/google-gemini/generative-ai-dart/tree/main/pkgs/google_generative_ai
 // https://pub.dev/documentation/google_generative_ai/latest/google_generative_ai/google_generative_ai-library.html
 
-final MODEL = 'gemini-1.5-flash';
 final API_VERSION = 'v1beta';
 final BASE_URL =
     'https://edge.backmesh.com/v1/proxy/PyHU4LvcdsQ4gm2xeniAFhMyuDl2/aUxjzrA9w7K9auXp6Be8';
@@ -40,11 +39,11 @@ class GeminiClient {
     return _instance!;
   }
 
-  factory GeminiClient(String token) {
-    _instance ??= GeminiClient._();
+  factory GeminiClient(String token, String model) {
+    _instance = GeminiClient._();
     Uri uri = Uri.parse('$BASE_URL/$API_VERSION');
     _instance!.client = createModelWithBaseUri(
-        model: MODEL,
+        model: model,
         apiKey: token,
         baseUri: uri,
         systemInstruction: Content.system(sysMessage),
@@ -74,8 +73,6 @@ class GeminiClient {
         List<FunctionCall> functionCalls = response.functionCalls.toList();
         if (functionCalls.isNotEmpty) {
           for (final functionCall in functionCalls)
-            // TODO be able to cancel
-            // TODO automatically respond with error
             res.fnCalls.add(FnCall(
                 fnArgs: functionCall.args,
                 fnName: functionCall.name,

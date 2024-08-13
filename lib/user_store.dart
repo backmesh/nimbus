@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:nimbus/files.dart';
 import 'package:nimbus/functions.dart';
+import 'package:nimbus/gemini.dart';
 import 'package:nimbus/logger.dart';
 
 class ChatResult {
@@ -151,24 +153,24 @@ class Chat {
 }
 
 class UserStore {
-  final String uid;
+  final User user;
   final CollectionReference<Chat> chatsRef;
   String model;
 
   static UserStore? _instance;
 
-  UserStore._(this.uid, this.chatsRef, this.model);
+  UserStore._(this.user, this.chatsRef, this.model);
 
-  factory UserStore(String uid) {
+  factory UserStore(User user) {
     final chatsRef = FirebaseFirestore.instance
-        .collection('users/${uid}/chats')
+        .collection('users/${user.uid}/chats')
         .withConverter<Chat>(
           fromFirestore: (snapshot, _) {
             return Chat.fromDb(snapshot.data()!);
           },
           toFirestore: (entry, _) => entry.toDb(),
         );
-    _instance ??= UserStore._(uid, chatsRef, 'gemini-1.5-flash');
+    _instance ??= UserStore._(user, chatsRef, 'gemini-1.5-flash');
     return _instance!;
   }
 
@@ -181,8 +183,10 @@ class UserStore {
     return _instance!;
   }
 
-  void setModel(String newModel) {
+  Future<void> setModel(String newModel) async {
     model = newModel;
+    final jwt = await user.getIdToken();
+    GeminiClient(jwt!, newModel);
   }
 
   static getModelOptions() {
